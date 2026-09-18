@@ -94,9 +94,13 @@ ai-research/
 
 | 日期 | 标题 | 方向 | 标签 | 链接 |
 |------|------|------|------|------|
+| 2026-09-18 | Seedance 1.0 深度技术调研报告 | video-generation | #视频生成 #Seedance #DiT #RLHF #推理加速 #多镜头 | [HTML](video-generation/2026-09-seedance-1.0.html) |
+| 2026-09-18 | Seedance 1.5 pro 深度技术调研报告 | video-generation | #视频生成 #Seedance #音视频联合 #双分支DiT #音频RLHF #唇形同步 | [HTML](video-generation/2026-09-seedance-1.5-pro.html) |
+| 2026-09-18 | Seedance 2.0 深度技术调研报告 | video-generation | #视频生成 #Seedance #多模态 #R2V #编辑 | [HTML](video-generation/2026-09-seedance-2.0.html) |
+| 2026-09-18 | Seedance 系列版本演进对比报告 | video-generation | #视频生成 #Seedance #版本对比 #技术演进 | [HTML](video-generation/2026-09-seedance-evolution.html) |
 | 2026-09-18 | 主流云厂商 KV Cache 存储商业模式调研报告 | inference-optimization | #KV-Cache #商业模式 #推理优化 #云厂商 #专属存储 | [HTML](inference-optimization/2026-09-kv-cache-storage.html) |
 | 2026-09-18 | MiniMax H3 开源训练框架调研报告 | video-generation | #视频生成 #训练框架 #SFT #RL #NPU #MoE #蒸馏 | [HTML](video-generation/2026-09-minimax-h3-training-frameworks.html) |
 
 ---
 
-*最后更新：2026-09-18 | 已归档报告：2 篇*
+*最后更新：2026-09-18 | 已归档报告：6 篇*

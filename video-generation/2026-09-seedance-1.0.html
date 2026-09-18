@@ -1,0 +1,2867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance 1.0 深度技术调研报告</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; padding: 30px 20px; background: #FAFAFA; color: #333333; line-height: 1.75; }
+  h1 { color: #333333; border-bottom: 3px solid #C7000B; padding-bottom: 12px; font-size: 1.8em; }
+  h2 { color: #C7000B; margin-top: 40px; border-left: 5px solid #C7000B; padding-left: 14px; background: linear-gradient(90deg, #FDE8EA 0%, transparent 100%); padding-top: 8px; padding-bottom: 8px; font-size: 1.4em; }
+  h3 { color: #333333; margin-top: 26px; font-size: 1.15em; border-bottom: 1px dashed #F5C6CB; padding-bottom: 4px; }
+  h4 { color: #0066B3; margin-top: 18px; font-size: 1.05em; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-radius: 6px; overflow: hidden; }
+  th { background: #C7000B; color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 0.92em; }
+  td { padding: 10px 14px; border-bottom: 1px solid #EEEEEE; vertical-align: top; font-size: 0.93em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover { background: #FFF0F0; }
+  .meta-box { background: #FDE8EA; border-radius: 10px; padding: 20px 26px; margin: 20px 0; border-left: 4px solid #C7000B; }
+  .meta-box p { margin: 6px 0; }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 0.82em; font-weight: 700; margin-right: 5px; white-space: nowrap; }
+  .tag-l1 { background: #E6F7F0; color: #00875A; }
+  .tag-l2 { background: #FFF8E6; color: #B8860B; }
+  .tag-l3 { background: #FFF8F0; color: #CC5500; }
+  .tag-l4 { background: #FDE8EA; color: #C7000B; }
+  .highlight { background: #FFF0F0; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .code-inline { background: #F5F5F5; padding: 2px 7px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.88em; color: #C7000B; }
+  .conclusion { background: #E6F7F0; border-left: 5px solid #00B578; padding: 18px 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+  .conclusion h3 { margin-top: 0; color: #00875A; border: none; }
+  .svg-container { background: white; border-radius: 8px; padding: 20px; margin: 18px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; overflow-x: auto; }
+  .svg-container svg { max-width: 100%; height: auto; }
+  .detail-card { background: white; border-radius: 8px; padding: 16px 20px; margin: 12px 0; border-left: 3px solid #0066B3; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .detail-card h4 { margin-top: 0; color: #C7000B; }
+  .purpose-box { background: #FFF8F0; border-left: 3px solid #FF6B00; padding: 10px 16px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.93em; }
+  .purpose-box strong { color: #CC5500; }
+  .overview-box { background: linear-gradient(135deg, #FDE8EA 0%, #FFF5F5 100%); border-radius: 12px; padding: 24px 28px; margin: 20px 0; border: 2px solid #C7000B; }
+  .overview-box h3 { margin-top: 0; color: #333333; border: none; }
+  .innovation-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .innovation-quick .item { background: white; border-radius: 8px; padding: 14px 16px; border-left: 3px solid #FF6B00; }
+  .innovation-quick .item strong { color: #CC5500; display: block; margin-bottom: 4px; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; color: #999999; font-size: 0.88em; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 768px) { .two-col, .innovation-quick { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Seedance 1.0 深度技术调研报告</h1>
+
+<div class="meta-box">
+  <p><strong>论文标题：</strong>Seedance 1.0: Exploring the Boundaries of Video Generation Models</p>
+  <p><strong>厂商：</strong>字节跳动 Seed 团队 ｜ <strong>模型 ID：</strong>Doubao-Seedance-1.0-pro</p>
+  <p><strong>发布时间：</strong>2025年6月10日（v1），2025年6月28日（v2） ｜ <strong>arXiv：</strong><a href="https://arxiv.org/abs/2506.09113" target="_blank">2506.09113</a></p>
+  <p><strong>部署平台：</strong>豆包、即梦、火山引擎 ｜ <strong>调研标准：</strong>九大维度 A-I + J 创新点核查（深度版）</p>
+  <p><strong>核心性能：</strong>5秒 1080p 视频在 NVIDIA L20 上仅需 <span class="highlight">41.4 秒</span>，端到端 ~10x 加速</p>
+  <p><strong>报告结构：</strong>① 文章大体工作与创新点总览 → ② 数据管线 → ③ 模型结构 → ④ 训练整体情况 → ⑤ 后训练过程 → ⑥ 推理加速 → ⑦ 长视频/可控性/音频 → ⑧ 安全合规 → ⑨ 评测体系 → ⑩ 创新点核查 → ⑪ V0.1修订建议</p>
+</div>
+
+<!-- ==================== ① 文章大体工作与创新点总览 ==================== -->
+
+<!-- 目录 -->
+<div class="toc-container" style="background: linear-gradient(135deg, #FDE8EA 0%, #F0F7FF 100%); border-radius: 12px; padding: 24px 30px; margin: 25px 0; border-left: 5px solid #C7000B; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+  <h2 style="color: #C7000B; margin-top: 0; margin-bottom: 16px; font-size: 1.3em; border: none; background: none; padding: 0;">📑 目录导航</h2>
+  <ul style="list-style: none; padding-left: 0; margin: 0; columns: 2; column-gap: 30px;">
+    <li class="toc-h2"><a href="#overview">① 文章大体工作与创新点总览</a></li>
+    <li class="toc-h3"><a href="#overview-oneline">一句话定位</a></li>
+    <li class="toc-h3"><a href="#overview-roadmap">整体技术路线一图流</a></li>
+    <li class="toc-h3"><a href="#overview-innovations">核心创新点速览</a></li>
+    <li class="toc-h3"><a href="#overview-performance">关键性能数据（可核查）</a></li>
+    <li class="toc-h2"><a href="#data-pipeline">② 数据管线深度拆解</a></li>
+    <li class="toc-h3"><a href="#data-preprocess">2.1 数据预处理（5步深度拆解）</a></li>
+    <li class="toc-h3"><a href="#data-captioning">2.2 Video Captioning（精准视频描述系统）</a></li>
+    <li class="toc-h3"><a href="#data-infra">2.3 工程基础设施</a></li>
+    <li class="toc-h2"><a href="#model-arch">③ 模型结构深度拆解</a></li>
+    <li class="toc-h3"><a href="#model-vae">3.1 VAE：时间因果卷积变分自编码器</a></li>
+    <li class="toc-h3"><a href="#model-dit">3.2 Diffusion Transformer：解耦时空层 + MMDiT</a></li>
+    <li class="toc-h3"><a href="#model-refiner">3.3 Diffusion Refiner：级联超分扩散模型</a></li>
+    <li class="toc-h3"><a href="#model-pe">3.4 Prompt Engineering (PE)：用户 prompt 重写系统</a></li>
+    <li class="toc-h2"><a href="#training-overall">④ 训练整体情况深度拆解</a></li>
+    <li class="toc-h3"><a href="#train-pretrain">4.1 Pre-Training 预训练</a></li>
+    <li class="toc-h3"><a href="#train-ct">4.2 Continue Training (CT) 继续训练</a></li>
+    <li class="toc-h3"><a href="#train-sft">4.3 SFT 监督微调</a></li>
+    <li class="toc-h3"><a href="#train-infra">4.4 训练基础设施（Training Infrastructure）</a></li>
+    <li class="toc-h2"><a href="#rlhf-overall">⑤ 后训练过程深度拆解（RLHF 人类反馈对齐）</a></li>
+    <li class="toc-h3"><a href="#rlhf-data">5.1 反馈数据基础设施</a></li>
+    <li class="toc-h3"><a href="#rlhf-rm">5.2 三维度 Reward Model 设计</a></li>
+    <li class="toc-h3"><a href="#rlhf-flowchart">5.3 RLHF 完整流程图</a></li>
+    <li class="toc-h3"><a href="#rlhf-base">5.4 Base Model 反馈学习算法</a></li>
+    <li class="toc-h3"><a href="#rlhf-sr">5.5 超分 RLHF 框架（Super-Resolution RLHF）</a></li>
+    <li class="toc-h2"><a href="#inference-accel">⑥ 推理加速与蒸馏</a></li>
+    <li class="toc-h3"><a href="#inf-dit">6.1 DiT 模型加速：三阶段蒸馏管线</a></li>
+    <li class="toc-h3"><a href="#inf-vae">6.2 VAE 优化：Thin Decoder（2x 加速）</a></li>
+    <li class="toc-h3"><a href="#inf-infra">6.3 推理基础设施优化</a></li>
+    <li class="toc-h2"><a href="#long-video">⑦ 长视频 / 可控性 / 音频</a></li>
+    <li class="toc-h2"><a href="#safety">⑧ 安全对齐与合规</a></li>
+    <li class="toc-h2"><a href="#evaluation">⑨ 评测体系</a></li>
+    <li class="toc-h2"><a href="#innovation-check">⑩ 创新点核查表（含消融实验状态 + 通用/特有标注）</a></li>
+    <li class="toc-h3"><a href="#innovation-summary">创新点核查总结论</a></li>
+    <li class="toc-h3"><a href="#v01-revision">⑪ 对 V0.1 从零训练方案的修订建议</a></li>
+  </ul>
+</div>
+<style>
+  .toc-container li { margin-bottom: 6px; break-inside: avoid; }
+  .toc-h2 { font-weight: 600; font-size: 0.95em; margin-top: 8px !important; }
+  .toc-h2 a { color: #C7000B; text-decoration: none; }
+  .toc-h2 a:hover { text-decoration: underline; }
+  .toc-h3 { padding-left: 16px; font-size: 0.88em; }
+  .toc-h3 a { color: #555555; text-decoration: none; }
+  .toc-h3 a:hover { color: #0066B3; text-decoration: underline; }
+  html { scroll-behavior: smooth; }
+</style>
+<h2 id="overview">① 文章大体工作与创新点总览</h2>
+
+<div class="overview-box">
+  <h3 id="overview-oneline">一句话定位</h3>
+  <p>Seedance 1.0 是字节跳动 Seed 团队推出的<strong>高性能、推理高效的视频基础生成模型</strong>，原生支持中英文双语 T2V/I2V 联合生成，通过"多源数据策展 + 高效架构设计 + 精细 post-training + 多阶段蒸馏加速"四大技术改进，在 Artificial Analysis 公开榜单上同时登顶 T2V 和 I2V 双榜，5秒 1080p 视频在 L20 单卡上仅需 41.4 秒。</p>
+</div>
+
+<h3 id="overview-roadmap">整体技术路线一图流</h3>
+
+<div class="svg-container">
+<svg viewBox="0 0 1000 340" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <text x="500" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">Seedance 1.0 整体技术路线总览</text>
+
+  <!-- 四大模块 -->
+  <rect x="30" y="50" width="220" height="120" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="140" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">① 多源数据策展</text>
+  <text x="140" y="95" text-anchor="middle" font-size="10" fill="#555555">5步策展：分割→修正→过滤</text>
+  <text x="140" y="110" text-anchor="middle" font-size="10" fill="#555555">→去重→重平衡</text>
+  <text x="140" y="130" text-anchor="middle" font-size="10" fill="#555555">密集Caption：Tarsier2</text>
+  <text x="140" y="145" text-anchor="middle" font-size="10" fill="#555555">动态+静态特征，中英双语</text>
+  <text x="140" y="162" text-anchor="middle" font-size="9" fill="#999999">≤12s片段 / 质量安全双过滤</text>
+
+  <line x1="252" y1="110" x2="278" y2="110" stroke="#C7000B" stroke-width="2" marker-end="url(#arrover)"/>
+
+  <rect x="280" y="50" width="220" height="120" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="390" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">② 高效架构设计</text>
+  <text x="390" y="95" text-anchor="middle" font-size="10" fill="#555555">VAE：(4,16,16)压缩，C=48</text>
+  <text x="390" y="110" text-anchor="middle" font-size="10" fill="#555555">DiT：解耦时空层+MMDiT</text>
+  <text x="390" y="125" text-anchor="middle" font-size="10" fill="#555555">MM-RoPE：多模态位置编码</text>
+  <text x="390" y="140" text-anchor="middle" font-size="10" fill="#555555">统一任务：T2I/T2V/I2V</text>
+  <text x="390" y="157" text-anchor="middle" font-size="9" fill="#999999">原生多镜头 / Refiner级联超分</text>
+
+  <line x1="502" y1="110" x2="528" y2="110" stroke="#00B578" stroke-width="2" marker-end="url(#arrover)"/>
+
+  <rect x="530" y="50" width="220" height="120" rx="10" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="640" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">③ 精细Post-Training</text>
+  <text x="640" y="95" text-anchor="middle" font-size="10" fill="#555555">预训练：256px→640px→24fps</text>
+  <text x="640" y="110" text-anchor="middle" font-size="10" fill="#555555">CT：I2V 20%→40%，双Caption</text>
+  <text x="640" y="125" text-anchor="middle" font-size="10" fill="#555555">SFT：几百类别+模型合并</text>
+  <text x="640" y="140" text-anchor="middle" font-size="10" fill="#555555">RLHF：3维度RM+直接最大化</text>
+  <text x="640" y="157" text-anchor="middle" font-size="9" fill="#999999">Foundational+Motion+Aesthetic</text>
+
+  <line x1="752" y1="110" x2="778" y2="110" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrover)"/>
+
+  <rect x="780" y="50" width="190" height="120" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="875" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B0000">④ 多阶段蒸馏加速</text>
+  <text x="875" y="95" text-anchor="middle" font-size="10" fill="#555555">TSCD一致性蒸馏(HyperSD)</text>
+  <text x="875" y="110" text-anchor="middle" font-size="10" fill="#555555">Score Distillation(RayFlow)</text>
+  <text x="875" y="125" text-anchor="middle" font-size="10" fill="#555555">多步对抗蒸馏(APT扩展)</text>
+  <text x="875" y="140" text-anchor="middle" font-size="10" fill="#555555">VAE thin decoder 2x加速</text>
+  <text x="875" y="157" text-anchor="middle" font-size="9" fill="#999999">端到端~10x / L20 41.4s</text>
+
+  <!-- 底部：推理流水线 -->
+  <rect x="30" y="200" width="940" height="100" rx="10" fill="#FAFAFA" stroke="#CCCCCC" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="500" y="222" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">推理流水线（端到端）</text>
+
+  <rect x="60" y="235" width="130" height="45" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="125" y="255" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">用户Prompt</text>
+  <text x="125" y="270" text-anchor="middle" font-size="9" fill="#555555">自然语言输入</text>
+
+  <line x1="192" y1="257" x2="208" y2="257" stroke="#555555" stroke-width="1.5" marker-end="url(#arrover)"/>
+
+  <rect x="210" y="235" width="130" height="45" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="275" y="255" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">PE重写</text>
+  <text x="275" y="270" text-anchor="middle" font-size="9" fill="#555555">Qwen2.5-14B+DPO</text>
+
+  <line x1="342" y1="257" x2="358" y2="257" stroke="#555555" stroke-width="1.5" marker-end="url(#arrover)"/>
+
+  <rect x="360" y="235" width="130" height="45" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="425" y="255" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">Text Encoder</text>
+  <text x="425" y="270" text-anchor="middle" font-size="9" fill="#555555">微调decoder-only LLM</text>
+
+  <line x1="492" y1="257" x2="508" y2="257" stroke="#555555" stroke-width="1.5" marker-end="url(#arrover)"/>
+
+  <rect x="510" y="235" width="130" height="45" rx="6" fill="white" stroke="#00B578"/>
+  <text x="575" y="255" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">Base DiT (480p)</text>
+  <text x="575" y="270" text-anchor="middle" font-size="9" fill="#555555">蒸馏后少步生成</text>
+
+  <line x1="642" y1="257" x2="658" y2="257" stroke="#555555" stroke-width="1.5" marker-end="url(#arrover)"/>
+
+  <rect x="660" y="235" width="130" height="45" rx="6" fill="white" stroke="#FF6B00"/>
+  <text x="725" y="255" text-anchor="middle" font-size="10" font-weight="bold" fill="#8B6914">Refiner (720/1080p)</text>
+  <text x="725" y="270" text-anchor="middle" font-size="9" fill="#555555">级联超分+RLHF</text>
+
+  <line x1="792" y1="257" x2="808" y2="257" stroke="#555555" stroke-width="1.5" marker-end="url(#arrover)"/>
+
+  <rect x="810" y="235" width="130" height="45" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="2"/>
+  <text x="875" y="255" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">输出视频</text>
+  <text x="875" y="270" text-anchor="middle" font-size="9" fill="#555555">5s 1080p / 41.4s(L20)</text>
+
+  <defs>
+    <marker id="arrover" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+</svg>
+</div>
+
+<h3 id="overview-innovations">核心创新点速览</h3>
+
+<div class="innovation-quick">
+  <div class="item">
+    <strong>创新1：原生多镜头 + T2V/I2V 联合</strong>
+    解耦时空层 + MMDiT + MM-RoPE 架构，单模型原生支持多镜头叙事和 T2V/I2V 联合生成，非 adapter 叠加
+  </div>
+  <div class="item">
+    <strong>创新2：密集 Caption 系统</strong>
+    基于 Tarsier2 的"动态+静态"特征分类密集 caption，PE 模型（Qwen2.5-14B + SFT + DPO）将用户 prompt 重写为训练对齐格式
+  </div>
+  <div class="item">
+    <strong>创新3：三维度 Reward RLHF</strong>
+    Foundational(VLM架构) + Motion(视频专用) + Aesthetic(关键帧输入) 三维度 RM，直接 reward 最大化（对比 DPO/PPO/GRPO 最优），多轮迭代学习
+  </div>
+  <div class="item">
+    <strong>创新4：三阶段蒸馏 + VAE 瘦身</strong>
+    TSCD(HyperSD) + Score Distillation(RayFlow) + 多步对抗蒸馏(APT扩展) 三阶段组合，VAE thin decoder 2x 加速，端到端 ~10x，四维度专家评估无质量损失
+  </div>
+</div>
+
+<h3 id="overview-performance">关键性能数据（可核查）</h3>
+
+<table>
+  <tr><th>指标</th><th>数值</th><th>说明</th></tr>
+  <tr><td>推理速度</td><td><strong>41.4 秒</strong></td><td>5秒 1080p 视频，NVIDIA L20 单卡，端到端</td></tr>
+  <tr><td>加速比</td><td><strong>~10x</strong></td><td>相比未加速的 Base 模型，端到端加速</td></tr>
+  <tr><td>Artificial Analysis T2V Elo</td><td><strong>1314</strong></td><td>双榜第一，领先第二名 Veo 3 Preview（1253）61 分</td></tr>
+  <tr><td>Artificial Analysis I2V Elo</td><td><strong>1365</strong></td><td>领先第二名 Veo 3 Preview（1240）125 分</td></tr>
+  <tr><td>Base 输出分辨率</td><td>480p</td><td>Base 模型生成，Refiner 超分到 720p/1080p</td></tr>
+  <tr><td>VAE 压缩比</td><td>(4,16,16), C=48</td><td>总压缩比 1/64，时间因果卷积</td></tr>
+  <tr><td>训练数据片段时长</td><td>≤12 秒</td><td>镜头感知时间分割，保留局部叙事流</td></tr>
+</table>
+
+<!-- 以下为深度拆解内容 -->
+
+<h2 id="data-pipeline">② 数据管线深度拆解</h2>
+
+<p>Seedance 1.0 的数据管线是其核心竞争力之一。论文明确给出了<strong>三阶段流水线</strong>，以下是完整的 SVG 流程图和每个步骤的深度拆解。</p>
+
+<div class="svg-container">
+<svg viewBox="0 0 1100 620" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <!-- 标题 -->
+  <text x="550" y="28" text-anchor="middle" font-size="18" font-weight="bold" fill="#333333">Seedance 1.0 视频数据处理流水线</text>
+
+  <!-- 阶段1: Diversity-oriented Data Sourcing -->
+  <rect x="20" y="50" width="330" height="540" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <rect x="20" y="50" width="330" height="36" rx="10" fill="#C7000B"/>
+  <text x="185" y="74" text-anchor="middle" font-size="14" font-weight="bold" fill="white">阶段一：多样性导向数据获取</text>
+
+  <rect x="45" y="100" width="280" height="50" rx="6" fill="white" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="185" y="122" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">多源数据采集</text>
+  <text x="185" y="140" text-anchor="middle" font-size="10" fill="#555555">公开库 + 授权库，覆盖时长/分辨率/</text>
+  <text x="185" y="153" text-anchor="middle" font-size="10" fill="#555555">主体/场景/动作/风格/运镜等维度</text>
+
+  <rect x="45" y="165" width="280" height="50" rx="6" fill="white" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="185" y="187" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">合规预筛选</text>
+  <text x="185" y="205" text-anchor="middle" font-size="10" fill="#555555">伦理与法律合规性初筛</text>
+  <text x="185" y="218" text-anchor="middle" font-size="10" fill="#555555">确保数据来源合法合规</text>
+
+  <!-- 箭头 -->
+  <line x1="185" y1="220" x2="185" y2="245" stroke="#C7000B" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <rect x="45" y="250" width="280" height="80" rx="6" fill="#FFF8E6" stroke="#f39c12" stroke-width="1.5"/>
+  <text x="185" y="272" text-anchor="middle" font-size="12" font-weight="bold" fill="#7d6608">Raw Data 原始数据池</text>
+  <text x="185" y="292" text-anchor="middle" font-size="10" fill="#555555">异构、含噪、未筛选的</text>
+  <text x="185" y="307" text-anchor="middle" font-size="10" fill="#555555">原始长视频集合</text>
+  <text x="185" y="322" text-anchor="middle" font-size="10" fill="#e74c3c">⚠ 含logo/水印/字幕/低质/NSFW</text>
+
+  <!-- 阶段2: Multi-stage Data Curation -->
+  <rect x="380" y="50" width="350" height="540" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <rect x="380" y="50" width="350" height="36" rx="10" fill="#00B578"/>
+  <text x="555" y="74" text-anchor="middle" font-size="14" font-weight="bold" fill="white">阶段二：多阶段数据策展</text>
+
+  <!-- 步骤1 -->
+  <rect x="400" y="100" width="310" height="48" rx="6" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="555" y="120" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">① 镜头感知时间分割</text>
+  <text x="555" y="138" text-anchor="middle" font-size="9.5" fill="#555555">帧间视觉差异/预训练检测器识别场景切换 → 切≤12s片段</text>
+
+  <line x1="555" y1="150" x2="555" y2="162" stroke="#00B578" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- 步骤2 -->
+  <rect x="400" y="165" width="310" height="48" rx="6" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="555" y="185" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">② 视觉覆盖修正</text>
+  <text x="555" y="203" text-anchor="middle" font-size="9.5" fill="#555555">启发式规则+目标检测识别logo/水印/字幕 → 自适应裁剪保留主体</text>
+
+  <line x1="555" y1="215" x2="555" y2="227" stroke="#00B578" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- 步骤3 -->
+  <rect x="400" y="230" width="310" height="55" rx="6" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="555" y="250" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">③ 质量与安全过滤</text>
+  <text x="555" y="267" text-anchor="middle" font-size="9.5" fill="#555555">视觉质量模型：过滤模糊/抖动/低美学/构图差/静态内容</text>
+  <text x="555" y="280" text-anchor="middle" font-size="9.5" fill="#e74c3c">安全分类器：过滤色情/暴力/儿童剥削/裸露</text>
+
+  <line x1="555" y1="290" x2="555" y2="302" stroke="#00B578" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- 步骤4 -->
+  <rect x="400" y="305" width="310" height="48" rx="6" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="555" y="325" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">④ 语义去重</text>
+  <text x="555" y="343" text-anchor="middle" font-size="9.5" fill="#555555">内部视频表征模型提取特征embedding → 聚类近重复 → 保留质量最高</text>
+
+  <line x1="555" y1="355" x2="555" y2="367" stroke="#00B578" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- 步骤5 -->
+  <rect x="400" y="370" width="310" height="55" rx="6" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="555" y="390" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">⑤ 分布重平衡</text>
+  <text x="555" y="407" text-anchor="middle" font-size="9.5" fill="#555555">按主体/场景/动作/类型/风格/时长/分辨率/运动分析分布</text>
+  <text x="555" y="420" text-anchor="middle" font-size="9.5" fill="#555555">头部下采样 ↓ ｜ 尾部增采样+定向采集 ↑</text>
+
+  <line x1="555" y1="430" x2="555" y2="442" stroke="#00B578" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <!-- 输出 -->
+  <rect x="400" y="445" width="310" height="60" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="2"/>
+  <text x="555" y="468" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">Video Clips 精炼视频片段</text>
+  <text x="555" y="487" text-anchor="middle" font-size="10" fill="#555555">高质量、多样化、安全、去重、分布均衡</text>
+  <text x="555" y="500" text-anchor="middle" font-size="10" fill="#555555">≤12秒 / 多镜头连贯片段</text>
+
+  <!-- 阶段3: Data Encoding & Packing -->
+  <rect x="760" y="50" width="320" height="540" rx="10" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <rect x="760" y="50" width="320" height="36" rx="10" fill="#FF6B00"/>
+  <text x="920" y="74" text-anchor="middle" font-size="14" font-weight="bold" fill="white">阶段三：离线编码与打包</text>
+
+  <rect x="780" y="100" width="280" height="70" rx="6" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="920" y="122" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">Video Captioning 视频描述生成</text>
+  <text x="920" y="142" text-anchor="middle" font-size="10" fill="#555555">基于 Tarsier2（视觉编码器冻结+</text>
+  <text x="920" y="157" text-anchor="middle" font-size="10" fill="#555555">LM全量微调），中英文双语</text>
+  <text x="920" y="170" text-anchor="middle" font-size="9.5" fill="#FF6B00">密集caption：动态特征+静态特征</text>
+
+  <line x1="920" y1="175" x2="920" y2="195" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <rect x="780" y="200" width="280" height="55" rx="6" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="920" y="220" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">Text Embeds 文本嵌入</text>
+  <text x="920" y="240" text-anchor="middle" font-size="10" fill="#555555">微调的 decoder-only LLM 作为文本编码器</text>
+  <text x="920" y="253" text-anchor="middle" font-size="10" fill="#555555">生成文本 token 序列</text>
+
+  <line x1="920" y1="260" x2="920" y2="280" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <rect x="780" y="285" width="280" height="55" rx="6" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="920" y="305" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">VAE Encoding 视觉编码</text>
+  <text x="920" y="325" text-anchor="middle" font-size="10" fill="#555555">时间因果卷积 VAE 编码器</text>
+  <text x="920" y="340" text-anchor="middle" font-size="10" fill="#555555">压缩比 (4,16,16)，C=48</text>
+
+  <line x1="920" y1="345" x2="920" y2="365" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <rect x="780" y="370" width="280" height="55" rx="6" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="920" y="390" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">VAE Embeds 视觉嵌入</text>
+  <text x="920" y="410" text-anchor="middle" font-size="10" fill="#555555">连续 latent 表示 (T+1, H, W, C)</text>
+  <text x="920" y="425" text-anchor="middle" font-size="10" fill="#555555">预计算缓存，加速训练IO</text>
+
+  <line x1="920" y1="430" x2="920" y2="450" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <rect x="780" y="455" width="280" height="60" rx="6" fill="#FFF8F0" stroke="#FF6B00" stroke-width="2"/>
+  <text x="920" y="478" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">训练样本打包</text>
+  <text x="920" y="497" text-anchor="middle" font-size="10" fill="#555555">Text Embeds + VAE Embeds 配对</text>
+  <text x="920" y="510" text-anchor="middle" font-size="10" fill="#555555">混合 T2V / I2V / T2I 任务样本</text>
+
+  <!-- 跨阶段箭头 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+  <line x1="350" y1="300" x2="378" y2="300" stroke="#C7000B" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+  <line x1="730" y1="300" x2="758" y2="300" stroke="#00B578" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+
+  <!-- 底部说明 -->
+  <text x="550" y="610" text-anchor="middle" font-size="10" fill="#999999">工程基础设施：统一平台层 + BMF/Ray 异构计算框架层 + ByteCloud/Volcengine 资源层 ｜ 异步通信 + 自适应扩缩容 + 失败重试</text>
+</svg>
+</div>
+
+<h3 id="data-preprocess">2.1 数据预处理（5步深度拆解）</h3>
+
+<div class="two-col">
+  <div class="detail-card">
+    <h4>① 镜头感知时间分割</h4>
+    <p><strong>怎么做：</strong>原始长视频不直接用于训练。通过分析<strong>帧间视觉差异</strong>（inter-frame visual dissimilarities）或使用<strong>预训练的镜头边界检测器</strong>识别自然场景切换点，将长视频切分为较短片段。</p>
+    <p><strong>关键参数：</strong>每个片段<strong>最长 12 秒</strong>，可包含一个或多个时间连贯的镜头，保留局部叙事流。</p>
+    <div class="purpose-box"><strong>设计目的：</strong>将原始长视频切分为模型可处理的固定长度片段，同时按自然镜头边界切割而非硬切，保留镜头内的叙事连贯性，避免跨镜头语义断裂导致模型学习到混乱的时序关系。</div>
+    <p><span class="tag tag-l1">L1</span></p>
+  </div>
+
+  <div class="detail-card">
+    <h4>② 视觉覆盖修正</h4>
+    <p><strong>怎么做：</strong>源视频常含 logo、水印、字幕、屏幕图形等外来覆盖物。采用<strong>启发式规则系统 + 专用目标检测模型</strong>的混合方法识别这些遮挡区域，然后对帧进行<strong>自适应裁剪</strong>以最大化保留主要视觉内容。</p>
+    <p><strong>目的：</strong>消除噪声和偏差，获得更干净、更聚焦的视频数据。</p>
+    <p><span class="tag tag-l1">L1</span></p>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="detail-card">
+    <h4>③ 质量与安全过滤（双轨制）</h4>
+    <p><strong>视觉质量过滤：</strong>专用视觉质量模型系统识别并移除以下缺陷——模糊、过度抖动、低美学质量、差的电影构图、以静态内容为主的片段。</p>
+    <p><strong>安全过滤：</strong>高级分类器检测并排除——色情、显性暴力、儿童剥削、显性裸露等有害或不当内容。</p>
+    <div class="purpose-box"><strong>设计目的：</strong>双重保障缺一不可——质量过滤确保训练数据的视觉品质下限（模糊/抖动/低美学数据会拉低模型生成质量上限），安全过滤确保模型不学习有害内容模式，从数据源头规避安全风险。</div>
+    <p><span class="tag tag-l1">L1</span></p>
+  </div>
+
+  <div class="detail-card">
+    <h4>④ 语义去重</h4>
+    <p><strong>怎么做：</strong>使用<strong>内部开发的视频表征模型</strong>提取鲁棒特征 embedding，对视觉和语义相似的片段进行<strong>聚类</strong>。在每个近重复聚类中，仅保留<strong>综合质量评分最高</strong>的单个实例（质量评分来自前一步的质量过滤阶段）。</p>
+    <p><strong>目的：</strong>促进数据集多样性，防止模型对冗余内容过拟合。</p>
+    <p><span class="tag tag-l1">L1</span></p>
+  </div>
+</div>
+
+<div class="detail-card">
+  <h4>⑤ 分布重平衡</h4>
+  <p><strong>怎么做：</strong>沿多个维度分析数据集分布——主体类别、场景类型、主导动作、类型（纪录片/动画等）、视觉风格、片段时长、分辨率、运动特征。</p>
+  <ul>
+    <li><strong>头部类别（过度代表）：</strong>应用<strong>下采样</strong>（downsampling）</li>
+    <li><strong>尾部类别（代表不足）：</strong>训练时<strong>增加采样概率</strong>，同时启动<strong>定向数据采集</strong>（targeted data acquisition）扩充其存在</li>
+  </ul>
+  <p><strong>目标：</strong>更公平、更全面地代表视觉世界。</p>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<h3 id="data-captioning">2.2 Video Captioning（精准视频描述系统）</h3>
+
+<div class="detail-card">
+  <h4>密集 Caption 风格设计</h4>
+  <p>Seedance 1.0 采用<strong>整合动态与静态特征的密集 caption 风格</strong>（dense caption style integrating dynamic and static features）：</p>
+  <div class="two-col">
+    <div>
+      <p><strong>动态特征（Dynamic Features）：</strong></p>
+      <ul>
+        <li>细致描述视频片段中的<strong>动作</strong>（motions）</li>
+        <li>描述<strong>相机运动</strong>（camera movements）</li>
+        <li>突出<strong>变化中的元素</strong>（changing elements）</li>
+        <li>主体或场景的变化</li>
+      </ul>
+    </div>
+    <div>
+      <p><strong>静态特征（Static Features）：</strong></p>
+      <ul>
+        <li>详细阐述视频中<strong>核心角色或场景</strong>的特征</li>
+        <li><strong>外观</strong>（appearances）</li>
+        <li><strong>美学</strong>（aesthetics）</li>
+        <li><strong>风格</strong>（styles）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="detail-card">
+  <h4>Caption 模型训练方案</h4>
+  <ul>
+    <li><strong>基座模型：</strong><span class="code-inline">Tarsier2</span>（具有强视频理解能力的模型）</li>
+    <li><strong>训练策略：</strong><strong>视觉编码器冻结</strong>（frozen），<strong>语言模型全量微调</strong>（fully fine-tuned）</li>
+    <li><strong>训练数据：</strong>收集上述动态/静态类别的多样化数据，进行<strong>高质量人工标注</strong>用于训练</li>
+    <li><strong>语言能力：</strong>同时在<strong>中文和英文</strong>数据上训练，获得双语能力</li>
+  </ul>
+  <p><strong>推理时：</strong>使用 Prompt Engineering (PE) 模型（见 D 节）将用户 prompt 重写为与训练 caption 格式对齐的详细视频描述。</p>
+  <p><span class="tag tag-l1">L1</span> Caption 系统设计和训练方案完整披露</p>
+</div>
+
+<h3 id="data-infra">2.3 工程基础设施</h3>
+<div class="detail-card">
+  <p>三层架构：</p>
+  <ol>
+    <li><strong>统一平台层：</strong>自动化人在回路工作流、任务管理、数据可视化、流水线监控</li>
+    <li><strong>计算框架层：</strong><span class="code-inline">BMF（Babit Multimedia Framework，内部）</span> + <span class="code-inline">Ray（开源）</span>，支持 CPU/GPU/NPU 异构计算，动态分配视频操作到最优硬件（CPU 解码、GPU 深度推理），异步通信缓解硬件性能差距瓶颈</li>
+    <li><strong>底层资源层：</strong>ByteCloud（内部）+ Volcengine（外部）云基础设施</li>
+  </ol>
+  <p><strong>关键能力：</strong>自适应自动扩缩容处理资源波动、被抢占任务的失败重试机制、近线性可扩展性、极高吞吐量处理海量视频训练数据。</p>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<!-- ==================== D. 模型结构 ==================== -->
+<h2 id="model-arch">③ 模型结构深度拆解</h2>
+
+<h3 id="model-vae">3.1 VAE：时间因果卷积变分自编码器</h3>
+<div class="detail-card">
+  <h4>架构设计</h4>
+  <p>遵循 <span class="code-inline">MAGVIT</span> 设计，编码器和解码器均采用<strong>时间因果卷积架构</strong>（temporally causal convolutional architecture），在 latent 空间中对图像和视频进行联合时空压缩。</p>
+  <p><strong>压缩过程：</strong>将 RGB 像素空间输入 <span class="code-inline">(T'+1, H', W', 3)</span> 转换为连续 latent 表示 <span class="code-inline">(T+1, H, W, C)</span>。</p>
+  <table>
+    <tr><th>参数</th><th>取值</th><th>说明</th></tr>
+    <tr><td>时间压缩比 r_t</td><td><strong>4</strong></td><td>时间维度下采样 4 倍</td></tr>
+    <tr><td>高度压缩比 r_h</td><td><strong>16</strong></td><td>空间高度下采样 16 倍</td></tr>
+    <tr><td>宽度压缩比 r_w</td><td><strong>16</strong></td><td>空间宽度下采样 16 倍</td></tr>
+    <tr><td>Latent 通道数 C</td><td><strong>48</strong></td><td>latent 表示的通道维度</td></tr>
+    <tr><td>总压缩比 r</td><td><strong>C/(3×r_t×r_h×r_w) = 48/(3×4×16×16) = 1/64</strong></td><td>像素到 latent 的总压缩率</td></tr>
+  </table>
+  <p><strong>关键设计：</strong>由于较高的下采样率，在 DiT 侧<strong>移除了 patchification 操作</strong>（遵循 DCAE 策略），直接使用 VAE 输出的 latent token。</p>
+  <p><strong>因果设计优势：</strong>当 T=T'=0 时，VAE 可无缝处理图像输入输出，实现图像视频统一。</p>
+</div>
+
+<div class="detail-card">
+  <h4>VAE 训练损失组合</h4>
+  <p>四种损失联合训练：</p>
+  <ol>
+    <li><strong>L1 重建损失</strong>：像素级绝对误差</li>
+    <li><strong>KL 散度损失</strong>：约束 latent 分布接近标准正态</li>
+    <li><strong>LPIPS 感知损失</strong>：基于深度特征的感知相似度</li>
+    <li><strong>对抗训练损失</strong>：使用类似 <span class="code-inline">PatchGAN</span> 架构的<strong>混合判别器</strong>（hybrid discriminator），同时监督外观和运动建模，强制更精细的局部纹理和细节结构监督</li>
+  </ol>
+  <p><span class="tag tag-l1">L1</span> VAE 架构、参数、损失完整披露</p>
+</div>
+
+<h3 id="model-dit">3.2 Diffusion Transformer：解耦时空层 + MMDiT</h3>
+
+<div class="svg-container">
+<svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <text x="450" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">Seedance 1.0 DiT 架构：解耦时空层 + MMDiT</text>
+
+  <!-- 输入 -->
+  <rect x="350" y="50" width="200" height="40" rx="6" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="450" y="70" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">VAE Visual Tokens + Text Tokens</text>
+  <text x="450" y="85" text-anchor="middle" font-size="9.5" fill="#555555">(MM-RoPE 多模态位置编码)</text>
+
+  <line x1="450" y1="92" x2="450" y2="110" stroke="#C7000B" stroke-width="2" marker-end="url(#arr2)"/>
+
+  <!-- N x Block -->
+  <rect x="150" y="115" width="600" height="230" rx="10" fill="#FAFAFA" stroke="#C7000B" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="450" y="135" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">N × 重复 Block（空间层 + 时间层交替）</text>
+
+  <!-- 空间层 -->
+  <rect x="180" y="150" width="250" height="175" rx="8" fill="#FDE8EA" stroke="#0066B3" stroke-width="2"/>
+  <text x="305" y="172" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">Spatial DiT Block（空间层）</text>
+
+  <rect x="195" y="185" width="220" height="35" rx="4" fill="white" stroke="#0066B3"/>
+  <text x="305" y="207" text-anchor="middle" font-size="10" fill="#333333">MM-RoPE 位置编码</text>
+
+  <rect x="195" y="228" width="220" height="45" rx="4" fill="white" stroke="#0066B3"/>
+  <text x="305" y="246" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">多模态自注意力 (MMDiT)</text>
+  <text x="305" y="262" text-anchor="middle" font-size="9" fill="#555555">视觉+文本 token 联合注意力</text>
+  <text x="305" y="274" text-anchor="middle" font-size="9" fill="#555555">两套权重(adaptive LN/QKV/MLP)</text>
+
+  <rect x="195" y="280" width="220" height="35" rx="4" fill="white" stroke="#0066B3"/>
+  <text x="305" y="302" text-anchor="middle" font-size="10" fill="#333333">Vision MLP + Text MLP（分离）</text>
+
+  <!-- 时间层 -->
+  <rect x="470" y="150" width="250" height="175" rx="8" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="595" y="172" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">Temporal DiT Block（时间层）</text>
+
+  <rect x="485" y="185" width="220" height="35" rx="4" fill="white" stroke="#00B578"/>
+  <text x="595" y="207" text-anchor="middle" font-size="10" fill="#00875A">RoPE 位置编码（仅视觉）</text>
+
+  <rect x="485" y="228" width="220" height="45" rx="4" fill="white" stroke="#00B578"/>
+  <text x="595" y="246" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">时空自注意力 + 窗口划分</text>
+  <text x="595" y="262" text-anchor="middle" font-size="9" fill="#555555">帧内窗口划分 + 帧间全局感受野</text>
+  <text x="595" y="274" text-anchor="middle" font-size="9" fill="#e74c3c">文本 token 不参与时间层</text>
+
+  <rect x="485" y="280" width="220" height="35" rx="4" fill="white" stroke="#00B578"/>
+  <text x="595" y="302" text-anchor="middle" font-size="10" fill="#00875A">Vision MLP（仅视觉）</text>
+
+  <!-- 箭头空间→时间 -->
+  <line x1="432" y1="237" x2="468" y2="237" stroke="#555555" stroke-width="2" marker-end="url(#arr2)"/>
+
+  <!-- 输出 -->
+  <line x1="450" y1="348" x2="450" y2="365" stroke="#C7000B" stroke-width="2" marker-end="url(#arr2)"/>
+  <rect x="350" y="370" width="200" height="35" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="2"/>
+  <text x="450" y="392" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">输出：预测噪声 / velocity</text>
+
+  <defs>
+    <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+</svg>
+</div>
+
+<div class="detail-card">
+  <h4>解耦时空层设计（Decoupled Spatial and Temporal Layers）</h4>
+  <p><strong>核心思想：</strong>将空间注意力和时间注意力<strong>解耦为独立的层</strong>，交替堆叠：</p>
+  <ul>
+    <li><strong>空间层（Spatial Layers）：</strong>在每一帧内部执行注意力聚合（帧内自注意力）</li>
+    <li><strong>时间层（Temporal Layers）：</strong>跨帧执行注意力计算（帧间自注意力），并在每一帧内部执行<strong>窗口划分</strong>（window partition），从而在时间维度上获得全局感受野</li>
+  </ul>
+  <p><strong>文本 token 参与规则：</strong>文本 token <strong>仅在空间层</strong>参与跨模态交互，<strong>不参与时间层</strong>的注意力计算。</p>
+  <p><strong>效率优势：</strong>解耦设计 + 窗口注意力大幅提升训练和推理效率。</p>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<div class="detail-card">
+  <h4>MMDiT 架构（多模态 Diffusion Transformer）</h4>
+  <p>遵循 <span class="code-inline">Stable Diffusion 3</span> 的 MMDiT 设计：</p>
+  <ul>
+    <li><strong>空间层：</strong>应用<strong>多模态自注意力层</strong>（multi-modality self-attention），整合视觉和文本 token</li>
+    <li><strong>时间层：</strong>仅处理视觉 token 的自注意力层</li>
+    <li><strong>双权重设计：</strong>考虑视觉和文本 token 的语义差异，在空间层中为两种模态使用<strong>两套独立权重</strong>——包括 adaptive layer norm、QKV projection、MLP</li>
+    <li><strong>训练稳定性：</strong>在注意力矩阵计算前对 Q 和 K embedding 进行<strong>归一化</strong>（QK normalization），防止训练不稳定</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<div class="detail-card">
+  <h4>Multishot MM-RoPE（多镜头多模态旋转位置编码）</h4>
+
+  <p><strong>论文原文：</strong>"In addition to using 3D RoPE encoding for visual tokens, following Seaweed and LCT, we add 3D Multi-modal RoPE (MM-RoPE) in the concatenated sequences by adding extra 1D positional encoding for textual tokens. The MM-RoPE also supports interleaved sequences of visual tokens and textual tokens, and can be extended to training video with multiple shots, where shots are organized in the temporal order of actions and each shot has its own detailed caption."</p>
+
+  <h4 style="color:#0066B3; margin-top:16px;">① RoPE 基础原理</h4>
+  <p>RoPE（Rotary Position Embedding，旋转位置编码）通过<strong>旋转矩阵</strong>将绝对位置信息注入到 query 和 key 中，使注意力分数天然包含相对位置信息：</p>
+  <ul>
+    <li>核心操作：对位置 m 的 query 施加旋转 R(mθ)，对位置 n 的 key 施加旋转 R(nθ)</li>
+    <li>优势：相对位置编码、长度外推性好、与注意力机制数学上天然兼容（内积后仅依赖 m-n 的相对位置）</li>
+    <li>实现方式：将 embedding 维度两两分组，每组施加不同频率 θ_i = 10000^(-2i/d) 的旋转</li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:16px;">② 视觉 token：3D RoPE 编码</h4>
+  <p>视频是<strong>三维信号</strong>（时间 t × 高度 h × 宽度 w），因此视觉 token 使用 3D RoPE：</p>
+  <ul>
+    <li>每个视觉 token 的位置由三元组 <strong>(t, h, w)</strong> 唯一确定（t=帧索引，h=空间行，w=空间列）</li>
+    <li>对三个维度<strong>分别施加 RoPE 旋转</strong>：时间维度用频率 θ_t，高度维度用 θ_h，宽度维度用 θ_w</li>
+    <li>3D RoPE = 三个维度旋转的组合，使注意力能同时感知"第几帧、帧内什么位置"</li>
+    <li>遵循 Seaweed 和 LCT 的 3D 位置编码思路</li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:16px;">③ 文本 token：1D RoPE 编码</h4>
+  <p>文本是<strong>一维序列</strong>，没有空间维度，因此文本 token 使用标准的 1D RoPE：</p>
+  <ul>
+    <li>每个文本 token 的位置由序列中的位置 <strong>pos</strong> 确定</li>
+    <li>施加标准 1D 旋转 R(pos·θ)</li>
+    <li><strong>不强行扩展为 3D</strong>——文本没有 h/w 维度，强行填充会引入无意义的位置维度，干扰注意力</li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:16px;">④ MM-RoPE：拼接序列中的双轨位置编码</h4>
+  <p>视觉 token 和文本 token 拼接成一个序列输入 DiT 空间层。MM-RoPE 的关键设计是<strong>在同一个拼接序列中，不同模态的 token 独立应用各自维度的位置编码</strong>：</p>
+  <ul>
+    <li>序列中属于视觉的位置 → 应用 3D RoPE (t, h, w)</li>
+    <li>序列中属于文本的位置 → 应用 1D RoPE (pos)</li>
+    <li>这就是"多模态 RoPE"（Multi-modal RoPE）的含义——<strong>不是统一用一种编码，而是按模态分别编码</strong></li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:16px;">⑤ 交错序列支持</h4>
+  <p>MM-RoPE 不仅支持"所有文本在前、所有视觉在后"的简单拼接，还支持<strong>视觉 token 和文本 token 交错排列</strong>的序列：</p>
+  <ul>
+    <li>因为每个 token 独立应用自己模态的位置编码，不受 token 在序列中的排列方式影响</li>
+    <li>视觉 token 的 3D 坐标由其在视频体素中的位置决定，而非在拼接序列中的序号</li>
+    <li>文本 token 的 1D 坐标由其在 caption 中的词序决定，而非在拼接序列中的序号</li>
+    <li>这为多镜头生成和复杂条件输入提供了架构灵活性</li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:16px;">⑥ 多镜头扩展（Multishot）</h4>
+  <p>MM-RoPE 可扩展到多镜头视频训练，这是 Seedance 1.0 能<strong>原生支持多镜头生成</strong>的关键：</p>
+  <ul>
+    <li>多镜头视频中，<strong>每个镜头有自己的详细 caption</strong></li>
+    <li>镜头按<strong>动作的时间顺序</strong>组织（Shot 1 → Shot 2 → ...）</li>
+    <li>每个镜头的视觉 token 使用<strong>该镜头局部的 3D 坐标系</strong>（t 从 0 开始计数，而非全局帧索引）</li>
+    <li>每个镜头的 caption 文本 token 使用自己的 1D 位置编码</li>
+    <li>多个镜头的 (caption + visual tokens) 对按时间顺序拼接，形成<strong>交错序列</strong></li>
+    <li>MM-RoPE 天然支持这种结构——因为每个 token 独立编码，镜头边界不需要特殊处理</li>
+  </ul>
+
+  <div class="svg-container" style="margin-top:20px;">
+    <svg viewBox="0 0 960 720" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+      <text x="480" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#C7000B">Multishot MM-RoPE：双轨位置编码与多镜头扩展</text>
+
+      <!-- 上半部分：单镜头 T2V -->
+      <text x="30" y="50" font-size="12" font-weight="bold" fill="#0066B3">单镜头 T2V 场景</text>
+
+      <!-- 文本 token -->
+      <rect x="30" y="62" width="200" height="28" rx="4" fill="#EBF5FB" stroke="#0066B3" stroke-width="1.5"/>
+      <text x="130" y="80" text-anchor="middle" font-size="10" fill="#0066B3" font-weight="bold">文本 Token 序列（Caption）</text>
+
+      <rect x="30" y="96" width="32" height="36" rx="3" fill="#D6EAF8" stroke="#0066B3"/>
+      <text x="46" y="112" text-anchor="middle" font-size="9" fill="#333">一</text>
+      <text x="46" y="125" text-anchor="middle" font-size="8" fill="#0066B3">1D pos=0</text>
+
+      <rect x="66" y="96" width="32" height="36" rx="3" fill="#D6EAF8" stroke="#0066B3"/>
+      <text x="82" y="112" text-anchor="middle" font-size="9" fill="#333">只</text>
+      <text x="82" y="125" text-anchor="middle" font-size="8" fill="#0066B3">1D pos=1</text>
+
+      <rect x="102" y="96" width="32" height="36" rx="3" fill="#D6EAF8" stroke="#0066B3"/>
+      <text x="118" y="112" text-anchor="middle" font-size="9" fill="#333">猫</text>
+      <text x="118" y="125" text-anchor="middle" font-size="8" fill="#0066B3">1D pos=2</text>
+
+      <rect x="138" y="96" width="32" height="36" rx="3" fill="#D6EAF8" stroke="#0066B3"/>
+      <text x="154" y="112" text-anchor="middle" font-size="9" fill="#333">在</text>
+      <text x="154" y="125" text-anchor="middle" font-size="8" fill="#0066B3">1D pos=3</text>
+
+      <rect x="174" y="96" width="32" height="36" rx="3" fill="#D6EAF8" stroke="#0066B3"/>
+      <text x="190" y="112" text-anchor="middle" font-size="9" fill="#333">跑</text>
+      <text x="190" y="125" text-anchor="middle" font-size="8" fill="#0066B3">1D pos=4</text>
+
+      <text x="220" y="118" font-size="16" fill="#999">→</text>
+
+      <!-- 拼接箭头 -->
+      <rect x="245" y="96" width="60" height="36" rx="4" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+      <text x="275" y="112" text-anchor="middle" font-size="9" fill="#C7000B" font-weight="bold">拼接</text>
+      <text x="275" y="125" text-anchor="middle" font-size="8" fill="#C7000B">Concat</text>
+
+      <text x="315" y="118" font-size="16" fill="#999">→</text>
+
+      <!-- 视觉 token -->
+      <rect x="335" y="62" width="200" height="28" rx="4" fill="#E8F8F0" stroke="#00B578" stroke-width="1.5"/>
+      <text x="435" y="80" text-anchor="middle" font-size="10" fill="#00875A" font-weight="bold">视觉 Token 序列（VAE Latent）</text>
+
+      <!-- 视觉token网格示意 3帧 x 2x2 -->
+      <g transform="translate(335, 96)">
+        <!-- Frame 0 -->
+        <text x="30" y="-4" text-anchor="middle" font-size="8" fill="#00875A">t=0</text>
+        <rect x="8" y="0" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="17" y="11" text-anchor="middle" font-size="7" fill="#333">0,0</text>
+        <rect x="28" y="0" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="37" y="11" text-anchor="middle" font-size="7" fill="#333">0,1</text>
+        <rect x="8" y="18" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="17" y="29" text-anchor="middle" font-size="7" fill="#333">1,0</text>
+        <rect x="28" y="18" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="37" y="29" text-anchor="middle" font-size="7" fill="#333">1,1</text>
+
+        <!-- Frame 1 -->
+        <text x="90" y="-4" text-anchor="middle" font-size="8" fill="#00875A">t=1</text>
+        <rect x="68" y="0" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="77" y="11" text-anchor="middle" font-size="7" fill="#333">0,0</text>
+        <rect x="88" y="0" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="97" y="11" text-anchor="middle" font-size="7" fill="#333">0,1</text>
+        <rect x="68" y="18" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="77" y="29" text-anchor="middle" font-size="7" fill="#333">1,0</text>
+        <rect x="88" y="18" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="97" y="29" text-anchor="middle" font-size="7" fill="#333">1,1</text>
+
+        <!-- Frame 2 -->
+        <text x="150" y="-4" text-anchor="middle" font-size="8" fill="#00875A">t=2</text>
+        <rect x="128" y="0" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="137" y="11" text-anchor="middle" font-size="7" fill="#333">0,0</text>
+        <rect x="148" y="0" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="157" y="11" text-anchor="middle" font-size="7" fill="#333">0,1</text>
+        <rect x="128" y="18" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="137" y="29" text-anchor="middle" font-size="7" fill="#333">1,0</text>
+        <rect x="148" y="18" width="18" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="157" y="29" text-anchor="middle" font-size="7" fill="#333">1,1</text>
+      </g>
+
+      <text x="560" y="118" font-size="16" fill="#999">→</text>
+
+      <!-- MM-RoPE 应用 -->
+      <rect x="580" y="80" width="160" height="60" rx="6" fill="#FFF8E6" stroke="#FF6B00" stroke-width="2"/>
+      <text x="660" y="100" text-anchor="middle" font-size="10" fill="#CC5500" font-weight="bold">MM-RoPE 双轨编码</text>
+      <text x="660" y="116" text-anchor="middle" font-size="8" fill="#666">视觉位置 → 3D RoPE (t,h,w)</text>
+      <text x="660" y="130" text-anchor="middle" font-size="8" fill="#666">文本位置 → 1D RoPE (pos)</text>
+
+      <text x="755" y="118" font-size="16" fill="#999">→</text>
+
+      <!-- DiT 空间层 -->
+      <rect x="775" y="90" width="155" height="44" rx="6" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+      <text x="852" y="108" text-anchor="middle" font-size="10" fill="#C7000B" font-weight="bold">DiT 空间层</text>
+      <text x="852" y="124" text-anchor="middle" font-size="8" fill="#666">MMDiT 多模态自注意力</text>
+
+      <!-- 分隔线 -->
+      <line x1="20" y1="160" x2="940" y2="160" stroke="#ddd" stroke-width="1" stroke-dasharray="4,4"/>
+
+      <!-- 下半部分：多镜头场景 -->
+      <text x="30" y="182" font-size="12" font-weight="bold" fill="#C7000B">多镜头（Multishot）场景：交错序列 + 局部 3D 坐标系</text>
+
+      <!-- Shot 1 -->
+      <rect x="30" y="195" width="900" height="130" rx="8" fill="#F8F9FA" stroke="#dee2e6" stroke-width="1"/>
+      <text x="45" y="214" font-size="11" font-weight="bold" fill="#0066B3">Shot 1（镜头一）</text>
+
+      <!-- Shot1 caption -->
+      <rect x="50" y="222" width="120" height="24" rx="3" fill="#EBF5FB" stroke="#0066B3"/>
+      <text x="110" y="238" text-anchor="middle" font-size="9" fill="#0066B3">Caption 1: 一只猫在跑</text>
+
+      <!-- Shot1 visual -->
+      <g transform="translate(185, 220)">
+        <text x="60" y="-4" text-anchor="middle" font-size="8" fill="#00875A">视觉 Token（局部 3D 坐标，t 从 0 开始）</text>
+        <rect x="5" y="2" width="22" height="20" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="16" y="15" text-anchor="middle" font-size="7" fill="#333">t0</text>
+        <rect x="30" y="2" width="22" height="20" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="41" y="15" text-anchor="middle" font-size="7" fill="#333">t1</text>
+        <rect x="55" y="2" width="22" height="20" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="66" y="15" text-anchor="middle" font-size="7" fill="#333">t2</text>
+        <rect x="80" y="2" width="22" height="20" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="91" y="15" text-anchor="middle" font-size="7" fill="#333">t3</text>
+        <rect x="105" y="2" width="22" height="20" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+        <text x="116" y="15" text-anchor="middle" font-size="7" fill="#333">t4</text>
+        <text x="145" y="15" font-size="10" fill="#999">...</text>
+      </g>
+
+      <!-- 镜头切换箭头 -->
+      <text x="480" y="278" text-anchor="middle" font-size="14" fill="#FF6B00">↓ 镜头切换（按动作时间顺序）</text>
+
+      <!-- Shot 2 -->
+      <rect x="30" y="290" width="900" height="130" rx="8" fill="#F8F9FA" stroke="#dee2e6" stroke-width="1"/>
+      <text x="45" y="309" font-size="11" font-weight="bold" fill="#FF6B00">Shot 2（镜头二）</text>
+
+      <!-- Shot2 caption -->
+      <rect x="50" y="317" width="140" height="24" rx="3" fill="#FFF8E6" stroke="#FF6B00"/>
+      <text x="120" y="333" text-anchor="middle" font-size="9" fill="#CC5500">Caption 2: 猫跳进了盒子里</text>
+
+      <!-- Shot2 visual -->
+      <g transform="translate(205, 315)">
+        <text x="60" y="-4" text-anchor="middle" font-size="8" fill="#00875A">视觉 Token（局部 3D 坐标，t 重新从 0 开始）</text>
+        <rect x="5" y="2" width="22" height="20" rx="2" fill="#FCF3CF" stroke="#FF6B00"/>
+        <text x="16" y="15" text-anchor="middle" font-size="7" fill="#333">t0</text>
+        <rect x="30" y="2" width="22" height="20" rx="2" fill="#FCF3CF" stroke="#FF6B00"/>
+        <text x="41" y="15" text-anchor="middle" font-size="7" fill="#333">t1</text>
+        <rect x="55" y="2" width="22" height="20" rx="2" fill="#FCF3CF" stroke="#FF6B00"/>
+        <text x="66" y="15" text-anchor="middle" font-size="7" fill="#333">t2</text>
+        <rect x="80" y="2" width="22" height="20" rx="2" fill="#FCF3CF" stroke="#FF6B00"/>
+        <text x="91" y="15" text-anchor="middle" font-size="7" fill="#333">t3</text>
+        <text x="120" y="15" font-size="10" fill="#999">...</text>
+      </g>
+
+      <!-- 右侧说明 -->
+      <rect x="560" y="200" width="360" height="210" rx="6" fill="#FFF8F0" stroke="#FF6B00" stroke-width="1.5"/>
+      <text x="580" y="222" font-size="10" font-weight="bold" fill="#CC5500">多镜头 MM-RoPE 关键设计：</text>
+      <text x="580" y="242" font-size="9" fill="#555">① 每个镜头有独立 caption（1D RoPE）</text>
+      <text x="580" y="260" font-size="9" fill="#555">② 每个镜头视觉 token 用局部 3D 坐标</text>
+      <text x="580" y="278" font-size="9" fill="#555">   （t 从 0 开始，非全局帧索引）</text>
+      <text x="580" y="296" font-size="9" fill="#555">③ 镜头按动作时间顺序排列</text>
+      <text x="580" y="314" font-size="9" fill="#555">④ (caption + visual) 对形成交错序列</text>
+      <text x="580" y="332" font-size="9" fill="#555">⑤ MM-RoPE 逐 token 独立编码</text>
+      <text x="580" y="350" font-size="9" fill="#555">   镜头边界无需特殊处理</text>
+      <text x="580" y="374" font-size="9" font-weight="bold" fill="#C7000B">→ 原生支持多镜头叙事生成</text>
+      <text x="580" y="392" font-size="9" fill="#555">   （正反打、切入切出、匹配剪辑等）</text>
+
+      <!-- 拼接后多镜头Token序列具体示例 -->
+      <text x="30" y="438" font-size="12" font-weight="bold" fill="#C7000B">拼接后多镜头 Token 序列具体示例（交错序列 + 局部 3D 坐标）</text>
+
+      <!-- 示例说明 -->
+      <text x="30" y="456" font-size="9" fill="#666">示例：Shot 1 caption="猫在跑"(3 token) + Shot 1 visual(2帧×2×2, 简化展示4 token) + Shot 2 caption="跳盒子"(3 token) + Shot 2 visual(2帧×2×2, 简化展示4 token)</text>
+
+      <!-- 镜头1边界标注 -->
+      <rect x="30" y="468" width="370" height="22" rx="4" fill="#EBF5FB" stroke="#0066B3" stroke-width="1"/>
+      <text x="215" y="483" text-anchor="middle" font-size="10" fill="#0066B3" font-weight="bold">Shot 1（镜头一）</text>
+
+      <!-- 镜头2边界标注 -->
+      <rect x="410" y="468" width="370" height="22" rx="4" fill="#FFF8E6" stroke="#FF6B00" stroke-width="1"/>
+      <text x="595" y="483" text-anchor="middle" font-size="10" fill="#CC5500" font-weight="bold">Shot 2（镜头二）</text>
+
+      <!-- Token序列：Shot 1 文本 (3个) -->
+      <g transform="translate(35, 498)">
+        <!-- 文本token 0 -->
+        <rect x="0" y="0" width="48" height="42" rx="4" fill="#D6EAF8" stroke="#0066B3" stroke-width="1.5"/>
+        <text x="24" y="16" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">猫</text>
+        <text x="24" y="30" text-anchor="middle" font-size="7" fill="#0066B3">1D pos=0</text>
+        <text x="24" y="40" text-anchor="middle" font-size="6" fill="#888">文本</text>
+        <!-- 文本token 1 -->
+        <rect x="52" y="0" width="48" height="42" rx="4" fill="#D6EAF8" stroke="#0066B3" stroke-width="1.5"/>
+        <text x="76" y="16" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">在</text>
+        <text x="76" y="30" text-anchor="middle" font-size="7" fill="#0066B3">1D pos=1</text>
+        <text x="76" y="40" text-anchor="middle" font-size="6" fill="#888">文本</text>
+        <!-- 文本token 2 -->
+        <rect x="104" y="0" width="48" height="42" rx="4" fill="#D6EAF8" stroke="#0066B3" stroke-width="1.5"/>
+        <text x="128" y="16" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">跑</text>
+        <text x="128" y="30" text-anchor="middle" font-size="7" fill="#0066B3">1D pos=2</text>
+        <text x="128" y="40" text-anchor="middle" font-size="6" fill="#888">文本</text>
+
+        <!-- 分隔：文本→视觉 -->
+        <text x="162" y="25" font-size="14" fill="#999">|</text>
+
+        <!-- Shot1 视觉 token (t0,h0,w0) -->
+        <rect x="172" y="0" width="48" height="42" rx="4" fill="#D5F5E3" stroke="#00B578" stroke-width="1.5"/>
+        <text x="196" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="196" y="26" text-anchor="middle" font-size="6" fill="#00875A">3D(0,0,0)</text>
+        <text x="196" y="37" text-anchor="middle" font-size="6" fill="#888">t0帧</text>
+        <!-- Shot1 视觉 (t0,h0,w1) -->
+        <rect x="224" y="0" width="48" height="42" rx="4" fill="#D5F5E3" stroke="#00B578" stroke-width="1.5"/>
+        <text x="248" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="248" y="26" text-anchor="middle" font-size="6" fill="#00875A">3D(0,0,1)</text>
+        <text x="248" y="37" text-anchor="middle" font-size="6" fill="#888">t0帧</text>
+        <!-- Shot1 视觉 (t1,h0,w0) -->
+        <rect x="276" y="0" width="48" height="42" rx="4" fill="#D5F5E3" stroke="#00B578" stroke-width="1.5"/>
+        <text x="300" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="300" y="26" text-anchor="middle" font-size="6" fill="#00875A">3D(1,0,0)</text>
+        <text x="300" y="37" text-anchor="middle" font-size="6" fill="#888">t1帧</text>
+        <!-- Shot1 视觉 (t1,h0,w1) -->
+        <rect x="328" y="0" width="48" height="42" rx="4" fill="#D5F5E3" stroke="#00B578" stroke-width="1.5"/>
+        <text x="352" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="352" y="26" text-anchor="middle" font-size="6" fill="#00875A">3D(1,0,1)</text>
+        <text x="352" y="37" text-anchor="middle" font-size="6" fill="#888">t1帧</text>
+      </g>
+
+      <!-- 镜头切换箭头 -->
+      <text x="407" y="523" text-anchor="middle" font-size="16" fill="#FF6B00" font-weight="bold">→</text>
+
+      <!-- Token序列：Shot 2 -->
+      <g transform="translate(415, 498)">
+        <!-- Shot2 文本 token 0 -->
+        <rect x="0" y="0" width="48" height="42" rx="4" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+        <text x="24" y="16" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">跳</text>
+        <text x="24" y="30" text-anchor="middle" font-size="7" fill="#C7000B">1D pos=0</text>
+        <text x="24" y="40" text-anchor="middle" font-size="6" fill="#888">文本</text>
+        <!-- Shot2 文本 token 1 -->
+        <rect x="52" y="0" width="48" height="42" rx="4" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+        <text x="76" y="16" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">进</text>
+        <text x="76" y="30" text-anchor="middle" font-size="7" fill="#C7000B">1D pos=1</text>
+        <text x="76" y="40" text-anchor="middle" font-size="6" fill="#888">文本</text>
+        <!-- Shot2 文本 token 2 -->
+        <rect x="104" y="0" width="48" height="42" rx="4" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+        <text x="128" y="16" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">盒</text>
+        <text x="128" y="30" text-anchor="middle" font-size="7" fill="#C7000B">1D pos=2</text>
+        <text x="128" y="40" text-anchor="middle" font-size="6" fill="#888">文本</text>
+
+        <!-- 分隔 -->
+        <text x="162" y="25" font-size="14" fill="#999">|</text>
+
+        <!-- Shot2 视觉 token (t0,h0,w0) - 注意：t从0重新开始！ -->
+        <rect x="172" y="0" width="48" height="42" rx="4" fill="#FCF3CF" stroke="#FF6B00" stroke-width="1.5"/>
+        <text x="196" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="196" y="26" text-anchor="middle" font-size="6" fill="#CC5500">3D(0,0,0)</text>
+        <text x="196" y="37" text-anchor="middle" font-size="6" fill="#888">t0帧★</text>
+        <!-- Shot2 视觉 (t0,h0,w1) -->
+        <rect x="224" y="0" width="48" height="42" rx="4" fill="#FCF3CF" stroke="#FF6B00" stroke-width="1.5"/>
+        <text x="248" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="248" y="26" text-anchor="middle" font-size="6" fill="#CC5500">3D(0,0,1)</text>
+        <text x="248" y="37" text-anchor="middle" font-size="6" fill="#888">t0帧★</text>
+        <!-- Shot2 视觉 (t1,h0,w0) -->
+        <rect x="276" y="0" width="48" height="42" rx="4" fill="#FCF3CF" stroke="#FF6B00" stroke-width="1.5"/>
+        <text x="300" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="300" y="26" text-anchor="middle" font-size="6" fill="#CC5500">3D(1,0,0)</text>
+        <text x="300" y="37" text-anchor="middle" font-size="6" fill="#888">t1帧</text>
+        <!-- Shot2 视觉 (t1,h0,w1) -->
+        <rect x="328" y="0" width="48" height="42" rx="4" fill="#FCF3CF" stroke="#FF6B00" stroke-width="1.5"/>
+        <text x="352" y="14" text-anchor="middle" font-size="8" fill="#333" font-weight="bold">V</text>
+        <text x="352" y="26" text-anchor="middle" font-size="6" fill="#CC5500">3D(1,0,1)</text>
+        <text x="352" y="37" text-anchor="middle" font-size="6" fill="#888">t1帧</text>
+      </g>
+
+      <!-- 关键标注：局部坐标系 -->
+      <rect x="800" y="498" width="140" height="42" rx="4" fill="#FFF8F0" stroke="#FF6B00" stroke-width="1.5"/>
+      <text x="870" y="514" text-anchor="middle" font-size="8" fill="#CC5500" font-weight="bold">★ 关键：局部 3D 坐标</text>
+      <text x="870" y="526" text-anchor="middle" font-size="7" fill="#666">Shot 2 的 t 从 0 重新开始</text>
+      <text x="870" y="536" text-anchor="middle" font-size="7" fill="#666">而非延续 Shot 1 的 t=2,3...</text>
+
+      <!-- 序列下方标注：交错序列 -->
+      <text x="30" y="562" font-size="9" fill="#666">↑ 这就是<strong style="fill:#C7000B;">交错序列</strong>（interleaved sequences）：文本 token 和视觉 token 按 [Shot1文本 | Shot1视觉 | Shot2文本 | Shot2视觉] 的顺序拼接，每个 token 独立应用自己模态的位置编码</text>
+
+      <!-- MM-RoPE应用说明 -->
+      <rect x="30" y="572" width="910" height="38" rx="6" fill="#F0F9FF" stroke="#0066B3" stroke-width="1"/>
+      <text x="45" y="590" font-size="9" fill="#0066B3" font-weight="bold">MM-RoPE 如何应用到这个序列：</text>
+      <text x="45" y="604" font-size="8" fill="#555">① 蓝色/红色文本 token → 应用 1D RoPE（pos=0,1,2，每个镜头的 caption 独立计数）；② 绿色/黄色视觉 token → 应用 3D RoPE（t,h,w，每个镜头局部坐标系，t 从 0 开始）；③ 镜头边界不需要特殊处理，因为每个 token 独立编码</text>
+
+      <!-- 底部图例（下移） -->
+      <rect x="30" y="625" width="910" height="75" rx="6" fill="#F8F9FA" stroke="#dee2e6"/>
+      <text x="50" y="647" font-size="10" font-weight="bold" fill="#333">图例：</text>
+      <rect x="100" y="635" width="16" height="16" rx="2" fill="#D6EAF8" stroke="#0066B3"/>
+      <text x="122" y="647" font-size="9" fill="#555">Shot1 文本 Token（1D RoPE）</text>
+      <rect x="260" y="635" width="16" height="16" rx="2" fill="#D5F5E3" stroke="#00B578"/>
+      <text x="282" y="647" font-size="9" fill="#555">Shot1 视觉 Token（3D RoPE）</text>
+      <rect x="420" y="635" width="16" height="16" rx="2" fill="#FDE8EA" stroke="#C7000B"/>
+      <text x="442" y="647" font-size="9" fill="#555">Shot2 文本 Token（1D RoPE）</text>
+      <rect x="580" y="635" width="16" height="16" rx="2" fill="#FCF3CF" stroke="#FF6B00"/>
+      <text x="602" y="647" font-size="9" fill="#555">Shot2 视觉 Token（局部 3D 坐标）</text>
+      <text x="50" y="672" font-size="9" fill="#888">注：RoPE 旋转频率 θ_i = 10000^(-2i/d)；3D RoPE 对 t/h/w 三维度分别施加旋转后组合；实际训练中视觉 token 数量远大于此示例（数百至数千个），此处仅展示结构原理；论文未披露具体频率分配和维度划分细节。</text>
+      <text x="50" y="688" font-size="8" fill="#aaa">示例中视觉 token 简化为 2帧×1行×2列=4个/镜头，实际为 T帧×H行×W列的完整体素网格。</text>
+    </svg>
+  </div>
+
+  <div class="purpose-box" style="margin-top:16px;">
+    <strong>设计目的：</strong>
+    <ul style="margin:6px 0; padding-left:18px;">
+      <li><strong>为什么视觉用 3D 而文本用 1D？</strong>视频的时空结构需要 3D 编码才能同时表达帧内空间关系（h,w）和帧间时间关系（t）；文本没有空间维度，强行用 3D 会引入无意义的 h/w 位置，干扰注意力学习。</li>
+      <li><strong>为什么在拼接序列中分别编码而非统一编码？</strong>统一编码会迫使文本 token 学习不存在的空间维度，或迫使视觉 token 丢失时空结构信息。按模态分别编码（MM-RoPE）让每种模态使用最适合自身的位置表示。</li>
+      <li><strong>为什么支持交错序列？</strong>多镜头生成中每个镜头有自己的 caption，天然形成"文本-视觉-文本-视觉"的交错排列。如果位置编码不支持交错，就无法在单个模型中统一处理多镜头输入。</li>
+      <li><strong>为什么多镜头用局部 3D 坐标系而非全局？</strong>每个镜头是独立的叙事单元，镜头间的时间间隔不固定（可能是切、叠化、跳切），用全局帧索引会导致位置编码分布不均且语义混乱。局部坐标系让每个镜头的 t=0 都代表"镜头开始"，语义更清晰。</li>
+    </ul>
+  </div>
+
+  <p><strong>论文未披露：</strong>3D RoPE 三个维度（t/h/w）的具体频率分配方案、旋转维度如何在 embedding 维度间划分、多镜头训练时 caption 与 visual 的具体拼接比例和排列方式。</p>
+  <p><span class="tag tag-l1">L1</span> 设计思路和能力完整披露，具体实现参数未披露</p>
+</div>
+
+<div class="detail-card">
+  <h4>统一任务公式（Unified Task Formulation）</h4>
+  <p><strong>怎么做：</strong>为实现条件视频生成，将<strong>带噪输入</strong>（noisy inputs）与<strong>干净帧或零填充帧</strong>（cleaned or zero-padded frames）沿<strong>通道维度</strong>拼接，并使用<strong>二进制掩码</strong>（binary masks）指示哪些帧是需要遵循的指令帧。</p>
+  <p><strong>统一效果：</strong>通过此公式，可以统一不同生成任务——<strong>文生图（T2I）、文生视频（T2V）、图生视频（I2V）</strong>。训练时混合这些任务，通过控制条件输入来调整比例。</p>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<h3 id="model-refiner">3.3 Diffusion Refiner：级联超分扩散模型</h3>
+<div class="detail-card">
+  <p><strong>怎么做：</strong>采用<strong>级联扩散框架</strong>（cascaded diffusion framework）生成高分辨率视频：</p>
+  <ol>
+    <li><strong>Base 模型</strong>先生成 <span class="code-inline">480p</span> 视频</li>
+    <li><strong>Diffusion Refiner 模型</strong>将 480p 视频上采样到 <span class="code-inline">720p 或 1080p</span> 高分辨率视频，增强视觉细节和纹理</li>
+  </ol>
+  <p><strong>Refiner 训练：</strong></p>
+  <ul>
+    <li>从<strong>预训练 Base 模型初始化</strong>（非从零训练）</li>
+    <li>与 Base 不同，Refiner 以<strong>低分辨率（LR）视频为条件</strong>进行训练</li>
+    <li>具体做法：LR 视频先上采样到高分辨率，然后与扩散噪声沿通道维度拼接，形成 DiT 的输入</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<h3 id="model-pe">3.4 Prompt Engineering (PE)：用户 prompt 重写系统</h3>
+<div class="detail-card">
+  <p>由于 DiT 训练使用的是<strong>密集视频 caption 格式</strong>，而用户输入的是自然语言 prompt，需要一个 PE 模型将用户 prompt 转换为对应的 caption 格式。</p>
+  <p><strong>基座：</strong><span class="code-inline">Qwen2.5-14B</span></p>
+  <p><strong>两阶段训练：</strong></p>
+  <ol>
+    <li><strong>SFT 阶段：</strong>人工标注大量用户 prompt 及其密集 caption 表达。<strong>特别区分 I2V 和 T2V 任务</strong>（因为用户 prompt 风格不同），采用<strong>全量微调</strong>策略获得基础改写能力</li>
+    <li><strong>RL 阶段：</strong>由于模型幻觉的存在，SFT 结果不能保证改写语义完全符合用户 prompt。收集<strong>正确和错误改写结果的配对数据</strong>，执行 <span class="code-inline">DPO（Direct Preference Optimization）</span>训练。此阶段在 SFT 模型上使用 <span class="code-inline">LoRA（Low-Rank Adaptation）</span>微调策略</li>
+  </ol>
+  <p><span class="tag tag-l1">L1</span> PE 模型设计完整披露</p>
+  <div class="purpose-box"><strong>设计目的：</strong>用户输入的自然语言 prompt 与训练用的密集 caption 格式存在分布差异，PE 模型作为"翻译层"将用户意图转换为模型熟悉的描述格式，SFT 学基础改写能力，DPO 纠正幻觉导致的语义偏移，二者配合确保用户意图被准确传达。</div>
+</div>
+
+<!-- ==================== E. 训练配方 ==================== -->
+<h2 id="training-overall">④ 训练整体情况深度拆解</h2>
+
+<div class="svg-container">
+<svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <text x="500" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">Seedance 1.0 训练流水线：Base 模型 + Refiner 模型双轨</text>
+
+  <!-- Base Model 轨道 -->
+  <text x="60" y="65" font-size="12" font-weight="bold" fill="#333333">Base Model</text>
+  <rect x="120" y="50" width="180" height="50" rx="6" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="210" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">Pre-Training 预训练</text>
+  <text x="210" y="88" text-anchor="middle" font-size="9.5" fill="#555555">256px T2I→256px联合→640px→24fps</text>
+
+  <line x1="302" y1="75" x2="318" y2="75" stroke="#C7000B" stroke-width="2" marker-end="url(#arr3)"/>
+
+  <rect x="320" y="50" width="180" height="50" rx="6" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="410" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">Continue Training (CT)</text>
+  <text x="410" y="88" text-anchor="middle" font-size="9.5" fill="#555555">I2V 20%→40%，高质量数据+长短caption</text>
+
+  <line x1="502" y1="75" x2="518" y2="75" stroke="#C7000B" stroke-width="2" marker-end="url(#arr3)"/>
+
+  <rect x="520" y="50" width="180" height="50" rx="6" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="610" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">SFT 监督微调</text>
+  <text x="610" y="88" text-anchor="middle" font-size="9.5" fill="#555555">几百类别人工精选+模型合并+早停</text>
+
+  <line x1="702" y1="75" x2="718" y2="75" stroke="#C7000B" stroke-width="2" marker-end="url(#arr3)"/>
+
+  <rect x="720" y="50" width="180" height="50" rx="6" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="810" y="72" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">RLHF 人类反馈对齐</text>
+  <text x="810" y="88" text-anchor="middle" font-size="9.5" fill="#555555">三维度RM+直接reward最大化+多轮迭代</text>
+
+  <!-- Refiner 轨道 -->
+  <text x="60" y="175" font-size="12" font-weight="bold" fill="#8B6914">Refiner</text>
+  <rect x="120" y="160" width="180" height="50" rx="6" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="210" y="182" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">Refiner Pre-Training</text>
+  <text x="210" y="198" text-anchor="middle" font-size="9.5" fill="#555555">从Base初始化，LR视频条件训练</text>
+
+  <line x1="302" y1="185" x2="318" y2="185" stroke="#FF6B00" stroke-width="2" marker-end="url(#arr3)"/>
+
+  <rect x="320" y="160" width="180" height="50" rx="6" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="410" y="182" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">Refiner SFT</text>
+  <text x="410" y="198" text-anchor="middle" font-size="9.5" fill="#555555">高质量超分数据微调</text>
+
+  <line x1="502" y1="185" x2="518" y2="185" stroke="#FF6B00" stroke-width="2" marker-end="url(#arr3)"/>
+
+  <rect x="520" y="160" width="180" height="50" rx="6" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="610" y="182" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">Refiner RLHF（超分RLHF）</text>
+  <text x="610" y="198" text-anchor="middle" font-size="9.5" fill="#555555">在加速后的Refiner上直接做RLHF</text>
+
+  <!-- Base→Refiner 初始化箭头 -->
+  <line x1="210" y1="102" x2="210" y2="158" stroke="#e74c3c" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arr3)"/>
+  <text x="230" y="135" font-size="9" fill="#e74c3c">从Base初始化</text>
+
+  <!-- 推理流水线 -->
+  <text x="60" y="265" font-size="12" font-weight="bold" fill="#00875A">Inference</text>
+  <rect x="120" y="250" width="130" height="40" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="1.5"/>
+  <text x="185" y="274" text-anchor="middle" font-size="10" fill="#00875A">用户Prompt</text>
+
+  <line x1="252" y1="270" x2="268" y2="270" stroke="#00B578" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <rect x="270" y="250" width="130" height="40" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="1.5"/>
+  <text x="335" y="274" text-anchor="middle" font-size="10" fill="#00875A">PE重写</text>
+
+  <line x1="402" y1="270" x2="418" y2="270" stroke="#00B578" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <rect x="420" y="250" width="130" height="40" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="1.5"/>
+  <text x="485" y="274" text-anchor="middle" font-size="10" fill="#00875A">Text Encoder</text>
+
+  <line x1="552" y1="270" x2="568" y2="270" stroke="#00B578" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <rect x="570" y="250" width="130" height="40" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="1.5"/>
+  <text x="635" y="274" text-anchor="middle" font-size="10" fill="#00875A">Base DiT (480p)</text>
+
+  <line x1="702" y1="270" x2="718" y2="270" stroke="#00B578" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <rect x="720" y="250" width="130" height="40" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="1.5"/>
+  <text x="785" y="274" text-anchor="middle" font-size="10" fill="#00875A">Refiner (720/1080p)</text>
+
+  <defs>
+    <marker id="arr3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+</svg>
+</div>
+
+<h3 id="train-pretrain">4.1 Pre-Training 预训练</h3>
+
+<div class="detail-card">
+  <h4>扩散调度（Diffusion Scheduling）</h4>
+
+  <p><strong>论文原文：</strong>"During training, we employ the flow matching framework with velocity prediction, and a training timestep is sampled from a logit-normal distribution. Considering that videos with higher resolution and longer duration require more noise to disrupt their signal, we then transform the training timestep with a resolution-aware shift, which increases the noise perturbation for videos with higher resolution and longer duration."</p>
+
+  <h4 style="color:#0066B3; margin-top:16px;">① Flow Matching + Velocity Prediction（简要）</h4>
+  <ul>
+    <li><strong>Flow Matching</strong>：学习从噪声分布到数据分布的确定性传输轨迹（ODE），相比 DDPM 的随机过程有更直的生成轨迹，推理步数更少</li>
+    <li><strong>Velocity Prediction</strong>：模型预测的是速度场 v_t(x) = dx/dt（数据与噪声的线性插值方向），而非 DDPM 中的噪声 ε 或 x_0。velocity prediction 对不同噪声水平的预测更稳定，训练收敛更快</li>
+    <li>带噪样本构造：x_t = (1-t)·x_0 + t·x_1，其中 x_0 是干净数据，x_1 ~ N(0,I) 是纯噪声，t ∈ [0,1]</li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:16px;">② Logit-Normal Timestep 采样（详细展开）</h4>
+
+  <p><strong>什么是 logit-normal 分布？</strong></p>
+  <ul>
+    <li>先从正态分布采样：z ~ N(μ, σ²)</li>
+    <li>再通过 sigmoid 变换得到 timestep：<strong>t = sigmoid(z) = 1 / (1 + e^(-z))</strong></li>
+    <li>由于 sigmoid 在 z=0（对应 t=0.5）附近斜率最大，相同 dz 对应更大的 dt，导致 t 的概率密度在 <strong>t≈0.5 附近最高</strong>，呈现<strong>"中间高、两端低"的钟型/倒 U 型分布</strong>（标准参数 μ=0 时）</li>
+    <li>概率密度函数：f(t) = [1/(σ√(2π))] · [1/(t(1-t))] · exp(-(logit(t)-μ)²/(2σ²))，其中 logit(t) = ln(t/(1-t))</li>
+    <li><strong>等价理解</strong>：log-SNR λ = 2·logit(t) 均匀分布，即每个 SNR 数量级（octave）获得相同训练权重，比 t 均匀更符合感知对数特性（SD3 论文的设计动机）</li>
+  </ul>
+
+  <p><strong>均匀采样的问题：</strong></p>
+  <ul>
+    <li>如果 t ~ Uniform(0,1)，每个噪声水平被采样的概率相同</li>
+    <li>但在实际训练中，<strong>中间区域 t≈0.5 的噪声/信号比最复杂、最难预测</strong>——信号和噪声各半，模型既要推断全局结构又要恢复局部细节，梯度信息最复杂、学习难度最高</li>
+    <li>两端（t→0 和 t→1）反而相对简单：t→0 时信号几乎完整，模型只需微调；t→1 时几乎全是噪声，模型只需"猜噪声"</li>
+    <li>结果：均匀采样给每个区域相同权重，导致<strong>最难的中间区域训练不足</strong>，而简单的两端被过度训练</li>
+  </ul>
+
+  <p><strong>Logit-normal 如何解决：</strong></p>
+  <ul>
+    <li>钟型分布主动<strong>提升中间区域（t≈0.5）的采样概率</strong>，<strong>降低两端（t→0 和 t→1）的采样概率</strong></li>
+    <li>这让最难的中间区域获得更多训练样本，确保模型在信号/噪声最复杂的阶段得到充分学习</li>
+    <li>SD3 论文在 61 种配方（epsilon/v-prediction、EDM、rectified flow、linear/cosine schedule 等）的大规模对比中，logit-normal + rectified flow 表现最优</li>
+  </ul>
+
+  <p><strong>不同噪声水平的学习难度：</strong></p>
+  <ul>
+    <li><strong>高噪声区域（t → 1，噪声占主导）</strong>：x_t 几乎是纯噪声，模型预测目标接近纯噪声，任务相对简单——"猜噪声"不需要理解语义结构</li>
+    <li><strong>★ 中等噪声区域（t ≈ 0.5）</strong>：信号和噪声各占一半，模型既要从噪声中推断全局结构，又要恢复局部细节，<strong>梯度最复杂、学习难度最高</strong>——这是 logit-normal 重点采样的区域</li>
+    <li><strong>低噪声区域（t → 0，信号占主导）</strong>：x_t 已经很接近干净数据，模型只需做局部微调，任务相对简单——"精修"不需要大幅改变结构</li>
+    <li>注意：高噪声学全局结构、低噪声学细节纹理的说法在定性上成立，但从<strong>学习难度</strong>角度看，两端都比中间简单，这正是 logit-normal 集中在中间的原因</li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:16px;">②.5 消融对比：Logit-Normal vs Uniform vs Timestep Shifting vs Curriculum Sampling</h4>
+
+  <p><strong>核心结论（修正）：</strong>Logit-Normal 和 Uniform 之间不是简单的"谁更好"，而是存在<strong>速度-质量权衡</strong>：
+  <ul>
+    <li><strong>Logit-Normal</strong>：早期收敛快（40k-90k steps FID 更低），但欠采样边界区域导致<strong>最终质量更差</strong>（性能天花板）</li>
+    <li><strong>Uniform</strong>：早期收敛慢，但持续稳定提升，<strong>最终 FID 优于所有纯 Logit-Normal</strong></li>
+    <li><strong>Curriculum Sampling（LN → Uniform）</strong>：兼具两者优势，<strong>最终质量和收敛速度都最优</strong></li>
+  </ul>
+  </p>
+
+  <p><strong>独立消融对比（静态策略）：</strong></p>
+  <table style="margin:12px 0;">
+    <tr><th style="width:22%">来源</th><th style="width:18%">实验设置</th><th style="width:22%">Logit-Normal</th><th style="width:22%">Uniform</th><th style="width:16%">结论</th></tr>
+    <tr>
+      <td><strong>Decomposable FM</strong><br>(OpenReview 2025)</td>
+      <td>ImageNet 512px<br>DiT-B/2</td>
+      <td>FID=38.01<br>IS=30.52</td>
+      <td>FID=45.61<br>IS=26.48</td>
+      <td><span style="color:#00875A;font-weight:bold;">LN胜</span><br><small>（但该实验训练步数有限，未测到 Uniform 反超）</small></td>
+    </tr>
+    <tr>
+      <td><strong>SD3 论文</strong><br>(Esser 2024)</td>
+      <td>61 种配方大规模对比</td>
+      <td colspan="2">logit-normal + rectified flow 在所有配方中表现最优，优于 8 个 diffusion/flow baseline</td>
+      <td><span style="color:#00875A;font-weight:bold;">LN胜</span></td>
+    </tr>
+    <tr>
+      <td><strong>Binary FM</strong><br>(arXiv 2026)</td>
+      <td>Toy experiments<br>梯度稳定性</td>
+      <td>梯度有界<br>稳定收敛</td>
+      <td>梯度爆炸<br>(x-pred + velocity loss)</td>
+      <td><span style="color:#00875A;font-weight:bold;">LN更稳</span></td>
+    </tr>
+    <tr>
+      <td><strong>Curriculum Sampling</strong><br>(Stanford, arXiv 2026)</td>
+      <td>CIFAR-10<br>U-Net 55M<br>150k steps</td>
+      <td>FID=4.03<br>(μ=-0.4, 90k饱和)</td>
+      <td><strong>FID=3.85</strong><br>(150k)</td>
+      <td><span style="color:#CC5500;font-weight:bold;">Uniform最终胜</span><br><small>LN早期快但有天花板</small></td>
+    </tr>
+    <tr>
+      <td><strong>L1 Sample Flow</strong><br>(arXiv 2025)</td>
+      <td>Uniform / Beta / MLN 对比</td>
+      <td colspan="2">替换中间侧重的 Mixed Logistic Normal 为 Uniform 或 Beta（高噪声侧重）均导致性能下降</td>
+      <td><span style="color:#00875A;font-weight:bold;">中间侧重胜</span></td>
+    </tr>
+  </table>
+
+  <div class="purpose-box">
+    <strong>如何理解看似矛盾的结论？</strong>Decomposable FM 和 SD3 的实验中 LN 胜，是因为训练步数有限或模型/数据规模不同，Uniform 还没来得及反超；Curriculum Sampling 的 150k steps 完整训练显示 Uniform 最终 FID 更好。<strong>LN 的真正优势是早期收敛速度，不是最终质量。</strong>大规模模型（如 SD3、Seedance）训练步数极多，LN 的早期优势在总训练成本中占比小，且 SD3 的 61 配方对比中 LN+RF 组合最优，不能简单归因于 LN 本身。
+  </div>
+
+  <h4 style="color:#C7000B; margin-top:20px;">★ Curriculum Sampling 详细做法（Stanford, arXiv:2603.12517, 2026）</h4>
+
+  <p><strong>核心动机——U 型损失曲线发现：</strong></p>
+  <ul>
+    <li>论文实际测量了 per-timestep 训练损失 L(t) = E[‖v_θ(z_t,t) - v_t(z_t|x)‖²]</li>
+    <li>发现损失呈现<strong>U 型</strong>：t→0（数据端）损失最大，t→1（噪声端）也较高，中间 t≈0.5 损失最低</li>
+    <li>这意味着<strong>边界区域才是最难收敛的</strong>：
+      <ul>
+        <li>t→0：信号几乎完整，模型需要学习<strong>精确的精细细节</strong>（纹理、边缘、色彩），差一点就明显</li>
+        <li>t→1：几乎全噪声，模型需要学习<strong>精确的噪声分布和初始结构</strong>，起点错了后面全错</li>
+        <li>t≈0.5：信噪比最复杂，但模型在中间区域学得快（损失低），因为结构和细节都不需要特别精确</li>
+      </ul>
+    </li>
+    <li>这与 SD3"中间最难"的说法形成 nuance：中间信噪比最复杂（信息论角度），但<strong>实际训练损失最低（收敛角度）</strong>；边界信噪比简单，但收敛最难</li>
+  </ul>
+
+  <p><strong>速度-质量权衡的发现：</strong></p>
+  <ul>
+    <li><strong>Logit-Normal（中间侧重）</strong>：把计算资源集中在 t≈0.5，快速学全局结构 → <strong>早期 FID 下降快</strong>（40k-90k steps 优于 Uniform），但欠采样边界 t→0,1 → 精细细节学不到 → <strong>90k 后饱和，最终 FID 更差</strong></li>
+    <li><strong>Uniform</strong>：均匀覆盖所有 t → 早期结构学习慢 → <strong>早期 FID 高</strong>，但边界区域得到充分训练 → <strong>持续提升，150k 反超所有 LN</strong></li>
+    <li>这是一个<strong>交叉现象（crossover）</strong>：LN 早期领先，Uniform 后期反超</li>
+  </ul>
+
+  <p><strong>两阶段课程做法：</strong></p>
+  <div class="svg-container" style="margin:16px 0;">
+    <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+      <text x="400" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#C7000B">Curriculum Sampling 两阶段课程</text>
+
+      <!-- Phase 1 -->
+      <rect x="30" y="40" width="350" height="200" rx="8" fill="#EBF5FB" stroke="#0066B3" stroke-width="2"/>
+      <text x="205" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#0066B3">Phase 1: Structure Phase（结构阶段）</text>
+      <text x="205" y="80" text-anchor="middle" font-size="9" fill="#666">0 ~ Ts steps（如 0~80k）</text>
+
+      <!-- LN分布示意（钟型） -->
+      <g transform="translate(60, 90)">
+        <text x="140" y="0" text-anchor="middle" font-size="9" fill="#0066B3" font-weight="bold">采样分布：Logit-Normal（钟型，集中 t≈0.5）</text>
+        <line x1="10" y1="80" x2="270" y2="80" stroke="#999" stroke-width="1"/>
+        <polygon points="10,75 30,72 50,65 70,55 90,42 110,28 130,18 150,12 170,18 190,28 210,42 230,55 250,65 270,72 270,80 10,80" fill="#D6EAF8" opacity="0.6"/>
+        <polyline points="10,75 30,72 50,65 70,55 90,42 110,28 130,18 150,12 170,18 190,28 210,42 230,55 250,65 270,72" fill="none" stroke="#0066B3" stroke-width="2"/>
+        <text x="140" y="95" text-anchor="middle" font-size="8" fill="#666">t=0 ─────────── t≈0.5 ─────────── t=1</text>
+      </g>
+
+      <text x="205" y="210" text-anchor="middle" font-size="9" fill="#333">目标：<strong>快速学全局结构</strong>（主体、构图、动作）</text>
+      <text x="205" y="225" text-anchor="middle" font-size="8" fill="#666">特点：FID 下降快，但边界细节欠训练</text>
+
+      <!-- 切换箭头 -->
+      <text x="400" y="140" text-anchor="middle" font-size="20" fill="#FF6B00" font-weight="bold">→</text>
+      <text x="400" y="160" text-anchor="middle" font-size="9" fill="#CC5500" font-weight="bold">Ts 切换</text>
+      <text x="400" y="175" text-anchor="middle" font-size="7" fill="#999">（超参数，如80k）</text>
+
+      <!-- Phase 2 -->
+      <rect x="420" y="40" width="350" height="200" rx="8" fill="#FFF8E6" stroke="#FF6B00" stroke-width="2"/>
+      <text x="595" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#CC5500">Phase 2: Refinement Phase（精修阶段）</text>
+      <text x="595" y="80" text-anchor="middle" font-size="9" fill="#666">Ts ~ 结束 steps（如 80k~150k）</text>
+
+      <!-- Uniform分布示意（水平） -->
+      <g transform="translate(450, 90)">
+        <text x="140" y="0" text-anchor="middle" font-size="9" fill="#CC5500" font-weight="bold">采样分布：Uniform（均匀覆盖全区间）</text>
+        <line x1="10" y1="80" x2="270" y2="80" stroke="#999" stroke-width="1"/>
+        <rect x="10" y="35" width="260" height="45" fill="#FCF3CF" opacity="0.6"/>
+        <line x1="10" y1="35" x2="270" y2="35" stroke="#FF6B00" stroke-width="2"/>
+        <text x="140" y="95" text-anchor="middle" font-size="8" fill="#666">t=0 ─────────── t≈0.5 ─────────── t=1</text>
+      </g>
+
+      <text x="595" y="210" text-anchor="middle" font-size="9" fill="#333">目标：<strong>补充边界训练，学精细细节</strong></text>
+      <text x="595" y="225" text-anchor="middle" font-size="8" fill="#666">特点：t→0 学纹理细节，t→1 学噪声起点</text>
+
+      <!-- 底部结果 -->
+      <rect x="30" y="250" width="740" height="25" rx="4" fill="#E8F8F0" stroke="#00B578" stroke-width="1"/>
+      <text x="400" y="267" text-anchor="middle" font-size="10" fill="#00875A" font-weight="bold">结果：FID 3.22（优于 Uniform 3.85 和纯 LN 4.03），100k steps 达峰值（vs Uniform 150k），质量+速度双优</text>
+    </svg>
+  </div>
+
+  <p><strong>具体步骤：</strong></p>
+  <ol>
+    <li><strong>Phase 1（0 ~ Ts steps）：</strong>使用 Logit-Normal 采样（钟型分布，集中 t≈0.5），让模型快速学习全局结构和语义布局。此阶段 FID 下降最快。</li>
+    <li><strong>切换点 Ts：</strong>当模型全局结构基本学完（FID 下降开始放缓），在 Ts steps 处切换采样分布。Ts 是超参数，论文实验中约为总训练步数的 50-60%。</li>
+    <li><strong>Phase 2（Ts ~ 结束）：</strong>切换为 Uniform 采样，均匀覆盖 t∈[0,1] 全区间，重点补充之前欠采样的边界区域 t→0（学精细细节）和 t→1（学精确噪声起点）。</li>
+    <li><strong>注意：</strong>切换的是<strong>训练时的 timestep 采样分布 p(t)</strong>，不是模型架构、损失函数或推理调度。模型权重连续训练，不重置。</li>
+  </ol>
+
+  <p><strong>静态策略 Best FID 完整对比（CIFAR-10, 150k steps）：</strong></p>
+  <table style="margin:12px 0;">
+    <tr><th>策略</th><th>分布形状</th><th>Best FID ↓</th><th>达峰值步数</th><th>特点</th></tr>
+    <tr><td><strong>Curriculum (LN→Uniform)</strong></td><td>动态两阶段</td><td><strong>3.22</strong></td><td><strong>100k</strong></td><td>质量+速度双优 🥇</td></tr>
+    <tr><td>Uniform</td><td>均匀（水平）</td><td>3.85</td><td>150k</td><td>最终质量好，早期慢 🥈</td></tr>
+    <tr><td>LN (μ=-0.4, σ=1)</td><td>钟型，略偏数据端</td><td>4.03</td><td>~90k 饱和</td><td>早期快，有天花板 🥉</td></tr>
+    <tr><td>LN (μ=-0.8, σ=1)</td><td>钟型，更偏数据端</td><td>4.12</td><td>~80k 饱和</td><td>早期更快，天花板更低</td></tr>
+    <tr><td>LN (μ=0.8, σ=1)</td><td>钟型，偏噪声端</td><td>4.13</td><td>~90k 饱和</td><td>—</td></tr>
+    <tr><td>Mode (s=-0.5, Arcsine)</td><td><strong>U 型/边界侧重</strong></td><td>4.42</td><td>—</td><td>边界过采样，结构学不好</td></tr>
+    <tr><td>Mode (s=1.0/1.2)</td><td>强中间侧重</td><td>4.56</td><td>—</td><td>边界严重欠采样，最差</td></tr>
+  </table>
+
+  <p><strong>Timestep Shifting（HunyuanVideo 风格）与上述策略的关系：</strong></p>
+  <ul>
+    <li>二者<strong>不是互斥的替代关系</strong>，作用阶段不同：
+      <ul>
+        <li><strong>Logit-normal / Uniform / Curriculum</strong>：<strong>训练时</strong>的 timestep 采样分布 p(t)，决定训练计算资源分配</li>
+        <li><strong>Timestep shifting</strong>：<strong>推理时</strong>的调度调整，通过偏移因子 s 改变推理时 t 的分布（偏向高噪声端），用于补偿低步数推理（HunyuanVideo：50步用 s=7，&lt;20步用 s=17）</li>
+      </ul>
+    </li>
+    <li>有些工作（LoomVideo 2026）同时使用两者：训练用 curriculum/logit-normal，推理用 dynamic timestep shift</li>
+    <li>Timestep shifting 消融（End-to-End AR Video Diffusion 2025）：s 太小→误差累积质量下降；s 太大→语义一致性下降内容漂移；需要适中值</li>
+  </ul>
+
+  <p><strong>其他新兴采样策略（详细展开）：</strong></p>
+
+  <h4 style="color:#0066B3; margin-top:14px;">(1) TQD — Timestep-aware Quality Decoupling（CVPR 2026, Wan/CogVideoX）</h4>
+
+  <p><strong>核心动机——Motion-Vision Quality Dilemma：</strong></p>
+  <ul>
+    <li>视频数据中视觉质量(VQ)和运动质量(MQ)呈<strong>负相关</strong>（Pearson r=-0.2187, p&lt;0.001）——运动越激烈的视频往往画面越容易模糊/压缩，画面越精美的视频往往运动越平淡</li>
+    <li>同时高VQ和高MQ的"黄金数据"仅占 <strong>21.9%</strong>；高MQ/低VQ和高VQ/低MQ各占约 <strong>28%</strong></li>
+    <li><strong>传统数据过滤为什么丢弃它们？</strong>传统管道用<strong>多维度联合阈值</strong>过滤——要求视频同时满足"VQ≥阈值"且"MQ≥阈值"才保留。由于VQ和MQ负相关，大量单维度突出的数据因"另一项不达标"被直接扔掉。TQD的核心思路就是：<strong>不扔，而是把每个数据放到它最擅长的timestep去学</strong></li>
+    <li>关键发现：视频扩散模型去噪是<strong>分层的</strong>——高噪声阶段(t大)建立运动和构图，低噪声阶段(t小)细化细节和纹理</li>
+    <li>梯度分析（120样本，3种VQ退化+1种MQ退化）证实：高MQ/低VQ数据在高timestep与黄金数据梯度相似（适合学运动）；高VQ/低MQ数据在低timestep与黄金数据梯度相似（适合学细节）</li>
+  </ul>
+
+  <p><strong>具体做法——两级自适应机制：</strong></p>
+  <ol>
+    <li><strong>Sample-Level Weighting（样本级加权/质量dropout）：</strong>
+      <ul>
+        <li><strong>VQ/MQ分数怎么来的？</strong>用 <strong>VideoAlign</strong> 框架预计算——这是一个视频质量评估模型，分别输出视觉质量(VQ)和运动质量(MQ)分数。论文特别说明：原始VideoAlign在生成视频上训练，他们<strong>在真实视频上重新训练</strong>了该模型，以更适合评估自然视频分布</li>
+        <li>所有样本的VQ和MQ分数通过 min-max 归一化到 [0,1]</li>
+        <li>每个样本以概率 <strong>p_sample = max(vq_norm, mq_norm)</strong> 被采样进batch（注意：是在PrepareBatch阶段按此概率抽样，不是训练时随机mask）</li>
+        <li><strong>双低样本怎么处理？</strong>不是硬丢弃，是<strong>软降权（概率加权采样）</strong>。例如 vq=0.2, mq=0.1 的双低样本，p=0.2，意味着训练中被抽到的概率是20%，出现频率低但不是完全排除。而 vq=0.9, mq=0.8 的黄金数据 p=0.9，几乎每次都被保留</li>
+        <li>效果：至少有一个维度强的样本获得足够训练，双低样本因采样概率低而自然减少训练占比</li>
+      </ul>
+    </li>
+    <li><strong>Timestep-Level Distribution Adjustment（时间步级分布调整）：</strong>
+      <ul>
+        <li>对保留样本，用质量相关的 <strong>Beta 分布</strong>参数化 timestep 分布：p(t|x₀) ∝ Beta(t; μκ, (1-μ)κ)</li>
+        <li><strong>中心参数 μ</strong>（相对质量差异）：μ = 0.5 + 0.5×(mq_norm - vq_norm)
+          <ul>
+            <li>高MQ/低VQ（μ&gt;0.5）→ 分布偏向高timestep → 学运动</li>
+            <li>高VQ/低MQ（μ&lt;0.5）→ 分布偏向低timestep → 学细节</li>
+          </ul>
+        </li>
+        <li><strong>集中度参数 κ</strong>（质量差异程度）：κ = κ_base + (κ_max-κ_base)×|mq_norm-vq_norm|
+          <ul>
+            <li>差异越大 → κ越高 → 分布越尖锐 → 更强的timestep专业化</li>
+            <li>平衡样本（黄金数据）→ 分布平坦 → 接近基线采样</li>
+            <li>κ_base 设置：CogVideoX=2（匹配uniform Beta(1,1)），Wan=4（近似logit-normal）</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>组合分布</strong>：p(t) ∝ max(vq_norm, mq_norm) × Beta(t; μκ, (1-μ)κ)</li>
+  </ol>
+
+  <p><strong>消融结果（Wan 1.3B, Set-A, VBench + VideoAlign）：</strong></p>
+  <table style="margin:10px 0; font-size:0.88em;">
+    <tr><th>方法</th><th>IQ↑</th><th>Aesthetic↑</th><th>Dynamic↑</th><th>MotionSmooth↑</th><th>MQ↑</th><th>VQ↑</th></tr>
+    <tr><td>Baseline (logit-normal)</td><td>0.6916</td><td>0.5722</td><td>0.5312</td><td>0.9935</td><td>2.1388</td><td>3.2537</td></tr>
+    <tr><td>+ Adaptive timestep</td><td>0.6972</td><td>0.5735</td><td><strong>0.6340</strong></td><td>0.9937</td><td>2.2193</td><td>3.3044</td></tr>
+    <tr><td>+ Quality dropout</td><td>0.6956</td><td>0.5701</td><td>0.5357</td><td>0.9916</td><td>2.1909</td><td>3.2921</td></tr>
+    <tr style="background:#E8F8F0;"><td><strong>+ Both (TQD)</strong></td><td><strong>0.7010</strong></td><td><strong>0.5757</strong></td><td><strong>0.6384</strong></td><td>0.9923</td><td><strong>2.2557</strong></td><td><strong>3.3450</strong></td></tr>
+  </table>
+  <ul>
+    <li>Adaptive timestep 单独提升最大（+0.0805 MQ, +0.0507 VQ）</li>
+    <li>两者组合有<strong>协同效应</strong>（+0.1169 MQ, +0.0913 VQ），1+1&gt;2</li>
+    <li>极端不平衡数据（Set-B，仅HMLV+LMHV）上，TQD 甚至超过基线在全量数据上的结果</li>
+    <li>κ_max 消融：CogVideoX 最优=20，Wan 最优=30；所有 Wan 配置都优于基线，对超参数鲁棒</li>
+  </ul>
+
+  <h4 style="color:#0066B3; margin-top:14px;">(2) CACFM / Loss-Aware Sampling（arXiv 2026, FLUX/SDXL）</h4>
+
+  <p><strong>核心发现——Consistency Distillation 的 U 型难度曲线：</strong></p>
+  <ul>
+    <li>标准迭代生成训练中，中间步骤最难（Logit-Normal 的假设基础）</li>
+    <li>但 Consistency Distillation 中，Oracle Consistency Error 呈 <strong>U 型分布</strong>——边界阶段（t→0 初始化和 t→1 最终细化）才是真正的几何瓶颈</li>
+    <li><strong>Logit-Normal 先验对 consistency distillation 是几何错位的</strong>（集中在中间，但中间反而是最简单的）</li>
+  </ul>
+
+  <p><strong>Loss-Aware Sampling（简单动态版）：</strong></p>
+  <ul>
+    <li>用 per-stage consistency loss 的 <strong>EMA（指数移动平均）</strong>动态更新阶段采样概率：p(stage) ∝ EMA[loss(stage)]</li>
+    <li>损失高的阶段多采样，损失低的阶段少采样</li>
+    <li>缺点：<strong>myopic（短视）</strong>——只看当前损失，没有状态转移建模和时间信用分配</li>
+  </ul>
+
+  <p><strong>CACFM（完整版，RL 驱动的曲率自适应）：</strong></p>
+  <ol>
+    <li>将子轨迹选择建模为 <strong>MDP（马尔可夫决策过程）</strong></li>
+    <li><strong>语义阶段抽象</strong>：将连续轨迹 t∈[0,1] 划分为 M=4 个粗几何阶段：Initialization → Structural Formation → Texture Filling → Final Refinement</li>
+    <li><strong>状态空间</strong>：各阶段当前损失的相对排名（低维离散空间）</li>
+    <li><strong>动作空间</strong>：选择哪个阶段进行采样</li>
+    <li><strong>奖励</strong>：该阶段一致性损失的减少量（优化收益）</li>
+    <li><strong>策略更新</strong>：<strong>表格 Q-learning</strong>（非神经网络策略，计算开销可忽略）</li>
+    <li>动态闭环：agent感知几何瓶颈 → 选择高收益段 → 学生模型更新 → 轨迹几何改变 → 误差分布改变 → 指导下一决策</li>
+  </ol>
+
+  <p><strong>涌现行为——自发课程学习：</strong></p>
+  <ul>
+    <li>早期训练（0-20k steps）：agent 优先 t→0 阶段（Phase 0），聚焦<strong>全局结构形成</strong></li>
+    <li>后期训练（20k+ steps）：焦点自动转向 t→1 阶段（Phase 3），细化<strong>高频细节和纹理</strong></li>
+    <li>完全由奖励驱动涌现，<strong>无需人工调度</strong>——agent 自己学会了"先学结构再学细节"</li>
+  </ul>
+
+  <p><strong>消融结果（FLUX, 4/8/16 step, HPS/Aesthetic/PickScore, Avg Rank 越低越好）：</strong></p>
+  <table style="margin:10px 0; font-size:0.88em;">
+    <tr><th>方法</th><th>4-step HPS↑</th><th>4-step Aes↑</th><th>4-step Pick↑</th><th>Avg Rank↓</th></tr>
+    <tr><td>Naive CFM (Uniform)</td><td>0.236</td><td>5.432</td><td>20.69</td><td>4.11</td></tr>
+    <tr style="background:#FDE8EA;"><td>CFM Logit-Normal</td><td>0.232</td><td>5.458</td><td>20.70</td><td><strong>4.89（最差）</strong></td></tr>
+    <tr><td>CFM Loss-Aware (EMA)</td><td>0.236</td><td>5.436</td><td>20.77</td><td>4.00</td></tr>
+    <tr><td>CACFM w/o DMD</td><td>0.239</td><td>5.485</td><td>20.78</td><td>3.78</td></tr>
+    <tr><td>CACFM w/o RL（静态U型先验）</td><td>0.235</td><td>5.430</td><td>20.71</td><td>3.22</td></tr>
+    <tr style="background:#E8F8F0;"><td><strong>CACFM (Ours)</strong></td><td><strong>0.276</strong></td><td><strong>5.893</strong></td><td><strong>21.22</strong></td><td><strong>1.00</strong></td></tr>
+  </table>
+  <ul>
+    <li><strong>关键发现</strong>：CFM Logit-Normal 在 consistency distillation 中表现最差（Avg Rank 4.89），甚至不如 Uniform（4.11），验证了 U 型难度曲线——LN 集中在中间，但中间反而是最简单的</li>
+    <li>Loss-Aware (4.00) 优于 Logit-Normal (4.89) 和 Uniform (4.11)，说明损失感知采样有效</li>
+    <li>CACFM 完整版本 (1.00) 显著优于所有方法，HPS 从 0.232 提升到 0.276（+19%）</li>
+    <li>语义阶段数 M 消融：M=4 最优（FID=39.19），M=3 太粗(39.85)，M=6 状态空间太大探索慢(39.51)</li>
+    <li>RL agent 计算开销可忽略（低维状态空间 + 表格 Q-learning）</li>
+  </ul>
+
+  <div class="purpose-box">
+    <strong>前沿方向总结：</strong>logit-normal 是当前主流但非终点。前沿方向包括：①<strong>数据感知采样</strong>（TQD：根据样本质量自适应分配timestep）；②<strong>损失感知采样</strong>（Loss-Aware：根据per-timestep损失动态调权重）；③<strong>课程式采样</strong>（Curriculum Sampling：先LN后Uniform两阶段）；④<strong>RL驱动自适应采样</strong>（CACFM：用RL agent自动发现几何瓶颈并涌现课程学习）。核心趋势是从<strong>静态固定分布</strong>走向<strong>动态自适应分布</strong>。
+  </div>
+
+  <div class="purpose-box">
+    <strong>对 Seedance 1.0 的定位（修正）：</strong>Seedance 1.0 采用 logit-normal 是跟随 SD3 之后的业界主流选择，并非特有创新；其在采样策略上的自有贡献是<strong>分辨率感知 shift</strong>（将 logit-normal 采样的 t 再按分辨率/时长偏移）。Curriculum Sampling 的发现提示：如果 Seedance 在训练后期切换为 Uniform 或损失感知采样，可能进一步提升最终质量——但这是推测，论文未做此消融。
+  </div>
+
+  <h4 style="color:#0066B3; margin-top:16px;">③ 分辨率感知 Shift（详细展开）</h4>
+
+  <p><strong>为什么高分辨率/长时长视频需要更多噪声？</strong></p>
+  <ul>
+    <li>在 flow matching 中，带噪样本 x_t = (1-t)·x_0 + t·x_1，信噪比 SNR ∝ (1-t)²·||x_0||² / (t²·||x_1||²)</li>
+    <li><strong>高分辨率视频</strong>：x_0 的维度更高（更多像素），信号总能量 ||x_0||² 更大。在相同 t 下，SNR 更高——意味着信号没有被噪声充分破坏，模型"看到了太多答案"，学习任务变简单，梯度信息不足</li>
+    <li><strong>长时长视频</strong>：更多帧意味着更高的信号维度，且帧间的时间相关性提供了额外的统计信号（相邻帧相似，可以互相"猜"出被噪声掩盖的部分），进一步提高了有效 SNR</li>
+    <li>结果：如果对所有规格视频用相同的 t 分布，<strong>高分辨率/长时长视频的实际训练难度低于低分辨率/短视频</strong>，导致模型在高规格数据上学不充分</li>
+  </ul>
+
+  <p><strong>Shift 如何工作：</strong></p>
+  <ul>
+    <li>对采样得到的 timestep t 施加一个<strong>与分辨率和时长相关的偏移变换</strong>：t' = shift(t, resolution, duration)</li>
+    <li>分辨率越高、时长越长 → shift 越大 → t' 越偏向高噪声端（t→1）</li>
+    <li>通过增大 t'，增加噪声比例 (t')²，降低 SNR，让高规格视频的信号被充分破坏</li>
+    <li>最终效果：<strong>不同规格视频在训练时获得相似的有效信噪比和学习难度</strong>，避免高规格数据"太简单"而学不充分</li>
+  </ul>
+
+  <p><strong>直观理解：</strong></p>
+  <ul>
+    <li>低分辨率短视频（256px, 3s）：信号弱，少量噪声就能"遮住"，不需要 shift 或 shift 很小</li>
+    <li>高分辨率长视频（640px, 12s）：信号强（像素多+帧多+时间相关性），需要"更大声的噪声"才能遮住，shift 将 t 向高噪声端推</li>
+    <li>类比：给小学生和大学生出同一张试卷，大学生觉得太简单学不到东西；需要给大学生出更难的题（更大的 shift = 更多噪声 = 更难的任务）</li>
+  </ul>
+
+  <div class="svg-container" style="margin-top:20px;">
+    <svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+      <text x="480" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#C7000B">扩散调度：Logit-Normal 采样 + 分辨率感知 Shift</text>
+
+      <!-- 上半部分：logit-normal vs 均匀 -->
+      <text x="30" y="48" font-size="12" font-weight="bold" fill="#0066B3">Timestep 采样分布对比</text>
+
+      <!-- 均匀分布 -->
+      <g transform="translate(40, 60)">
+        <text x="130" y="0" text-anchor="middle" font-size="11" font-weight="bold" fill="#666">均匀采样 U(0,1) — 问题</text>
+        <!-- 坐标轴 -->
+        <line x1="20" y1="130" x2="260" y2="130" stroke="#999" stroke-width="1"/>
+        <line x1="20" y1="10" x2="20" y2="130" stroke="#999" stroke-width="1"/>
+        <text x="140" y="148" text-anchor="middle" font-size="9" fill="#666">t (噪声水平)</text>
+        <text x="5" y="75" text-anchor="middle" font-size="9" fill="#666" transform="rotate(-90, 5, 75)">概率密度</text>
+        <!-- 均匀分布：水平线 -->
+        <rect x="20" y="50" width="240" height="80" fill="#EBF5FB" opacity="0.5"/>
+        <line x1="20" y1="50" x2="260" y2="50" stroke="#0066B3" stroke-width="2"/>
+        <text x="140" y="42" text-anchor="middle" font-size="9" fill="#0066B3">每个 t 采样概率相同</text>
+        <!-- t 标注 -->
+        <text x="20" y="143" text-anchor="middle" font-size="8" fill="#666">0</text>
+        <text x="140" y="143" text-anchor="middle" font-size="8" fill="#666">0.5</text>
+        <text x="260" y="143" text-anchor="middle" font-size="8" fill="#666">1</text>
+        <!-- 问题标注 -->
+        <rect x="40" y="55" width="200" height="25" rx="3" fill="#FDE8EA" stroke="#C7000B" stroke-width="1"/>
+        <text x="140" y="72" text-anchor="middle" font-size="8" fill="#C7000B" font-weight="bold">⚠ 中间最难区域训练不足，两端过简单</text>
+      </g>
+
+      <!-- logit-normal 分布 -->
+      <g transform="translate(360, 60)">
+        <text x="130" y="0" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">Logit-Normal 采样 — SD3方案</text>
+        <!-- 坐标轴 -->
+        <line x1="20" y1="130" x2="260" y2="130" stroke="#999" stroke-width="1"/>
+        <line x1="20" y1="10" x2="20" y2="130" stroke="#999" stroke-width="1"/>
+        <text x="140" y="148" text-anchor="middle" font-size="9" fill="#666">t (噪声水平)</text>
+        <!-- 钟型/倒U型曲线：集中在中间t≈0.5（SD3 logit-normal标准形状） -->
+        <polygon points="20,115 35,112 50,105 65,95 80,82 95,68 110,52 125,38 140,30 155,38 170,52 185,68 200,82 215,95 230,105 245,112 260,115 260,130 20,130" fill="#E8F8F0" opacity="0.6"/>
+        <polyline points="20,115 35,112 50,105 65,95 80,82 95,68 110,52 125,38 140,30 155,38 170,52 185,68 200,82 215,95 230,105 245,112 260,115" fill="none" stroke="#00B578" stroke-width="2"/>
+        <text x="140" y="25" text-anchor="middle" font-size="8" fill="#00875A">t = sigmoid(z), z ~ N(μ,σ²)</text>
+        <!-- 中间峰值标注 -->
+        <text x="140" y="50" text-anchor="middle" font-size="7" fill="#00875A" font-weight="bold">↑ 峰值 t≈0.5</text>
+        <!-- t 标注 -->
+        <text x="20" y="143" text-anchor="middle" font-size="8" fill="#666">0</text>
+        <text x="140" y="143" text-anchor="middle" font-size="8" fill="#666">0.5</text>
+        <text x="260" y="143" text-anchor="middle" font-size="8" fill="#666">1</text>
+        <!-- 中间最难区域标注 -->
+        <rect x="100" y="105" width="80" height="20" rx="3" fill="#FFF8E6" stroke="#FF6B00" stroke-width="1"/>
+        <text x="140" y="119" text-anchor="middle" font-size="7" fill="#CC5500" font-weight="bold">中间t≈0.5最难预测↑</text>
+      </g>
+
+      <!-- 不同t学什么 -->
+      <g transform="translate(680, 60)">
+        <rect x="0" y="10" width="260" height="140" rx="6" fill="#F8F9FA" stroke="#dee2e6"/>
+        <text x="130" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">不同噪声水平学什么</text>
+        <rect x="10" y="40" width="240" height="28" rx="4" fill="#FDE8EA" stroke="#C7000B" stroke-width="1"/>
+        <text x="130" y="55" text-anchor="middle" font-size="9" fill="#C7000B" font-weight="bold">高噪声 t→1：信号几乎全被破坏</text>
+        <text x="130" y="66" text-anchor="middle" font-size="8" fill="#666">预测接近纯噪声，任务相对简单（"猜噪声"）</text>
+        <rect x="10" y="74" width="240" height="28" rx="4" fill="#FFF8E6" stroke="#FF6B00" stroke-width="1.5"/>
+        <text x="130" y="89" text-anchor="middle" font-size="9" fill="#CC5500" font-weight="bold">★ 中等噪声 t≈0.5：最难预测区域</text>
+        <text x="130" y="100" text-anchor="middle" font-size="8" fill="#666">信号/噪声各半，结构和细节都要学，梯度最复杂</text>
+        <rect x="10" y="108" width="240" height="28" rx="4" fill="#E8F8F0" stroke="#00B578" stroke-width="1"/>
+        <text x="130" y="123" text-anchor="middle" font-size="9" fill="#00875A" font-weight="bold">低噪声 t→0：信号几乎完整</text>
+        <text x="130" y="134" text-anchor="middle" font-size="8" fill="#666">预测接近干净数据，任务相对简单（"微调"）</text>
+      </g>
+
+      <!-- 分隔线 -->
+      <line x1="20" y1="225" x2="940" y2="225" stroke="#ddd" stroke-width="1" stroke-dasharray="4,4"/>
+
+      <!-- 下半部分：分辨率感知 shift -->
+      <text x="30" y="248" font-size="12" font-weight="bold" fill="#FF6B00">分辨率感知 Shift：让不同规格视频获得匹配的噪声水平</text>
+
+      <!-- 低分辨率短视频 -->
+      <g transform="translate(40, 260)">
+        <rect x="0" y="0" width="260" height="180" rx="8" fill="#F0F9FF" stroke="#0066B3" stroke-width="1.5"/>
+        <text x="130" y="22" text-anchor="middle" font-size="11" font-weight="bold" fill="#0066B3">低分辨率短视频</text>
+        <text x="130" y="38" text-anchor="middle" font-size="9" fill="#666">（256px, 3s, 12fps）</text>
+        <line x1="10" y1="46" x2="250" y2="46" stroke="#cce5ff" stroke-width="1"/>
+        <text x="20" y="64" font-size="9" fill="#333">• 像素少 → 信号总能量 ||x₀||² 小</text>
+        <text x="20" y="80" font-size="9" fill="#333">• 帧少 → 时间相关性弱</text>
+        <text x="20" y="96" font-size="9" fill="#333">• 相同 t 下 SNR 较低（噪声相对大）</text>
+        <text x="20" y="112" font-size="9" fill="#333">• 信号容易被噪声破坏</text>
+        <rect x="15" y="124" width="230" height="24" rx="4" fill="#E8F8F0" stroke="#00B578"/>
+        <text x="130" y="140" text-anchor="middle" font-size="9" fill="#00875A" font-weight="bold">Shift 小（或不需要 shift）</text>
+        <text x="130" y="162" text-anchor="middle" font-size="8" fill="#666">t' ≈ t，噪声水平已足够</text>
+        <text x="130" y="175" text-anchor="middle" font-size="8" fill="#666">学习难度：适中</text>
+      </g>
+
+      <!-- 中间：shift 变换 -->
+      <g transform="translate(330, 260)">
+        <text x="100" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#FF6B00">Shift 变换</text>
+        <rect x="10" y="45" width="180" height="50" rx="6" fill="#FFF8E6" stroke="#FF6B00" stroke-width="2"/>
+        <text x="100" y="65" text-anchor="middle" font-size="10" fill="#CC5500" font-weight="bold">t' = shift(t, res, dur)</text>
+        <text x="100" y="82" text-anchor="middle" font-size="8" fill="#666">分辨率↑ 时长↑ → t' 向高噪声端偏移</text>
+
+        <!-- 箭头 -->
+        <text x="100" y="115" text-anchor="middle" font-size="20" fill="#FF6B00">↓</text>
+        <text x="100" y="135" text-anchor="middle" font-size="9" fill="#CC5500" font-weight="bold">有效噪声水平对齐</text>
+        <text x="100" y="150" text-anchor="middle" font-size="8" fill="#666">不同规格视频获得相似 SNR</text>
+        <text x="100" y="163" text-anchor="middle" font-size="8" fill="#666">和相似的学习难度</text>
+
+        <!-- 类比 -->
+        <rect x="5" y="175" width="190" height="0" rx="0" fill="none"/>
+      </g>
+
+      <!-- 高分辨率长视频 -->
+      <g transform="translate(560, 260)">
+        <rect x="0" y="0" width="260" height="180" rx="8" fill="#FFF5F5" stroke="#C7000B" stroke-width="1.5"/>
+        <text x="130" y="22" text-anchor="middle" font-size="11" font-weight="bold" fill="#C7000B">高分辨率长视频</text>
+        <text x="130" y="38" text-anchor="middle" font-size="9" fill="#666">（640px, 12s, 24fps）</text>
+        <line x1="10" y1="46" x2="250" y2="46" stroke="#ffcccc" stroke-width="1"/>
+        <text x="20" y="64" font-size="9" fill="#333">• 像素多 → 信号总能量 ||x₀||² 大</text>
+        <text x="20" y="80" font-size="9" fill="#333">• 帧多 → 时间相关性强（可互猜）</text>
+        <text x="20" y="96" font-size="9" fill="#333">• 相同 t 下 SNR 较高（噪声相对小）</text>
+        <text x="20" y="112" font-size="9" fill="#333">• 信号难被噪声充分破坏 → 任务太简单</text>
+        <rect x="15" y="124" width="230" height="24" rx="4" fill="#FDE8EA" stroke="#C7000B"/>
+        <text x="130" y="140" text-anchor="middle" font-size="9" fill="#C7000B" font-weight="bold">Shift 大（向高噪声端推）</text>
+        <text x="130" y="162" text-anchor="middle" font-size="8" fill="#666">t' > t，增加噪声比例 (t')²</text>
+        <text x="130" y="175" text-anchor="middle" font-size="8" fill="#666">学习难度：提升至匹配水平</text>
+      </g>
+
+      <!-- 底部：SNR 对齐示意 -->
+      <g transform="translate(40, 460)">
+        <rect x="0" y="0" width="880" height="70" rx="6" fill="#F8F9FA" stroke="#dee2e6"/>
+        <text x="20" y="22" font-size="10" font-weight="bold" fill="#333">Shift 前后有效信噪比（SNR）对比：</text>
+        <text x="20" y="42" font-size="9" fill="#666">Shift 前：低分辨率短视频 SNR 低（难度高）↔ 高分辨率长视频 SNR 高（难度低）→ 学习难度不均衡，高规格数据学不充分</text>
+        <text x="20" y="58" font-size="9" fill="#00875A" font-weight="bold">Shift 后：通过 t' = shift(t, res, dur) 调整，不同规格视频的有效 SNR 对齐 → 学习难度均衡，所有数据都能充分训练</text>
+      </g>
+
+      <!-- 底部注 -->
+      <text x="480" y="550" text-anchor="middle" font-size="8" fill="#999">注：论文未披露 logit-normal 的具体参数 (μ, σ) 和分辨率感知 shift 的具体公式；以上为基于 flow matching 数学框架的原理解释。</text>
+    </svg>
+  </div>
+
+  <div class="purpose-box" style="margin-top:16px;">
+    <strong>设计目的（展开版）：</strong>
+    <ul style="margin:6px 0; padding-left:18px;">
+      <li><strong>Flow Matching + Velocity Prediction：</strong>Flow Matching 学习确定性 ODE 轨迹，比 DDPM 的随机过程轨迹更直、推理步数更少；velocity prediction 预测速度场 v=dx/dt，对不同噪声水平的预测比 ε-prediction 更稳定，二者结合提升收敛速度和生成质量。</li>
+      <li><strong>Logit-Normal 采样：</strong>均匀采样下中间区域 t≈0.5 的噪声/信号比最复杂、最难预测，但均匀采样给每个区域相同权重，导致最难的中间区域训练不足。logit-normal 的钟型分布（SD3 首创）集中在 t≈0.5，给最难区域更多训练样本；等价于让 log-SNR 均匀分布，每个 SNR 数量级获得相同权重。多项独立消融证实 logit-normal 显著优于均匀采样（见下方消融对比）。</li>
+      <li><strong>分辨率感知 Shift：</strong>高分辨率/长时长视频的信号维度更高（像素多+帧多+时间相关性强），在相同 t 下 SNR 更高、信号未被充分破坏，学习任务"太简单"导致梯度信息不足。shift 将高规格视频的 t 向高噪声端偏移，增加噪声比例，让不同规格视频获得相似的有效 SNR 和学习难度，避免高规格数据学不充分。</li>
+    </ul>
+  </div>
+
+  <p><strong>论文未披露：</strong>① logit-normal 分布的具体参数 μ 和 σ；② 分辨率感知 shift 的具体公式（线性/非线性、基于分辨率和时长的什么函数）；③ shift 在训练不同阶段是否有不同参数。</p>
+  <p><span class="tag tag-l1">L1</span> 设计思路和原理完整披露，具体参数和公式未披露</p>
+</div>
+
+<div class="detail-card">
+  <h4>渐进式训练课程（Progressive Training）</h4>
+  <p>为实现更高数据吞吐量和训练效率，采用<strong>四阶段渐进式训练</strong>：</p>
+  <table>
+    <tr><th>阶段</th><th>分辨率</th><th>时长/帧率</th><th>任务混合</th><th>目的</th></tr>
+    <tr><td><strong>阶段0</strong></td><td>256px</td><td>纯图像</td><td>100% T2I</td><td>语义对齐+视觉质量基础</td></tr>
+    <tr><td><strong>阶段1</strong></td><td>256px</td><td>3-12秒 / 12fps</td><td>图像视频联合训练，I2V 占 20%</td><td>引入视频模态，学习时序运动</td></tr>
+    <tr><td><strong>阶段2</strong></td><td><strong>640px</strong></td><td>3-12秒 / 12fps</td><td>同上</td><td>提升分辨率，学习细节</td></tr>
+    <tr><td><strong>阶段3</strong></td><td>640px</td><td>3-12秒 / <strong>24fps</strong></td><td>保留少量 T2I 维持语义对齐，I2V 20%</td><td>提升帧率，改善视频流畅度</td></tr>
+  </table>
+  <p><span class="tag tag-l1">L1</span> 渐进式训练课程完整披露</p>
+</div>
+
+<h3 id="train-ct">4.2 Continue Training (CT) 继续训练</h3>
+<div class="detail-card">
+  <p><strong>为什么需要 CT：</strong>预训练中 I2V 任务仅占 20%，模型在该领域的潜力未充分挖掘。CT 阶段专门强化 I2V 生成能力。</p>
+  <p><strong>具体做法：</strong></p>
+  <ol>
+    <li><strong>I2V 比例提升：</strong>从 20% 提升到 <strong>40%</strong> —— 目的：预训练阶段 I2V 占比低导致能力不足，CT 专门强化图像条件生成，提升 I2V 的质量和可控性</li>
+    <li><strong>高质量数据选择：</strong>使用一系列专用评估模型从预训练数据中选择子集——<strong>美学评分器</strong>（aesthetic scorer）+ 基于<strong>光流的运动评估器</strong>（motion evaluators based on optical flow），筛选出更高美学质量和更丰富运动动态的数据 —— 目的：CT 阶段用更高质量数据精调，美学评分器筛选视觉品质，光流评估器筛选运动丰富性，避免低质量数据拉低模型上限</li>
+    <li><strong>双 Caption 设计（长短 Caption 混合训练）：</strong>由于 I2V 任务中第一帧总是给定的，设计两种 caption 版本在 CT 阶段混合训练：
+      <ul>
+        <li><strong>长 Caption：</strong>完整描述 = 动态特征（动作+相机运动）+ 静态特征（外观+美学+风格）</li>
+        <li><strong>短 Caption：</strong>仅保留运动动态描述，<strong>移除与第一帧对应的静态描述</strong>（因为静态信息已由第一帧图像提供）</li>
+        <li><strong>怎么一起训：</strong>训练数据中<strong>同时包含两种 caption 的样本</strong>，按一定比例混合喂给模型（数据集层面按比例采样，不是每个样本同时跑两次 forward）。<strong>论文未披露具体混合比例</strong></li>
+        <li><strong>使用范围：</strong>仅在 <strong>CT 阶段</strong>使用，预训练阶段用统一的 dense caption（含动态+静态）</li>
+      </ul>
+      <div class="purpose-box"><strong>设计目的（直觉解释）：</strong>I2V 任务中第一帧图像已经告诉模型"这个人长什么样、穿什么衣服、在什么场景"，如果 caption 里再重复一遍静态描述，模型可能过度依赖文本而忽略图像输入。短 Caption 强制模型形成<strong>"从图像看静态，从文本看运动"</strong>的分工，避免冗余监督，增强运动生成质量和文本-运动语义对齐。</div>
+    </li>
+    <li><strong>训练策略——退火学习率调度（annealed learning rate schedule）：</strong>
+      <ul>
+        <li><strong>什么是退火学习率：</strong>学习率随训练步数<strong>逐渐衰减（退火）</strong>的调度策略。训练初期用较大学习率快速适应新数据分布，后期逐步减小学习率精细调整参数，缓慢收敛到最优解</li>
+        <li><strong>常见退火方式：</strong>cosine annealing（余弦退火）、linear decay（线性衰减）、step decay（阶梯衰减）等。<strong>论文未披露具体使用哪种退火方式</strong></li>
+        <li><strong>CT 阶段为什么用退火：</strong>CT 在预训练基础上精调，模型已经有较好的通用能力。退火学习率让模型先快速适应 CT 的高质量数据和 I2V 强化目标，再缓慢收敛，<strong>避免大学习率破坏预训练学到的通用能力</strong>（灾难性遗忘）</li>
+        <li><strong>其他训练配置：</strong>使用比预训练<strong>稍少的 GPU</strong>（CT 数据量小于预训练，不需要大规模分布式）</li>
+      </ul>
+      <div class="purpose-box"><strong>设计目的：</strong>退火学习率是精调阶段的标准技巧——初期大学习率快速跨越损失地形的初始平坦区域，后期小学习率在最优点附近精细搜索，既保证收敛速度又避免震荡。配合 CT 阶段的高质量数据，能在不破坏通用能力的前提下显著提升 I2V 和 T2V 的视觉保真度。</div>
+    </li>
+  </ol>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<h3 id="train-sft">4.3 SFT 监督微调</h3>
+<div class="detail-card">
+  <p><strong>数据：</strong>精心策划的高质量视频-文本对，caption 经过人工验证。</p>
+  <p><strong>数据构建方法：</strong></p>
+  <ol>
+    <li>基于视觉风格、运动类型和其他关键属性定义<strong>几百个类别</strong></li>
+    <li>在每个类别内<strong>定向收集数据</strong>（collect data in a targeted manner），确保分布平衡 —— 目的：SFT 需覆盖用户实际使用的各种场景，按类别定向收集确保数据分布平衡，避免常见场景过拟合而稀有场景能力不足</li>
+  </ol>
+  <div class="purpose-box"><strong>数据来源说明（论文未明确）：</strong>论文描述 SFT 数据为"carefully curated set of high-quality video-text pairs with manually verified captions"，按几百个类别<strong>定向收集</strong>。论文<strong>没有明确说明</strong>这些数据是从预训练数据集中精选，还是从外部额外收集。按"定向收集"推断，可能包含预训练数据中的精选 + 外部补充，但数据来源边界论文未披露。与 CT 阶段不同（CT 明确说"select a subset of the pre-training data"，即从预训练数据中选子集），SFT 用的是"定向收集"的独立数据集。</div>
+  <p><strong>模型合并（Model Merging）——关键技巧：</strong></p>
+  <ul>
+    <li>在捕获不同风格、运动、场景的<strong>精选子集上分别训练独立模型</strong></li>
+    <li>将这些模型<strong>合并为单一模型</strong>，整合各自的优势</li>
+    <li>每个模型使用比预训练更小的学习率，使用有限 GPU</li>
+    <li>应用<strong>早停</strong>（early stopping）在有效点防止过拟合，维持文本可控性</li>
+  </ul>
+  <div class="purpose-box"><strong>合并方法说明（论文未披露具体算法）：</strong>论文只说"subsequently merged into a single model that integrates their respective strengths"，<strong>没有说明具体合并算法</strong>。未披露的细节包括：① 是简单参数平均加权（weight average / soup）还是更高级的合并方法（如 task arithmetic、TIES-merging、DARE 等）；② 合并权重如何确定（等权平均还是按子集质量/规模加权）；③ 合并后是否有再微调（post-merge fine-tuning）。按常规做法推断最可能是<strong>等权或加权参数平均</strong>（model soup 类方法），但论文未明确，标注为"论文未披露"。</div>
+  <div class="purpose-box"><strong>设计目的：</strong>① 模型合并：不同风格/运动/场景的精调会互相干扰（灾难性遗忘），子集独立训练再合并可整合各子集优势，比单模型全量精调效果更好；② 早停：SFT 容易过拟合到精选数据而丧失泛化能力，早停在视觉保真度和文本可控性之间取得平衡。</div>
+  <p><strong>效果：</strong>最终合并步骤显著提升视觉保真度和运动质量。</p>
+  <p><span class="tag tag-l2">L2</span> SFT 数据定向收集+模型合并思路公开，但合并具体算法论文未披露</p>
+</div>
+
+<h3 id="train-infra">4.4 训练基础设施（Training Infrastructure）</h3>
+
+<h4>4.4.1 预训练优化（Pre-Training Optimization）</h4>
+<div class="detail-card">
+  <p>为支持长上下文视频模型在数千 GPU 上的高效大规模预训练，设计了高度优化的训练基础设施，聚焦硬件效率、可扩展性和鲁棒性。</p>
+  <table>
+    <tr><th>优化技术</th><th>具体做法</th><th>效果</th></tr>
+    <tr>
+      <td><strong>高性能 Kernel</strong></td>
+      <td>torch.compile + 手写 CUDA kernel 用于性能关键算子；识别内存受限操作并融合为单个 CUDA kernel（如 RoPE + normalization），中间结果存储在寄存器或共享内存</td>
+      <td>全局内存流量减少 <strong>>90%</strong></td>
+    </tr>
+    <tr>
+      <td><strong>并行策略</strong></td>
+      <td>数据并行 + 序列并行混合策略：<strong>HSDP</strong>（Hybrid Sharded Data Parallelism）用于内存高效的权重分片；<strong>Ulysses</strong> 序列并行沿序列和头维度跨 GPU 分片 token，实现长视频样本并行处理</td>
+      <td>支持数千 GPU 高效扩展</td>
+    </tr>
+    <tr>
+      <td><strong>多级激活检查点</strong></td>
+      <td><strong>MLAC</strong>（Multi-Level Activation Checkpointing）策略，实现优化的异步缓存和预取机制，最大化内存传输与前向/反向计算的重叠</td>
+      <td>在可忽略的重计算开销下降低 GPU 内存压力</td>
+    </tr>
+    <tr>
+      <td><strong>工作负载均衡</strong></td>
+      <td>大规模视频预训练常涉及异构数据类型，导致 GPU 间计算不平衡；采用 runtime-aware 工作负载均衡策略，通过额外的 all-to-all 通信步骤将工作负载均匀分布到各 GPU</td>
+      <td>解决异构数据导致的计算不平衡</td>
+    </tr>
+    <tr>
+      <td><strong>容错机制</strong></td>
+      <td>多级容错：模型和优化器状态的周期 checkpoint；全面的机器健康检查；使用 PyTorch <strong>meta tensor</strong> 初始化减少模型初始化开销</td>
+      <td>提升大规模训练稳定性</td>
+    </tr>
+  </table>
+
+  <h4 style="color:#0066B3; margin-top:20px;">工作负载均衡（Runtime-aware Workload Balancing）详细展开</h4>
+  <div class="detail-card" style="background:#F0F7FF; border-left:4px solid #0066B3;">
+    <p><strong>问题根源：</strong>大规模视频预训练中，一个 batch 内可能同时包含 5 秒 1080p 长视频和 2 秒 480p 短视频，token 数和 FLOPs 差异可达 5-10 倍。如果按顺序静态分配 GPU，拿到长视频的 GPU 计算量远大于短视频的 GPU，快的 GPU 等慢的 GPU（木桶效应），产生大量空闲时间。</p>
+    <p><strong>论文具体做法：</strong></p>
+    <ol>
+      <li><strong>额外 all-to-all 通信步骤：</strong>在每个 batch 内，通过 all-to-all 集体通信将各 GPU 上的样本/token 重新分配，使每个 GPU 的总计算量趋于均匀</li>
+      <li><strong>Batch 内执行：</strong>均衡操作在<strong>每个 batch 内</strong>执行（不是全局静态分配），以保持数据一致性——每个 batch 的数据分布不同，需要动态调整</li>
+      <li><strong>异步预计算：</strong>均衡方案在<strong>后台异步预计算</strong>，不阻塞主训练循环，避免增加 critical path 延迟</li>
+      <li><strong>引用来源：</strong>策略引用 [24]，与 MLAC（多级激活检查点）同一引用，推测是 ByteDance 内部训练优化系统/论文</li>
+    </ol>
+    <p><strong>效果：</strong>显著减少 GPU 间空闲时间，提升整体训练吞吐量。</p>
+    <div class="purpose-box"><strong>论文未披露的细节：</strong>① all-to-all 交换粒度（整个样本交换还是 token 级交换？）；② 工作负载衡量标准（按 token 数？FLOPs？实际测量前向耗时？）；③ 均衡分配算法（贪心？动态规划？基于历史耗时预测？）；④ 引用 [24] 的具体论文标题。论文给出了核心思路和工程框架，但具体算法细节未公开。</div>
+    <div class="purpose-box"><strong>直觉理解：</strong>就像餐厅分桌——如果按排队顺序坐，有的桌全点大菜（计算重），有的桌全点小菜（计算轻），后厨忙闲不均。runtime-aware 均衡就是每批客人进来后，先预估每桌的"做菜工作量"，然后重新安排座位，让每桌后厨的工作量差不多，避免有的厨师闲死有的忙死。</div>
+  </div>
+
+  <div class="purpose-box"><strong>设计目的：</strong>长上下文视频模型训练面临三大挑战——计算量巨大（数千 GPU）、内存压力（长序列激活值）、异构数据负载不均衡。高性能 kernel 减少内存瓶颈，HSDP+Ulysses 混合并行实现跨 GPU 扩展，MLAC 在内存和重计算间取最优平衡，工作负载均衡解决异构数据拖慢整体速度的问题，多级容错保障数千 GPU 长时间训练的稳定性。</div>
+  <p><span class="tag tag-l1">L1</span> 预训练基础设施完整披露</p>
+</div>
+
+<h4>4.4.2 后训练优化（Post-Training Optimization）</h4>
+<div class="detail-card">
+  <p>后训练主要包括 SFT、RL、蒸馏三个阶段，核心挑战是<strong>优化训练效率的同时最小化 GPU 内存消耗</strong>。</p>
+  <p><strong>三大内存挑战来源：</strong></p>
+  <ol>
+    <li><strong>Memory Contention</strong>（内存争用）：多阶段训练中不同模块竞争有限 GPU 内存</li>
+    <li><strong>Complex Training Modes</strong>（复杂训练模式）：SFT/RL/蒸馏各有不同的计算图和内存需求</li>
+    <li><strong>Diverse Workloads</strong>（多样化工作负载）：不同任务和数据类型导致内存使用波动</li>
+  </ol>
+  <p><strong>解决方案——动态内存管理框架 + 并行策略：</strong></p>
+  <p><strong>① 动态内存管理框架（核心创新）：</strong></p>
+  <ul>
+    <li><strong>CPU Offloading：</strong>使用 <strong>PyTorch hooks</strong> 实现 CPU offloading，最小化对用户代码的侵入——通过前向/反向 hook 在需要时把张量从 CPU 搬回 GPU，用完立即卸载回 CPU</li>
+    <li><strong>Recomputation：</strong>对激活值不存储而是反向时重新计算，通过详细 profiling 和建模确定最优的 offloading 和 recomputation 策略（哪些张量 offload、哪些重计算、哪些保留在 GPU）</li>
+    <li><strong>局部静态内存规划：</strong>针对频繁分配/释放不同大小张量导致的内存碎片，应用局部静态内存规划减少碎片</li>
+  </ul>
+  <p><strong>② 并行策略（复用+定制）：</strong></p>
+  <ul>
+    <li><strong>FSDP + 序列并行：</strong>复用预训练的并行方案，利用 FSDP + 序列并行实现多节点扩展</li>
+    <li><strong>差异化并行度配置：</strong>不同模型（Text Encoder / DiT / VAE / Reward Model）按计算特征配置<strong>不同的序列并行度</strong></li>
+    <li><strong>NCCL 流管理：</strong>设置 <code>TORCH_NCCL_AVOID_RECORD_STREAMS=1</code> 消除延迟内存释放问题</li>
+    <li><strong>FSDP 冻结参数管理：</strong>手动管理 <code>free_event_queue</code> 解决 FSDP 在参数冻结时的延迟释放问题；使用 <code>register_post_backward_reshard_only_hook</code> 调整冻结模式下反向计算的内存分配和释放顺序</li>
+  </ul>
+  <div class="purpose-box"><strong>设计目的：</strong>后训练阶段（尤其 RLHF/蒸馏）需要同时加载生成模型、Reward Model、VAE、Text Encoder 及各自优化器状态和激活张量，内存压力远大于预训练。动态内存管理框架通过 PyTorch hooks 非侵入式 CPU 卸载 + 选择性重计算 + 防碎片，在有限 GPU 内存下完成多模型共存的复杂训练流程；FSDP+序列并行复用预训练成熟方案，但针对后训练多模型特点做了差异化并行度和冻结参数内存管理的定制。</div>
+  <div class="purpose-box"><strong>与预训练 Infra 的核心区别：</strong>预训练面向"数千 GPU + 长序列 + 异构数据"做<strong>吞吐优化</strong>（kernel 融合、HSDP 扩展、MLAC、all-to-all 负载均衡、大规模容错）；后训练面向"多模型共存 + 冻结/可训练混合 + 内存受限"做<strong>内存优化</strong>（动态 CPU offload、防碎片、冻结参数内存管理、NCCL 流调优）。并行策略和 kernel 优化在后训练中复用预训练成果。</div>
+  <p><span class="tag tag-l1">L1</span> 后训练基础设施完整披露</p>
+</div>
+
+<h4 style="color:#C7000B; margin-top:30px;">预训练 vs 后训练 Infra 分层特性矩阵</h4>
+<div class="svg-container">
+<svg viewBox="0 0 1120 680" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs>
+    <linearGradient id="hdrPre" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C7000B"/><stop offset="100%" stop-color="#A00009"/></linearGradient>
+    <linearGradient id="hdrPost" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0066B3"/><stop offset="100%" stop-color="#004C85"/></linearGradient>
+    <linearGradient id="hdrDiff" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF6B00"/><stop offset="100%" stop-color="#CC5500"/></linearGradient>
+  </defs>
+  <text x="560" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#333333">预训练 vs 后训练 Infra 分层特性矩阵</text>
+  <text x="560" y="54" text-anchor="middle" font-size="11" fill="#888888">Seedance 1.0 论文 6.1 / 6.2 节整理</text>
+  <rect x="20" y="70" width="160" height="44" rx="4" fill="#555555"/><text x="100" y="97" text-anchor="middle" font-size="13" font-weight="bold" fill="white">能力层次</text>
+  <rect x="184" y="70" width="340" height="44" rx="4" fill="url(#hdrPre)"/><text x="354" y="90" text-anchor="middle" font-size="13" font-weight="bold" fill="white">预训练 Infra（6.1）</text><text x="354" y="107" text-anchor="middle" font-size="10" fill="#FFD6D9">数千 GPU 大规模 · 长上下文 · 高吞吐</text>
+  <rect x="528" y="70" width="340" height="44" rx="4" fill="url(#hdrPost)"/><text x="698" y="90" text-anchor="middle" font-size="13" font-weight="bold" fill="white">后训练 Infra（6.2）</text><text x="698" y="107" text-anchor="middle" font-size="10" fill="#CCE4FF">SFT/RL/蒸馏 · 多模型共存 · 内存受限</text>
+  <rect x="872" y="70" width="228" height="44" rx="4" fill="url(#hdrDiff)"/><text x="986" y="97" text-anchor="middle" font-size="13" font-weight="bold" fill="white">核心区别</text>
+  <rect x="20" y="118" width="160" height="80" rx="4" fill="#F5F5F5" stroke="#DDDDDD"/><text x="100" y="150" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">计算优化层</text><text x="100" y="170" text-anchor="middle" font-size="10" fill="#666666">Kernel / 算子融合</text>
+  <rect x="184" y="118" width="340" height="80" rx="4" fill="#FFF5F5" stroke="#F5C6CB"/><text x="196" y="140" font-size="10.5" fill="#333333">• torch.compile + 手写 CUDA kernel</text><text x="196" y="158" font-size="10.5" fill="#333333">• RoPE + normalization 融合为单 kernel</text><text x="196" y="176" font-size="10.5" fill="#333333">• 中间结果存寄存器/共享内存</text><text x="196" y="192" font-size="10" font-weight="bold" fill="#C7000B">全局内存访问减少 90%+</text>
+  <rect x="528" y="118" width="340" height="80" rx="4" fill="#F0F7FF" stroke="#B3D9FF"/><text x="540" y="140" font-size="10.5" fill="#333333">• 复用预训练 kernel 优化</text><text x="540" y="158" font-size="10.5" fill="#333333">• 无额外 kernel 级创新披露</text><text x="540" y="176" font-size="10.5" fill="#333333">• 聚焦内存而非计算瓶颈</text><text x="540" y="192" font-size="10" font-weight="bold" fill="#0066B3">后训练瓶颈在内存，不在算力</text>
+  <rect x="872" y="118" width="228" height="80" rx="4" fill="#FFF8F0" stroke="#FFD9B3"/><text x="884" y="145" font-size="10.5" fill="#333333">预训练：算力瓶颈，</text><text x="884" y="162" font-size="10.5" fill="#333333">重 kernel 融合提吞吐</text><text x="884" y="185" font-size="10.5" fill="#333333">后训练：内存瓶颈，</text><text x="884" y="202" font-size="10.5" fill="#333333">kernel 复用即可</text>
+  <rect x="20" y="202" width="160" height="90" rx="4" fill="#F5F5F5" stroke="#DDDDDD"/><text x="100" y="235" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">并行通信层</text><text x="100" y="255" text-anchor="middle" font-size="10" fill="#666666">数据并行 / 序列并行</text>
+  <rect x="184" y="202" width="340" height="90" rx="4" fill="#FFF5F5" stroke="#F5C6CB"/><text x="196" y="224" font-size="10.5" fill="#333333">• HSDP（Hybrid Sharded Data Parallel）</text><text x="196" y="242" font-size="10.5" fill="#333333">• Ulysses 序列并行（沿 seq+head 切分）</text><text x="196" y="260" font-size="10.5" fill="#333333">• 混合并行：数据并行 + 序列并行</text><text x="196" y="278" font-size="10.5" fill="#333333">• all-to-all 工作负载均衡通信</text><text x="196" y="294" font-size="10" font-weight="bold" fill="#C7000B">面向数千 GPU 扩展设计</text>
+  <rect x="528" y="202" width="340" height="90" rx="4" fill="#F0F7FF" stroke="#B3D9FF"/><text x="540" y="224" font-size="10.5" fill="#333333">• FSDP（Fully Sharded Data Parallel）</text><text x="540" y="242" font-size="10.5" fill="#333333">• 序列并行（复用预训练方案）</text><text x="540" y="260" font-size="10.5" fill="#333333">• 不同模型配置不同序列并行度</text><text x="540" y="278" font-size="10.5" fill="#333333">• TORCH_NCCL_AVOID_RECORD_STREAMS=1</text><text x="540" y="294" font-size="10" font-weight="bold" fill="#0066B3">面向多模型共存+内存优化</text>
+  <rect x="872" y="202" width="228" height="90" rx="4" fill="#FFF8F0" stroke="#FFD9B3"/><text x="884" y="228" font-size="10.5" fill="#333333">预训练：HSDP（混合</text><text x="884" y="245" font-size="10.5" fill="#333333">分片），重跨节点扩展</text><text x="884" y="268" font-size="10.5" fill="#333333">后训练：FSDP（全分片），</text><text x="884" y="285" font-size="10.5" fill="#333333">重内存节省+NCCL流管理</text>
+  <rect x="20" y="296" width="160" height="100" rx="4" fill="#F5F5F5" stroke="#DDDDDD"/><text x="100" y="330" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">内存管理层</text><text x="100" y="350" text-anchor="middle" font-size="10" fill="#666666">激活检查点 / Offload</text>
+  <rect x="184" y="296" width="340" height="100" rx="4" fill="#FFF5F5" stroke="#F5C6CB"/><text x="196" y="318" font-size="10.5" fill="#333333">• MLAC（Multi-Level Activation Checkpointing）</text><text x="196" y="336" font-size="10.5" fill="#333333">• 异步缓存 + 预取机制</text><text x="196" y="354" font-size="10.5" fill="#333333">• 优先 offload 高重计算算子（attention/FC2）</text><text x="196" y="372" font-size="10.5" fill="#333333">• 激活检查点模块输入 offload → 零激活占用</text><text x="196" y="390" font-size="10" font-weight="bold" fill="#C7000B">降低序列并行度 → 减少通信</text>
+  <rect x="528" y="296" width="340" height="100" rx="4" fill="#F0F7FF" stroke="#B3D9FF"/><text x="540" y="318" font-size="10.5" fill="#333333">• 动态内存管理框架（CPU offload + recompute）</text><text x="540" y="336" font-size="10.5" fill="#333333">• PyTorch hooks 实现非侵入 CPU offload</text><text x="540" y="354" font-size="10.5" fill="#333333">• profiling + modeling 确定最优 offload/recompute</text><text x="540" y="372" font-size="10.5" fill="#333333">• 局部静态内存规划减少碎片</text><text x="540" y="390" font-size="10" font-weight="bold" fill="#0066B3">多模型动态共享内存</text>
+  <rect x="872" y="296" width="228" height="100" rx="4" fill="#FFF8F0" stroke="#FFD9B3"/><text x="884" y="322" font-size="10.5" fill="#333333">预训练：MLAC 激活</text><text x="884" y="339" font-size="10.5" fill="#333333">检查点，单模型长序列</text><text x="884" y="362" font-size="10.5" fill="#333333">后训练：动态 offload+</text><text x="884" y="379" font-size="10.5" fill="#333333">recompute，多模型共存</text><text x="884" y="396" font-size="10" fill="#666666">+ 防碎片 + 冻结参数管理</text>
+  <rect x="20" y="400" width="160" height="75" rx="4" fill="#F5F5F5" stroke="#DDDDDD"/><text x="100" y="432" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">负载/调度层</text><text x="100" y="452" text-anchor="middle" font-size="10" fill="#666666">工作负载均衡</text>
+  <rect x="184" y="400" width="340" height="75" rx="4" fill="#FFF5F5" stroke="#F5C6CB"/><text x="196" y="422" font-size="10.5" fill="#333333">• runtime-aware 工作负载均衡</text><text x="196" y="440" font-size="10.5" fill="#333333">• 额外 all-to-all 通信均匀分布负载</text><text x="196" y="458" font-size="10.5" fill="#333333">• batch 内执行 + 后台异步预计算</text><text x="196" y="474" font-size="10" font-weight="bold" fill="#C7000B">解决异构数据（长/短/分辨率）计算不平衡</text>
+  <rect x="528" y="400" width="340" height="75" rx="4" fill="#F0F7FF" stroke="#B3D9FF"/><text x="540" y="422" font-size="10.5" fill="#333330">• 无独立工作负载均衡策略披露</text><text x="540" y="440" font-size="10.5" fill="#333333">• 不同模型配置不同序列并行度（间接均衡）</text><text x="540" y="458" font-size="10.5" fill="#333333">• 手动管理 free_event_queue（FSDP 冻结参数）</text><text x="540" y="474" font-size="10" font-weight="bold" fill="#0066B3">通过内存调度间接平衡负载</text>
+  <rect x="872" y="400" width="228" height="75" rx="4" fill="#FFF8F0" stroke="#FFD9B3"/><text x="884" y="428" font-size="10.5" fill="#333333">预训练：显式 all-to-all</text><text x="884" y="445" font-size="10.5" fill="#333333">负载均衡（异构数据）</text><text x="884" y="468" font-size="10.5" fill="#333333">后训练：无显式均衡，</text><text x="884" y="485" font-size="10.5" fill="#333333">靠内存管理间接处理</text>
+  <rect x="20" y="479" width="160" height="80" rx="4" fill="#F5F5F5" stroke="#DDDDDD"/><text x="100" y="512" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">容错/稳定性层</text><text x="100" y="532" text-anchor="middle" font-size="10" fill="#666666">Checkpoint / 健康检查</text>
+  <rect x="184" y="479" width="340" height="80" rx="4" fill="#FFF5F5" stroke="#F5C6CB"/><text x="196" y="501" font-size="10.5" fill="#333333">• 周期 checkpoint（模型+优化器+dataloader）</text><text x="196" y="519" font-size="10.5" fill="#333333">• 支持 FSDP 分片权重的 checkpoint</text><text x="196" y="537" font-size="10.5" fill="#333333">• 机器健康检查（启动前排除故障节点）</text><text x="196" y="555" font-size="10.5" fill="#333333">• PyTorch meta tensor 初始化（减少启动开销）</text>
+  <rect x="528" y="479" width="340" height="80" rx="4" fill="#F0F7FF" stroke="#B3D9FF"/><text x="540" y="501" font-size="10.5" fill="#333333">• 复用预训练容错机制</text><text x="540" y="519" font-size="10.5" fill="#333333">• register_post_backward_reshard_only_hook</text><text x="540" y="537" font-size="10.5" fill="#333333">  （调整冻结模式反向内存分配顺序）</text><text x="540" y="555" font-size="10.5" fill="#333333">• 手动 free_event_queue（冻结参数延迟释放）</text>
+  <rect x="872" y="479" width="228" height="80" rx="4" fill="#FFF8F0" stroke="#FFD9B3"/><text x="884" y="505" font-size="10.5" fill="#333333">预训练：重大规模容错</text><text x="884" y="522" font-size="10.5" fill="#333333">（数千 GPU 长时间运行）</text><text x="884" y="545" font-size="10.5" fill="#333333">后训练：重冻结参数</text><text x="884" y="562" font-size="10.5" fill="#333333">内存管理（RL/蒸馏）</text>
+  <rect x="20" y="573" width="1080" height="90" rx="6" fill="#F9F9F9" stroke="#CCCCCC"/>
+  <text x="40" y="598" font-size="12" font-weight="bold" fill="#333333">核心差异总结：</text>
+  <text x="40" y="620" font-size="11" fill="#333333">• <tspan font-weight="bold" fill="#C7000B">预训练</tspan>：面向"数千 GPU + 长序列 + 异构数据"的<tspan font-weight="bold">吞吐优化</tspan>——重 kernel 融合、HSDP 扩展、MLAC、all-to-all 负载均衡、大规模容错</text>
+  <text x="40" y="640" font-size="11" fill="#333333">• <tspan font-weight="bold" fill="#0066B3">后训练</tspan>：面向"多模型共存 + 冻结/可训练混合 + 内存受限"的<tspan font-weight="bold">内存优化</tspan>——重动态 CPU offload、防碎片、冻结参数内存管理、NCCL 流调优</text>
+  <text x="40" y="658" font-size="10.5" fill="#666666">• 共享基础：FSDP/序列并行、kernel 优化、checkpoint 容错在后训练中复用预训练成果</text>
+</svg>
+</div>
+<div class="purpose-box"><strong>矩阵解读：</strong>按 5 个能力层次（计算优化 / 并行通信 / 内存管理 / 负载调度 / 容错稳定性）对比预训练和后训练 Infra。预训练在每一层都有独立创新（HSDP、MLAC、all-to-all 负载均衡、meta tensor 初始化），后训练则复用预训练基础并在内存管理层做深度定制（动态 offload、防碎片、冻结参数管理）。核心差异源于瓶颈不同：预训练瓶颈是算力和扩展，后训练瓶颈是内存。</div>
+
+<div style="height:0;overflow:hidden;">
+</div>
+
+<!-- ==================== F. Post-train RLHF ==================== -->
+<h2 id="rlhf-overall">⑤ 后训练过程深度拆解（RLHF 人类反馈对齐）</h2>
+
+<h3 id="rlhf-data">5.1 反馈数据基础设施</h3>
+<div class="detail-card">
+  <ul>
+    <li><strong>Prompt 来源：</strong>训练数据集 + 在线用户</li>
+    <li><strong>Prompt 处理：</strong>数据平衡 + 信息过滤，丢弃重复和模糊的 prompt</li>
+    <li><strong>偏好数据：</strong>收集高质量视频数据对进行人类偏好标注，包括模型不同阶段生成的合成视频</li>
+    <li><strong>多源视觉材料：</strong>实验证明纳入多源视觉材料可进一步增强 RM 模型的领域能力、扩展偏好上限、强化泛化能力 —— 目的：单一来源偏好数据会限制 RM 的判断视野，多源材料增强领域覆盖、扩展偏好上限、强化泛化</li>
+    <li><strong>多维标注方法：</strong>在特定标注维度下选择最好和最差的视频，同时确保最好视频在其他维度上不劣于最差视频 —— 目的：避免标注者只关注单一维度而忽略其他维度，确保选中的"最好"视频在所有维度上都不劣于"最差"，提升偏好数据质量</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<h3 id="rlhf-rm">5.2 三维度 Reward Model 设计</h3>
+
+<div class="svg-container">
+<svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <text x="450" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">Seedance 1.0 三维度 Reward Model 系统</text>
+
+  <!-- 输入 -->
+  <rect x="350" y="50" width="200" height="40" rx="6" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="450" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">生成视频 x0</text>
+
+  <line x1="400" y1="92" x2="200" y2="130" stroke="#555555" stroke-width="1.5"/>
+  <line x1="450" y1="92" x2="450" y2="130" stroke="#555555" stroke-width="1.5"/>
+  <line x1="500" y1="92" x2="700" y2="130" stroke="#555555" stroke-width="1.5"/>
+
+  <!-- RM1 Foundational -->
+  <rect x="80" y="135" width="240" height="100" rx="8" fill="#FDE8EA" stroke="#0066B3" stroke-width="2"/>
+  <text x="200" y="158" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">① Foundational RM</text>
+  <text x="200" y="178" text-anchor="middle" font-size="10" fill="#555555">架构：Vision-Language Model (VLM)</text>
+  <text x="200" y="195" text-anchor="middle" font-size="10" fill="#555555">关注：图文对齐 + 结构稳定性</text>
+  <text x="200" y="212" text-anchor="middle" font-size="10" fill="#555555">基础能力维度</text>
+  <text x="200" y="228" text-anchor="middle" font-size="9" fill="#999999">Reward 曲线稳定上升至 ~0.55</text>
+
+  <!-- RM2 Motion -->
+  <rect x="330" y="135" width="240" height="100" rx="8" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="450" y="158" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">② Motion RM</text>
+  <text x="450" y="178" text-anchor="middle" font-size="10" fill="#555555">缓解视频伪影</text>
+  <text x="450" y="195" text-anchor="middle" font-size="10" fill="#555555">增强运动幅度和生动性</text>
+  <text x="450" y="212" text-anchor="middle" font-size="10" fill="#555555">运动质量维度</text>
+  <text x="450" y="228" text-anchor="middle" font-size="9" fill="#999999">Reward 曲线稳定上升至 ~0.21</text>
+
+  <!-- RM3 Aesthetic -->
+  <rect x="580" y="135" width="240" height="100" rx="8" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="700" y="158" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">③ Aesthetic RM</text>
+  <text x="700" y="178" text-anchor="middle" font-size="10" fill="#555555">灵感来自 Seedream</text>
+  <text x="700" y="195" text-anchor="middle" font-size="10" fill="#555555">从图像空间输入（视频关键帧）</text>
+  <text x="700" y="212" text-anchor="middle" font-size="10" fill="#555555">视觉美学维度</text>
+  <text x="700" y="228" text-anchor="middle" font-size="9" fill="#999999">Reward 曲线稳定上升至 ~0.63</text>
+
+  <!-- 复合reward -->
+  <rect x="300" y="250" width="300" height="25" rx="4" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="450" y="267" text-anchor="middle" font-size="10" font-weight="bold" fill="#C7000B">复合 Reward = w1×Foundational + w2×Motion + w3×Aesthetic（直接最大化）</text>
+</svg>
+</div>
+
+<div class="detail-card">
+  <h4>三个 Reward Model 详解</h4>
+  <table>
+    <tr><th>RM 名称</th><th>架构</th><th>关注维度</th><th>设计细节</th></tr>
+    <tr>
+      <td><strong>Foundational RM</strong></td><td>Vision-Language Model (VLM)</td>
+      <td>图文对齐、结构稳定性</td>
+      <td>基础模型能力，VLM 架构天然适合图文对齐评估</td>
+    </tr>
+    <tr>
+      <td><strong>Motion RM</strong></td><td>未明确（视频专用）</td>
+      <td>缓解视频伪影、增强运动幅度和生动性</td>
+      <td>视频运动质量专用评估</td>
+    </tr>
+    <tr>
+      <td><strong>Aesthetic RM</strong></td><td>图像空间输入（灵感来自 Seedream）</td>
+      <td>视觉美学质量</td>
+      <td>视频美学主要来自关键帧，因此从<strong>图像空间输入</strong>设计，数据源修改为使用视频的关键帧</td>
+    </tr>
+  </table>
+  <p><span class="tag tag-l1">L1</span> 三维度 RM 设计完整披露，含 Reward 曲线图</p>
+  <div class="purpose-box"><strong>设计目的：</strong>① 为什么分三个维度：视频质量是多维度的，单一 RM 无法同时准确评估图文对齐、运动质量和美学品质，分维度设计让每个 RM 专注擅长领域，再加权组合避免"平均化"导致的维度间互相抵消；② Foundational 用 VLM 架构：图文对齐和结构稳定性需要跨模态理解能力，VLM 天然具备图文联合理解能力；③ Motion 用视频专用架构：运动伪影和运动幅度需要时序建模能力，专用视频 RM 能捕捉帧间动态变化，比 VLM 更适合；④ Aesthetic 用关键帧输入：美学品质主要体现在静态画面上，从视频提取关键帧用图像美学模型评估，灵感来自 Seedream 成功经验，比全视频输入更高效且准确。</div>
+
+  <h4 style="color:#0066B3; margin-top:20px;">三个 RM 的输入输出详解</h4>
+  <table>
+    <tr><th>RM</th><th>输入</th><th>输出</th><th>为什么这样设计</th></tr>
+    <tr>
+      <td><strong>Foundational RM</strong></td>
+      <td>视频 + 文本 prompt（VLM 跨模态输入）</td>
+      <td>基础能力奖励分数（图文对齐 + 结构稳定性的综合标量）</td>
+      <td>图文对齐需要同时看视频内容和 prompt 文本，VLM 的跨模态输入天然支持；结构稳定性通过视频帧间一致性评估</td>
+    </tr>
+    <tr>
+      <td><strong>Motion RM</strong></td>
+      <td>视频（时序输入，不含文本）</td>
+      <td>运动质量奖励分数（运动幅度 + 生动性 - 伪影的综合标量）</td>
+      <td>运动质量是视频本身的时序属性，不需要文本条件；需要帧间时序建模能力来评估运动是否自然、有无伪影</td>
+    </tr>
+    <tr>
+      <td><strong>Aesthetic RM</strong></td>
+      <td>视频<strong>关键帧</strong>（图像输入，非整段视频）</td>
+      <td>美学质量奖励分数（视觉质感 + 艺术表达的综合标量）</td>
+      <td>论文明确说"视频美学主要来自关键帧"，用关键帧（图像）输入可以复用 Seedream 图像美学评估的成熟能力，计算效率更高，不需要视频级时序计算</td>
+    </tr>
+  </table>
+
+  <h4 style="color:#C7000B; margin-top:20px;">Loss 构成——复合奖励的线性组合</h4>
+  <div class="detail-card" style="background:#FFF5F5; border-left:4px solid #C7000B;">
+    <p><strong>Base Model RLHF（4.4.3）：</strong></p>
+    <ul>
+      <li>训练时模拟视频推理流水线，直接预测 x0（干净视频）</li>
+      <li>用三个 RM 分别评估生成的视频，得到三个奖励分数</li>
+      <li><strong>直接最大化多个 RM 的复合奖励（composite rewards）</strong></li>
+    </ul>
+    <p><strong>Super-Resolution RLHF（4.4.4）：</strong></p>
+    <ul>
+      <li>论文明确说"直接最大化这些奖励信号的<strong>线性组合</strong>（linear combination）"</li>
+      <li>低分辨率 VAE latent 作为条件输入，生成的高分辨率视频由多个 RM 评估</li>
+    </ul>
+    <p><strong>Loss 形式（推断）：</strong></p>
+    <div style="background:white; padding:12px 18px; border-radius:6px; border:1px solid #F5C6CB; margin:10px 0; font-family:monospace; font-size:14px;">
+      Loss = - ( w₁ · R<sub>foundational</sub> + w₂ · R<sub>motion</sub> + w₃ · R<sub>aesthetic</sub> )
+    </div>
+    <p>即最小化负的加权奖励和。训练目标是让生成视频在三个维度上同时获得高奖励。</p>
+    <div class="purpose-box"><strong>论文未披露：</strong>① 具体权重 w₁/w₂/w₃ 的数值；② 三个 RM 的分数是否归一化到同一量纲后再加权；③ Base Model RLHF 和 Super-Resolution RLHF 是否使用相同的权重配置。论文只说"线性组合"和"复合奖励"，未给出具体权重。</div>
+    <p><strong>多轮迭代学习：</strong>在扩散模型和 RM 之间做多轮迭代——模型生成新视频 → RM 评估 → 模型更新 → 再生成，逐步提升性能上限。比动态更新 RM 更稳定可控，避免 RM 和生成模型"共同漂移"导致训练崩溃。</p>
+    <p><strong>对比实验结论：</strong>论文对比了 DPO / PPO / GRPO 三种算法，证明<strong>直接奖励最大化</strong>在扩散模型上最高效有效——DPO 受限于偏好对质量且无法利用连续 reward，PPO/GRPO 训练不稳定且需要 Critic/组内采样，直接最大化可充分利用三维度连续 reward 信号。</p>
+  </div>
+
+  <h4 style="color:#00B578; margin-top:20px;">为什么是三个 RM 而不是一个？——深度分析</h4>
+  <div class="detail-card" style="background:#F0FAF6; border-left:4px solid #00B578;">
+    <p><strong>核心原因：三个维度评估空间不同，需要不同的模型架构和输入形式。</strong></p>
+    <table>
+      <tr><th>维度</th><th>评估空间</th><th>需要的能力</th><th>单一 RM 的问题</th></tr>
+      <tr>
+        <td><strong>Foundational</strong></td>
+        <td>跨模态（文本+视频）</td>
+        <td>VLM 图文理解 + 时序一致性</td>
+        <td rowspan="3">如果用一个 RM 同时评估三个维度：① 模型架构需要同时支持 VLM 跨模态 + 视频时序 + 图像美学，设计复杂且互相干扰；② 训练数据需要同时标注三个维度，标注成本高且标注者难以同时准确判断所有维度；③ 单一 RM 的评估偏差会同时影响三个维度，风险集中；④ 三个维度的 reward 量纲不同，单一模型输出难以平衡</td>
+      </tr>
+      <tr>
+        <td><strong>Motion</strong></td>
+        <td>纯视频时序</td>
+        <td>帧间动态建模 + 伪影检测</td>
+      </tr>
+      <tr>
+        <td><strong>Aesthetic</strong></td>
+        <td>静态图像（关键帧）</td>
+        <td>图像美学评估（可复用图像模型）</td>
+      </tr>
+    </table>
+    <p><strong>分开训练的优势：</strong>① 每个 RM 可以用最适合自己维度的架构（VLM / 视频模型 / 图像模型）；② 每个 RM 可以独立训练和迭代，某个维度提升不需要重训其他维度；③ 三维度 reward 可以灵活调整权重，根据产品需求侧重不同维度；④ 评估偏差分散，单个 RM 出问题不会全局崩溃。</p>
+  </div>
+</div>
+
+<h3 id="rlhf-flowchart">5.3 RLHF 完整流程图</h3>
+<div class="svg-container">
+<svg viewBox="0 0 1060 820" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arrR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#666666"/></marker>
+    <linearGradient id="gData" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8F4FD"/><stop offset="100%" stop-color="#D0E8F7"/></linearGradient>
+    <linearGradient id="gRM" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FDE8EA"/><stop offset="100%" stop-color="#FAD0D5"/></linearGradient>
+    <linearGradient id="gBase" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFF3E6"/><stop offset="100%" stop-color="#FFE4C4"/></linearGradient>
+    <linearGradient id="gSR" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E8F8F0"/><stop offset="100%" stop-color="#D0F0E0"/></linearGradient>
+  </defs>
+
+  <text x="530" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#333333">Seedance 1.0 RLHF 完整流程图</text>
+  <text x="530" y="50" text-anchor="middle" font-size="11" fill="#888888">数据收集 → 三维度 RM 训练 → Base Model RLHF → Super-Resolution RLHF → 多轮迭代</text>
+
+  <!-- ===== 第1层：数据收集 ===== -->
+  <rect x="30" y="70" width="1000" height="80" rx="8" fill="url(#gData)" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="50" y="92" font-size="13" font-weight="bold" fill="#0066B3">① 反馈数据基础设施（4.4.1）</text>
+
+  <rect x="50" y="100" width="200" height="40" rx="4" fill="white" stroke="#0066B3"/>
+  <text x="150" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">Prompt 收集</text>
+  <text x="150" y="132" text-anchor="middle" font-size="9" fill="#666">训练集 + 在线用户</text>
+
+  <rect x="270" y="100" width="200" height="40" rx="4" fill="white" stroke="#0066B3"/>
+  <text x="370" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">Prompt 处理</text>
+  <text x="370" y="132" text-anchor="middle" font-size="9" fill="#666">数据平衡 + 信息过滤</text>
+
+  <rect x="490" y="100" width="220" height="40" rx="4" fill="white" stroke="#0066B3"/>
+  <text x="600" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">视频对收集（多源）</text>
+  <text x="600" y="132" text-anchor="middle" font-size="9" fill="#666">模型不同阶段生成的合成视频</text>
+
+  <rect x="730" y="100" width="280" height="40" rx="4" fill="white" stroke="#0066B3"/>
+  <text x="870" y="118" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">多维标注（最好/最差）</text>
+  <text x="870" y="132" text-anchor="middle" font-size="9" fill="#666">最好在其他维度不劣于最差</text>
+
+  <!-- 箭头向下 -->
+  <line x1="530" y1="150" x2="530" y2="175" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <!-- ===== 第2层：三个RM训练 ===== -->
+  <rect x="30" y="180" width="1000" height="110" rx="8" fill="url(#gRM)" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="50" y="202" font-size="13" font-weight="bold" fill="#C7000B">② 三维度 Reward Model 训练（4.4.2）</text>
+
+  <!-- Foundational RM -->
+  <rect x="60" y="212" width="290" height="65" rx="6" fill="white" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="205" y="232" text-anchor="middle" font-size="11" font-weight="bold" fill="#C7000B">Foundational RM（基础）</text>
+  <text x="205" y="248" text-anchor="middle" font-size="9.5" fill="#333">架构：Vision-Language Model (VLM)</text>
+  <text x="205" y="262" text-anchor="middle" font-size="9.5" fill="#333">输入：视频 + 文本 prompt</text>
+  <text x="205" y="276" text-anchor="middle" font-size="9" fill="#666">输出：图文对齐 + 结构稳定性分数</text>
+
+  <!-- Motion RM -->
+  <rect x="385" y="212" width="290" height="65" rx="6" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="530" y="232" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">Motion RM（运动）</text>
+  <text x="530" y="248" text-anchor="middle" font-size="9.5" fill="#333">架构：视频专用理解模型</text>
+  <text x="530" y="262" text-anchor="middle" font-size="9.5" fill="#333">输入：视频（时序输入，不含文本）</text>
+  <text x="530" y="276" text-anchor="middle" font-size="9" fill="#666">输出：运动幅度+生动性-伪影分数</text>
+
+  <!-- Aesthetic RM -->
+  <rect x="710" y="212" width="290" height="65" rx="6" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="855" y="232" text-anchor="middle" font-size="11" font-weight="bold" fill="#CC5500">Aesthetic RM（美学）</text>
+  <text x="855" y="248" text-anchor="middle" font-size="9.5" fill="#333">架构：图像美学模型（受 Seedream 启发）</text>
+  <text x="855" y="262" text-anchor="middle" font-size="9.5" fill="#333">输入：视频关键帧（图像输入）</text>
+  <text x="855" y="276" text-anchor="middle" font-size="9" fill="#666">输出：视觉质感 + 艺术表达分数</text>
+
+  <!-- 箭头向下 -->
+  <line x1="205" y1="290" x2="205" y2="315" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+  <line x1="530" y1="290" x2="530" y2="315" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+  <line x1="855" y1="290" x2="855" y2="315" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <!-- ===== 第3层：Base Model RLHF ===== -->
+  <rect x="30" y="320" width="1000" height="180" rx="8" fill="url(#gBase)" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="50" y="342" font-size="13" font-weight="bold" fill="#CC5500">③ Base Model 反馈学习（4.4.3）——直接最大化复合奖励</text>
+
+  <!-- 训练流程 -->
+  <rect x="50" y="355" width="160" height="50" rx="4" fill="white" stroke="#FF6B00"/>
+  <text x="130" y="373" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">模拟推理流水线</text>
+  <text x="130" y="388" text-anchor="middle" font-size="9" fill="#666">直接预测 x0（干净视频）</text>
+
+  <line x1="210" y1="380" x2="245" y2="380" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <rect x="250" y="355" width="160" height="50" rx="4" fill="white" stroke="#FF6B00"/>
+  <text x="330" y="373" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">生成视频 x0</text>
+  <text x="330" y="388" text-anchor="middle" font-size="9" fill="#666">Base Model 输出</text>
+
+  <line x1="410" y1="380" x2="445" y2="380" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <!-- 三个RM评估 -->
+  <rect x="450" y="350" width="80" height="30" rx="4" fill="#FDE8EA" stroke="#C7000B"/>
+  <text x="490" y="369" text-anchor="middle" font-size="9" font-weight="bold" fill="#C7000B">R_found</text>
+
+  <rect x="450" y="385" width="80" height="30" rx="4" fill="#E8F8F0" stroke="#00B578"/>
+  <text x="490" y="404" text-anchor="middle" font-size="9" font-weight="bold" fill="#00875A">R_motion</text>
+
+  <rect x="540" y="350" width="80" height="30" rx="4" fill="#FFF3E6" stroke="#FF6B00"/>
+  <text x="580" y="369" text-anchor="middle" font-size="9" font-weight="bold" fill="#CC5500">R_aesth</text>
+
+  <rect x="540" y="385" width="80" height="30" rx="4" fill="#F5F5F5" stroke="#999"/>
+  <text x="580" y="404" text-anchor="middle" font-size="9" fill="#666">三维度评估</text>
+
+  <line x1="620" y1="380" x2="655" y2="380" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <!-- 复合奖励 -->
+  <rect x="660" y="355" width="180" height="50" rx="4" fill="white" stroke="#C7000B" stroke-width="2"/>
+  <text x="750" y="373" text-anchor="middle" font-size="10" font-weight="bold" fill="#C7000B">复合 Reward</text>
+  <text x="750" y="388" text-anchor="middle" font-size="8.5" fill="#333">w₁·R_found + w₂·R_motion + w₃·R_aesth</text>
+
+  <line x1="840" y1="380" x2="875" y2="380" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <rect x="880" y="355" width="130" height="50" rx="4" fill="#FFF0F0" stroke="#C7000B" stroke-width="2"/>
+  <text x="945" y="373" text-anchor="middle" font-size="10" font-weight="bold" fill="#C7000B">直接最大化</text>
+  <text x="945" y="388" text-anchor="middle" font-size="9" fill="#666">Loss = -复合Reward</text>
+
+  <!-- 对比实验 -->
+  <rect x="50" y="420" width="450" height="65" rx="4" fill="white" stroke="#FF6B00"/>
+  <text x="275" y="438" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">对比实验：DPO / PPO / GRPO vs 直接 Reward 最大化</text>
+  <text x="275" y="455" text-anchor="middle" font-size="9" fill="#666">DPO：受限于偏好对质量，无法利用连续 reward</text>
+  <text x="275" y="470" text-anchor="middle" font-size="9" fill="#666">PPO/GRPO：训练不稳定，需要 Critic/组内采样</text>
+  <text x="275" y="483" text-anchor="middle" font-size="9" font-weight="bold" fill="#C7000B">结论：直接最大化最高效有效，全面提升对齐/运动/美学</text>
+
+  <!-- 多轮迭代 -->
+  <rect x="520" y="420" width="490" height="65" rx="4" fill="white" stroke="#FF6B00"/>
+  <text x="765" y="438" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">多轮迭代学习（扩散模型 ↔ RM）</text>
+  <text x="765" y="455" text-anchor="middle" font-size="9" fill="#666">模型生成新视频 → RM 评估 → 模型更新 → 再生成</text>
+  <text x="765" y="470" text-anchor="middle" font-size="9" fill="#666">提升 RLHF 性能上限，比动态更新 RM 更稳定可控</text>
+  <text x="765" y="483" text-anchor="middle" font-size="9" fill="#666">避免 RM 和生成模型"共同漂移"导致训练崩溃</text>
+
+  <!-- 箭头向下 -->
+  <line x1="530" y1="500" x2="530" y2="525" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <!-- ===== 第4层：Super-Resolution RLHF ===== -->
+  <rect x="30" y="530" width="1000" height="140" rx="8" fill="url(#gSR)" stroke="#00B578" stroke-width="1.5"/>
+  <text x="50" y="552" font-size="13" font-weight="bold" fill="#00875A">④ Super-Resolution RLHF 框架（4.4.4）——Refiner 上的 RLHF</text>
+
+  <rect x="50" y="565" width="180" height="50" rx="4" fill="white" stroke="#00B578"/>
+  <text x="140" y="583" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">LR VAE Latent</text>
+  <text x="140" y="598" text-anchor="middle" font-size="9" fill="#666">低分辨率 latent 作为条件输入</text>
+
+  <line x1="230" y1="590" x2="265" y2="590" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <rect x="270" y="565" width="180" height="50" rx="4" fill="white" stroke="#00B578"/>
+  <text x="360" y="583" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">Diffusion Refiner</text>
+  <text x="360" y="598" text-anchor="middle" font-size="9" fill="#666">生成高分辨率视频（720p/1080p）</text>
+
+  <line x1="450" y1="590" x2="485" y2="590" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <rect x="490" y="565" width="180" height="50" rx="4" fill="white" stroke="#00B578"/>
+  <text x="580" y="583" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">多 RM 评估</text>
+  <text x="580" y="598" text-anchor="middle" font-size="9" fill="#666">三维度 RM 评估 HR 视频</text>
+
+  <line x1="670" y1="590" x2="705" y2="590" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <rect x="710" y="565" width="180" height="50" rx="4" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="800" y="583" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">直接最大化线性组合</text>
+  <text x="800" y="598" text-anchor="middle" font-size="9" fill="#333">Loss = -Σ wᵢ·Rᵢ（论文明确）</text>
+
+  <line x1="890" y1="590" x2="925" y2="590" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <rect x="930" y="565" width="80" height="50" rx="4" fill="#E8F8F0" stroke="#00B578"/>
+  <text x="970" y="585" text-anchor="middle" font-size="9" font-weight="bold" fill="#00875A">加速后</text>
+  <text x="970" y="600" text-anchor="middle" font-size="9" fill="#00875A">Refiner</text>
+
+  <!-- 关键特点 -->
+  <rect x="50" y="625" width="960" height="35" rx="4" fill="white" stroke="#00B578"/>
+  <text x="530" y="642" text-anchor="middle" font-size="9.5" fill="#333">关键特点：直接在<strong>加速后的 Refiner</strong>上做 RLHF → 低 NFE 场景下增强运动质量和视觉保真度，同时保持计算效率</text>
+
+  <!-- 箭头向下 -->
+  <line x1="530" y1="670" x2="530" y2="695" stroke="#666" stroke-width="1.5" marker-end="url(#arrR)"/>
+
+  <!-- ===== 第5层：最终输出 ===== -->
+  <rect x="200" y="700" width="660" height="90" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="530" y="725" text-anchor="middle" font-size="14" font-weight="bold" fill="#C7000B">最终模型：Base Model（480p）+ Refiner（720p/1080p）</text>
+  <text x="530" y="748" text-anchor="middle" font-size="10.5" fill="#333">Base Model 经过 RLHF：图文对齐 + 运动质量 + 美学全面提升</text>
+  <text x="530" y="766" text-anchor="middle" font-size="10.5" fill="#333">Refiner 经过 RLHF：低 NFE 场景下高分辨率视频的运动质量和视觉保真度增强</text>
+  <text x="530" y="784" text-anchor="middle" font-size="10" fill="#666">Reward 曲线（Figure 7）：三个 RM 在 Base 和 Refiner RLHF 过程中均稳定一致上升</text>
+
+  <!-- 左侧标注 -->
+  <text x="15" y="115" font-size="9" fill="#999" transform="rotate(-90, 15, 115)">数据层</text>
+  <text x="15" y="235" font-size="9" fill="#999" transform="rotate(-90, 15, 235)">RM 层</text>
+  <text x="15" y="410" font-size="9" fill="#999" transform="rotate(-90, 15, 410)">Base RLHF</text>
+  <text x="15" y="600" font-size="9" fill="#999" transform="rotate(-90, 15, 600)">SR RLHF</text>
+</svg>
+</div>
+<div class="purpose-box"><strong>流程图解读：</strong>Seedance 1.0 的 RLHF 是一个四层流水线——① 数据层收集 prompt 和多源视频对，做多维标注；② 用标注数据分别训练三个独立的 RM（Foundational VLM / Motion 视频模型 / Aesthetic 图像关键帧模型）；③ Base Model RLHF 模拟推理流程生成 x0，三个 RM 同时评估，直接最大化复合奖励（对比 DPO/PPO/GRPO 证明最优），并做多轮迭代；④ Super-Resolution RLHF 在加速后的 Refiner 上直接做 RLHF，最大化奖励线性组合。最终输出经过 RLHF 对齐的 Base + Refiner 模型。</div>
+
+<h3 id="rlhf-base">5.4 Base Model 反馈学习算法</h3>
+<div class="detail-card">
+  <p><strong>核心方法：</strong></p>
+  <ol>
+    <li>训练时<strong>模拟视频推理流水线</strong>，当 Reward Model 充分评估视频质量时，直接预测 <span class="code-inline">x0</span>（生成的干净视频）</li>
+    <li>优化策略<strong>直接最大化多个 RM 的复合 reward</strong>（直接 reward 最大化，而非基于偏好对比）</li>
+    <li><strong>对比实验：</strong>与 DPO / PPO / GRPO 进行对比实验，证明 Seedance 的 reward 最大化方法是<strong>最高效和最有效的</strong>，全面提升文本-视频对齐、运动质量、美学</li>
+    <li><strong>多轮迭代学习：</strong>在扩散模型和 RM 之间执行多轮迭代学习。此方法提升 RLHF 过程的性能上限，比动态更新 RM 更稳定、更可控</li>
+  </ol>
+  <p><span class="tag tag-l1">L1</span> RLHF 算法和对比实验完整披露</p>
+  <div class="purpose-box"><strong>设计目的：</strong>① 为什么用直接 reward 最大化而非 DPO/PPO/GRPO：论文通过对比实验证明直接最大化在扩散模型上效果最优——DPO 受限于偏好对质量且无法利用连续 reward 信号，PPO/GRPO 训练不稳定且计算成本高（需要价值函数/critic），直接最大化更简单有效且可充分利用三维度连续 reward 信号；② 多轮迭代学习：扩散模型和 RM 之间多轮迭代可提升 RLHF 性能上限，比动态更新 RM 更稳定可控，避免 RM 和生成模型"共同漂移"导致的训练崩溃。</div>
+</div>
+
+<h4>RLHF 优化算法对比示意图（DPO / PPO / GRPO vs 直接 Reward 最大化）</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 340" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arrrlhf" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+  <text x="480" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">扩散模型 RLHF 四种优化算法对比（Seedance 1.0 选择直接 Reward 最大化）</text>
+
+  <!-- DPO -->
+  <rect x="20" y="50" width="210" height="180" rx="8" fill="white" stroke="#999999" stroke-width="1.5"/>
+  <rect x="20" y="50" width="210" height="30" rx="8" fill="#CCCCCC"/>
+  <text x="125" y="70" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">DPO（偏好对优化）</text>
+  <text x="125" y="95" text-anchor="middle" font-size="10" fill="#555">基于偏好对(y_w, y_l)</text>
+  <text x="125" y="112" text-anchor="middle" font-size="10" fill="#555">隐式奖励，无需在线采样</text>
+  <text x="125" y="130" text-anchor="middle" font-size="10" fill="#555">无需Critic网络</text>
+  <text x="125" y="150" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ 受限于偏好对质量</text>
+  <text x="125" y="167" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ 无法利用连续reward</text>
+  <text x="125" y="185" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ 扩散模型上效果非最优</text>
+  <text x="125" y="210" text-anchor="middle" font-size="10" font-weight="bold" fill="#999">Seedance对比：非最优</text>
+
+  <!-- PPO -->
+  <rect x="250" y="50" width="210" height="180" rx="8" fill="white" stroke="#999999" stroke-width="1.5"/>
+  <rect x="250" y="50" width="210" height="30" rx="8" fill="#CCCCCC"/>
+  <text x="355" y="70" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">PPO（Actor-Critic）</text>
+  <text x="355" y="95" text-anchor="middle" font-size="10" fill="#555">优势函数估计A(s,a)</text>
+  <text x="355" y="112" text-anchor="middle" font-size="10" fill="#555">需要Critic价值网络</text>
+  <text x="355" y="130" text-anchor="middle" font-size="10" fill="#555">连续reward可用</text>
+  <text x="355" y="150" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ 训练不稳定</text>
+  <text x="355" y="167" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ Critic增加显存/计算</text>
+  <text x="355" y="185" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ 扩散连续动作空间困难</text>
+  <text x="355" y="210" text-anchor="middle" font-size="10" font-weight="bold" fill="#999">Seedance对比：非最优</text>
+
+  <!-- GRPO -->
+  <rect x="480" y="50" width="210" height="180" rx="8" fill="white" stroke="#999999" stroke-width="1.5"/>
+  <rect x="480" y="50" width="210" height="30" rx="8" fill="#CCCCCC"/>
+  <text x="585" y="70" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">GRPO（组内相对优势）</text>
+  <text x="585" y="95" text-anchor="middle" font-size="10" fill="#555">组内采样，免Critic</text>
+  <text x="585" y="112" text-anchor="middle" font-size="10" fill="#555">相对优势=reward-组均值</text>
+  <text x="585" y="130" text-anchor="middle" font-size="10" fill="#555">省显存，适合大batch</text>
+  <text x="585" y="150" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ 需组内多样样本</text>
+  <text x="585" y="167" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ 对采样策略敏感</text>
+  <text x="585" y="185" text-anchor="middle" font-size="9.5" fill="#C7000B">✗ Flow-GRPO适配流匹配</text>
+  <text x="585" y="210" text-anchor="middle" font-size="10" font-weight="bold" fill="#999">Seedance对比：非最优</text>
+
+  <!-- 直接Reward最大化 (Seedance选择) -->
+  <rect x="710" y="45" width="230" height="190" rx="8" fill="#E6F7F0" stroke="#00B578" stroke-width="2.5"/>
+  <rect x="710" y="45" width="230" height="30" rx="8" fill="#00B578"/>
+  <text x="825" y="65" text-anchor="middle" font-size="12" font-weight="bold" fill="white">直接 Reward 最大化 ✓</text>
+  <text x="825" y="92" text-anchor="middle" font-size="10" fill="#333">模拟推理流水线</text>
+  <text x="825" y="109" text-anchor="middle" font-size="10" fill="#333">RM评估→直接预测x0</text>
+  <text x="825" y="126" text-anchor="middle" font-size="10" fill="#333">最大化复合reward线性组合</text>
+  <text x="825" y="146" text-anchor="middle" font-size="9.5" fill="#00875A">✓ 最简单，无需Critic</text>
+  <text x="825" y="163" text-anchor="middle" font-size="9.5" fill="#00875A">✓ 充分利用多维连续reward</text>
+  <text x="825" y="180" text-anchor="middle" font-size="9.5" fill="#00875A">✓ 多轮迭代稳定可控</text>
+  <text x="825" y="200" text-anchor="middle" font-size="9.5" fill="#00875A">✓ 扩散模型上最高效最有效</text>
+  <text x="825" y="222" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">Seedance选择：最优</text>
+
+  <!-- 底部：复合reward公式 -->
+  <rect x="20" y="250" width="920" height="70" rx="8" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="480" y="275" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">Seedance 复合 Reward 公式（三维度线性组合，直接最大化）</text>
+  <text x="480" y="300" text-anchor="middle" font-size="14" font-family="monospace" fill="#C7000B">R_total = α·R_foundational + β·R_motion + γ·R_aesthetic</text>
+  <text x="480" y="318" text-anchor="middle" font-size="9.5" fill="#777">注：论文有DPO/PPO/GRPO对比结论"most efficient and effective"，有Reward曲线图(Figure 7)，但未给出具体对比数字</text>
+</svg>
+</div>
+
+<h4 style="color:#C7000B; margin-top:20px;">四种 RLHF 优化算法详细拆解</h4>
+
+<!-- DPO -->
+<div class="detail-card" style="background:#FAFAFA; border-left:4px solid #999999;">
+  <h4 style="color:#555555; margin-top:0;">① DPO（Direct Preference Optimization，直接偏好优化）</h4>
+  <p><strong>提出：</strong>Rafailov et al., 2023</p>
+  <p><strong>核心思想：</strong>将 RLHF 转化为<strong>分类问题</strong>，直接用偏好对（chosen/rejected）训练策略模型，<strong>不需要显式 reward model，不需要在线采样</strong>。</p>
+  <p><strong>流程：</strong></p>
+  <ol>
+    <li>收集偏好对数据：同一个 prompt 下，人类偏好的视频 y_w（chosen）和不偏好的视频 y_l（rejected）</li>
+    <li>用偏好对直接训练策略模型 π，最大化 chosen 的对数概率，最小化 rejected 的对数概率</li>
+    <li>引入参考模型 π_ref（通常是 SFT 模型）作为正则，防止策略漂移过大</li>
+  </ol>
+  <p><strong>损失函数：</strong></p>
+  <div style="background:white; padding:10px 16px; border-radius:6px; border:1px solid #DDD; font-family:monospace; font-size:13px; margin:8px 0;">
+    L_DPO = -log σ( β · [log π(y_w|x)/π_ref(y_w|x) - log π(y_l|x)/π_ref(y_l|x)] )
+  </div>
+  <p><strong>优点：</strong>① 简单稳定，训练流程最简洁；② 不需要 reward model，省去 RM 训练成本；③ 不需要在线采样，计算成本最低；④ 不需要 Critic 网络</p>
+  <p><strong>缺点：</strong>① <strong>受限于偏好对质量</strong>——偏好对数量和质量直接决定上限；② <strong>无法利用连续 reward 信号</strong>——只能二分类偏好（好/坏），无法利用"好多少"的连续信息；③ 扩散模型上效果非最优（论文对比实验证明）</p>
+
+  <h4 style="color:#0066B3; margin-top:15px;">偏好对详细举例</h4>
+  <p><strong>标注过程：</strong></p>
+  <div style="background:white; padding:12px 16px; border-radius:6px; border:1px solid #DDD; margin:8px 0; font-size:13px;">
+    <p><strong>Prompt：</strong>"一只金毛犬在阳光下的草地上奔跑，慢动作，电影质感"</p>
+    <p>SFT 模型用此 prompt 生成 4 个视频：</p>
+    <ul>
+      <li><strong>视频A：</strong>金毛犬四肢协调奔跑，阳光透过毛发，背景清晰，电影质感强</li>
+      <li><strong>视频B：</strong>金毛犬在跑，但后腿偶尔畸形（5条腿），画面有闪烁</li>
+      <li><strong>视频C：</strong>金毛犬在走（不是跑），动作缓慢，但画面质量很好</li>
+      <li><strong>视频D：</strong>金毛犬在跑，动作自然，但背景模糊，色彩偏灰</li>
+    </ul>
+    <p>标注者在<strong>"运动质量"</strong>维度下判断：</p>
+    <ul>
+      <li>✅ 最好（chosen）= 视频A（奔跑自然、协调、无伪影）</li>
+      <li>❌ 最差（rejected）= 视频B（畸形问题最严重，运动伪影明显）</li>
+    </ul>
+    <p><strong>偏好对 = (prompt, 视频A, 视频B)</strong></p>
+  </div>
+
+  <p><strong>偏好对数据结构：</strong></p>
+  <div style="background:white; padding:10px 16px; border-radius:6px; border:1px solid #DDD; font-family:monospace; font-size:12px; margin:8px 0;">
+preference_pair = {<br>
+&nbsp;&nbsp;"prompt": "一只金毛犬在阳光下的草地上奔跑...",<br>
+&nbsp;&nbsp;"chosen": 视频A的latent, &nbsp;&nbsp;# 标注者认为最好的<br>
+&nbsp;&nbsp;"rejected": 视频B的latent, &nbsp;# 标注者认为最差的<br>
+&nbsp;&nbsp;"dimension": "运动质量", &nbsp;&nbsp;&nbsp;&nbsp;# 在哪个维度下选的最好/最差<br>
+}
+  </div>
+
+  <p><strong>为什么只选最好和最差（中间的视频C、D不用）？</strong></p>
+  <ul>
+    <li><strong>偏好信号最强：</strong>最好 vs 最差差异最大，loss 梯度更明显，训练更高效</li>
+    <li><strong>标注简单：</strong>标注者只需判断"哪个最好、哪个最差"，不需要给所有视频排序</li>
+    <li><strong>避免模糊偏好：</strong>中间视频之间差异小，标注者难以判断，容易引入标注噪声</li>
+    <li><strong>DPO 只需要一对：</strong>DPO loss 只需要一个 chosen 和一个 rejected，不需要全排序</li>
+  </ul>
+
+  <p><strong>中间视频（C、D）怎么处理？</strong></p>
+  <ul>
+    <li>不直接参与这个偏好对的训练（被丢弃）</li>
+    <li>但可能被用于<strong>其他维度的偏好对</strong>：比如在"美学质量"维度下，最好可能是视频C（画面质量好），最差可能是视频D（背景模糊）</li>
+    <li>同一个 prompt 可以在不同维度下生成多个偏好对，提高数据利用率</li>
+  </ul>
+
+  <div class="purpose-box"><strong>关键约束：最好在其他维度不劣于最差。</strong>Seedance 论文明确要求"ensuring that the best videos are not inferior to the worst ones in other dimensions"。例如在"运动质量"维度下选 chosen=A、rejected=B，但要确保 A 在美学、图文对齐等其他维度上不比 B 差。否则模型可能学到"运动好=美学差"的错误关联。这个约束确保模型学到的是"在其他条件相同的情况下，运动好的更受偏好"，而不是被其他维度的差异干扰。</div>
+</div>
+
+<!-- PPO -->
+<div class="detail-card" style="background:#FAFAFA; border-left:4px solid #999999; margin-top:15px;">
+  <h4 style="color:#555555; margin-top:0;">② PPO（Proximal Policy Optimization，近端策略优化）——详细展开</h4>
+  <p><strong>提出：</strong>Schulman et al., 2017（OpenAI）</p>
+  <p><strong>核心思想：</strong><strong>Actor-Critic 框架</strong>——Actor（策略模型）负责生成动作，Critic（价值网络）负责评估动作好坏。通过<strong>裁剪的目标函数</strong>限制策略更新幅度，保证训练稳定。</p>
+
+  <h4 style="color:#0066B3; margin-top:15px;">PPO 的三个核心组件</h4>
+  <table>
+    <tr><th>组件</th><th>作用</th><th>输入</th><th>输出</th></tr>
+    <tr>
+      <td><strong>Actor（策略模型 π）</strong></td>
+      <td>根据状态生成动作（在扩散模型中，动作 = 去噪步骤的预测）</td>
+      <td>状态 s（带噪 latent + prompt）</td>
+      <td>动作 a（去噪方向）的概率分布</td>
+    </tr>
+    <tr>
+      <td><strong>Critic（价值网络 V）</strong></td>
+      <td>评估状态的好坏，即从当前状态开始的期望累计奖励</td>
+      <td>状态 s</td>
+      <td>状态价值 V(s)（标量）</td>
+    </tr>
+    <tr>
+      <td><strong>Reward Model（RM）</strong></td>
+      <td>评估生成视频的质量，给出连续奖励分数</td>
+      <td>生成的视频 + prompt</td>
+      <td>奖励 r（标量，连续分数）</td>
+    </tr>
+  </table>
+
+  <h4 style="color:#0066B3; margin-top:15px;">关键概念详解</h4>
+
+  <p><strong>① 状态价值 V(s)：</strong>从状态 s 开始，按照当前策略执行，能获得的期望累计奖励。
+  <div style="background:white; padding:8px 14px; border-radius:6px; border:1px solid #DDD; font-family:monospace; font-size:12px; margin:6px 0;">
+    V(s) = E[ r₁ + γr₂ + γ²r₃ + ... | s ]  （γ 是折扣因子，通常 0.99）
+  </div>
+  V(s) 高 = 从这个状态开始，未来能获得高奖励；V(s) 低 = 这个状态不好，未来奖励低。</p>
+
+  <p><strong>② 优势函数 A(s,a)：</strong>在状态 s 下执行动作 a，比"平均水平"好多少。
+  <div style="background:white; padding:8px 14px; border-radius:6px; border:1px solid #DDD; font-family:monospace; font-size:12px; margin:6px 0;">
+    A(s,a) = r + γ·V(s') - V(s)
+  </div>
+  - A > 0：这个动作比平均好，应该增加其概率
+  - A < 0：这个动作比平均差，应该降低其概率
+  - A = 0：这个动作和平均一样，不需要调整</p>
+
+  <p><strong>③ GAE（Generalized Advantage Estimation，广义优势估计）：</strong>实际 PPO 中用 GAE 计算优势，平衡偏差和方差。
+  <div style="background:white; padding:8px 14px; border-radius:6px; border:1px solid #DDD; font-family:monospace; font-size:12px; margin:6px 0;">
+    A_GAE = Σₖ (γλ)ᵏ · δₜ₊ₖ ，其中 δₜ = rₜ + γV(sₜ₊₁) - V(sₜ)
+  </div>
+  λ 是 GAE 参数（通常 0.95），λ=1 是 Monte Carlo（无偏差但高方差），λ=0 是单步 TD（有偏差但低方差）。</p>
+
+  <p><strong>④ 新旧策略概率比 ratio：</strong>当前策略 π_θ 生成动作 a 的概率，相对于旧策略 π_θ_old 的比值。
+  <div style="background:white; padding:8px 14px; border-radius:6px; border:1px solid #DDD; font-family:monospace; font-size:12px; margin:6px 0;">
+    ratio = π_θ(a|s) / π_θ_old(a|s)
+  </div>
+  - ratio = 1：当前策略和旧策略一样
+  - ratio > 1：当前策略比旧策略更可能生成这个动作
+  - ratio < 1：当前策略比旧策略更不可能生成这个动作</p>
+
+  <h4 style="color:#C7000B; margin-top:15px;">PPO 裁剪目标——核心创新</h4>
+  <p>PPO 的损失函数：</p>
+  <div style="background:white; padding:10px 16px; border-radius:6px; border:1px solid #C7000B; font-family:monospace; font-size:13px; margin:8px 0;">
+    L_PPO = E[ min( ratio·A, clip(ratio, 1-ε, 1+ε)·A ) ] - β·KL(π_θ || π_ref)
+  </div>
+
+  <p><strong>裁剪的直觉（为什么需要 clip）：</strong></p>
+  <ul>
+    <li>如果 A > 0（动作好），我们想增加这个动作的概率（ratio 增大）。但如果 ratio 超过 1+ε，就<strong>裁剪</strong>到 1+ε——防止策略更新过大，避免"一步迈太大"导致训练崩溃</li>
+    <li>如果 A < 0（动作差），我们想降低这个动作的概率（ratio 减小）。但如果 ratio 低于 1-ε，就<strong>裁剪</strong>到 1-ε——同样防止更新过大</li>
+    <li><strong>min 的作用</strong>：取 ratio·A 和 clip(ratio)·A 中较小的那个。当 ratio 在 [1-ε, 1+ε] 范围内时，两者相等，正常更新；当 ratio 超出范围时，clip 后的值更小，限制更新幅度</li>
+  </ul>
+
+  <p><strong>ε 的含义：</strong>裁剪范围，通常 0.1 或 0.2。ε=0.2 表示 ratio 允许在 [0.8, 1.2] 范围内自由变化，超出就被裁剪。</p>
+
+  <p><strong>KL 正则项：</strong>-β·KL(π_θ || π_ref)，防止当前策略偏离参考模型（通常是 SFT 模型）太远，保持训练稳定。β 是 KL 惩罚系数。</p>
+
+  <h4 style="color:#0066B3; margin-top:15px;">PPO 完整训练循环</h4>
+  <ol>
+    <li><strong>在线采样：</strong>用当前策略 π_θ 对一批 prompt 生成视频，记录每个状态 s、动作 a、奖励 r（由 RM 评估）</li>
+    <li><strong>计算状态价值：</strong>用 Critic V 评估每个状态的 V(s)</li>
+    <li><strong>计算优势函数：</strong>用 GAE 计算每个 (s,a) 的优势 A(s,a)</li>
+    <li><strong>计算 ratio：</strong>用当前策略 π_θ 和旧策略 π_θ_old 计算每个动作的 ratio</li>
+    <li><strong>计算 PPO 损失：</strong>L = E[min(ratio·A, clip(ratio,1-ε,1+ε)·A)] - β·KL</li>
+    <li><strong>更新 Actor：</strong>梯度下降更新策略模型 π_θ</li>
+    <li><strong>更新 Critic：</strong>用 MSE 损失更新价值网络 V（让 V(s) 更接近实际累计奖励）</li>
+    <li><strong>重复：</strong>回到步骤 1，用更新后的策略继续采样</li>
+  </ol>
+
+  <h4 style="color:#00B578; margin-top:15px;">数值例子</h4>
+  <div style="background:white; padding:12px 16px; border-radius:6px; border:1px solid #DDD; margin:8px 0; font-size:13px;">
+    <p>假设：ε=0.2（裁剪范围 [0.8, 1.2]），A=2.0（这个动作比平均好很多）</p>
+    <p><strong>情况1：ratio=1.1（在范围内）</strong></p>
+    <ul>
+      <li>ratio·A = 1.1 × 2.0 = 2.2</li>
+      <li>clip(ratio)·A = 1.1 × 2.0 = 2.2（未被裁剪）</li>
+      <li>min = 2.2 → 正常更新，增加这个动作的概率</li>
+    </ul>
+    <p><strong>情况2：ratio=1.5（超出范围）</strong></p>
+    <ul>
+      <li>ratio·A = 1.5 × 2.0 = 3.0</li>
+      <li>clip(ratio)·A = 1.2 × 2.0 = 2.4（被裁剪到 1.2）</li>
+      <li>min = 2.4 → 限制更新幅度，防止策略一步迈太大</li>
+    </ul>
+    <p><strong>情况3：A=-1.5（动作差），ratio=0.7（超出下限）</strong></p>
+    <ul>
+      <li>ratio·A = 0.7 × (-1.5) = -1.05</li>
+      <li>clip(ratio)·A = 0.8 × (-1.5) = -1.2（被裁剪到 0.8）</li>
+      <li>min = -1.2 → 限制降低幅度，防止过度降低</li>
+    </ul>
+  </div>
+
+  <h4 style="color:#C7000B; margin-top:15px;">扩散模型适配 PPO 的困难</h4>
+  <ul>
+    <li><strong>连续动作空间：</strong>PPO originally designed for discrete actions（如 LLM 的 token 选择），扩散模型的动作是连续的（latent 空间的去噪方向），概率比 ratio 的计算更复杂</li>
+    <li><strong>多步去噪：</strong>扩散生成需要多步去噪（如 50 步），每一步都是一个动作，PPO 需要处理长序列的信用分配（credit assignment）</li>
+    <li><strong>Critic 成本高：</strong>Critic 通常和 Actor 同规模，扩散模型本身很大，再加一个 Critic 显存翻倍</li>
+    <li><strong>训练不稳定：</strong>Actor-Critic 训练容易震荡，Critic 估计不准会导致优势函数偏差，进而影响 Actor 更新</li>
+    <li><strong>在线采样成本高：</strong>每轮训练都需要用当前策略生成新视频，扩散生成计算成本高</li>
+  </ul>
+
+  <p><strong>优点：</strong>① <strong>可以利用连续 reward 信号</strong>——RM 输出的连续分数可以充分利用；② 理论保证成熟，在 LLM 上广泛验证；③ 适合连续动作空间（扩散模型的 latent 是连续的）</p>
+  <p><strong>缺点：</strong>① <strong>训练不稳定</strong>——Actor-Critic 训练容易震荡；② <strong>需要 Critic 网络</strong>——增加显存和计算成本（Critic 通常和 Actor 同规模）；③ <strong>扩散连续动作空间困难</strong>——PPO originally designed for discrete actions，适配扩散需要额外工作；④ 在线采样成本高</p>
+</div>
+
+<!-- GRPO -->
+<div class="detail-card" style="background:#FAFAFA; border-left:4px solid #999999; margin-top:15px;">
+  <h4 style="color:#555555; margin-top:0;">③ GRPO（Group Relative Policy Optimization，组内相对策略优化）</h4>
+  <p><strong>提出：</strong>DeepSeek，2024（用于 DeepSeekMath / DeepSeek-R1）</p>
+  <p><strong>核心思想：</strong><strong>PPO 的简化版</strong>，去掉 Critic，用<strong>组内采样的 reward 均值作为基线</strong>，计算相对优势。省掉 Critic 网络，降低显存。</p>
+  <p><strong>流程：</strong></p>
+  <ol>
+    <li>训练 reward model（RM）</li>
+    <li>同一个 prompt 下采样<strong>一组（group）视频</strong>（通常 8-16 个），保证组内多样性</li>
+    <li>RM 评估每个视频得到 reward r_i</li>
+    <li>计算组内相对优势：A_i = (r_i - mean(r)) / std(r)——这个视频比组内平均好多少</li>
+    <li>用 PPO 风格的裁剪目标更新策略，但不需要 Critic（用组内均值代替 V(s)）</li>
+  </ol>
+  <p><strong>损失函数：</strong></p>
+  <div style="background:white; padding:10px 16px; border-radius:6px; border:1px solid #DDD; font-family:monospace; font-size:13px; margin:8px 0;">
+    L_GRPO = E[ min( ratio·A_i, clip(ratio, 1-ε, 1+ε)·A_i ) ]，其中 A_i = (r_i - mean(r)) / std(r)
+  </div>
+  <p><strong>优点：</strong>① <strong>省显存</strong>——不需要 Critic 网络，显存占用显著降低；② 适合大 batch 训练；③ 组内相对优势比绝对优势更稳定（消除 RM 整体偏差）；④ 在 LLM（DeepSeek-R1）上效果出色</p>
+  <p><strong>缺点：</strong>① <strong>需要组内多样样本</strong>——同一个 prompt 采样 8-16 个视频，采样成本高；② <strong>对采样策略敏感</strong>——组内样本多样性不足会导致优势估计偏差；③ <strong>Flow-GRPO 需要适配流匹配</strong>——GRPO originally for LLM，适配扩散/流匹配需要额外工作；④ 扩散模型上效果非最优（论文对比实验证明）</p>
+</div>
+
+<!-- 直接Reward最大化 -->
+<div class="detail-card" style="background:#F0FAF6; border-left:4px solid #00B578; margin-top:15px;">
+  <h4 style="color:#00875A; margin-top:0;">④ 直接 Reward 最大化（Seedance 1.0 选择）——最优</h4>
+  <p><strong>核心思想：</strong>不经过偏好对或优势函数，<strong>直接最大化 reward model 的输出</strong>。训练时模拟推理流程，生成视频后用 RM 评估，直接用 reward 作为损失信号。</p>
+  <p><strong>流程：</strong></p>
+  <ol>
+    <li>训练三个维度的 reward model（Foundational/Motion/Aesthetic）</li>
+    <li>训练时<strong>模拟推理流水线</strong>，直接预测 x0（干净视频）</li>
+    <li>三个 RM 同时评估生成的 x0，得到三个奖励分数</li>
+    <li>计算复合奖励：R = w₁·R_found + w₂·R_motion + w₃·R_aesth（线性组合）</li>
+    <li><strong>直接最大化复合奖励</strong>：Loss = -R（可带 KL 正则防止策略漂移）</li>
+    <li><strong>多轮迭代</strong>：模型生成新视频 → RM 评估 → 模型更新 → 再生成，逐步提升上限</li>
+  </ol>
+  <p><strong>损失函数：</strong></p>
+  <div style="background:white; padding:10px 16px; border-radius:6px; border:1px solid #00B578; font-family:monospace; font-size:13px; margin:8px 0;">
+    L = - ( w₁·R_foundational + w₂·R_motion + w₃·R_aesthetic ) + β·KL(π||π_ref)
+  </div>
+  <p><strong>优点：</strong>① <strong>充分利用三维度连续 reward 信号</strong>——不是二分类偏好，而是连续分数，信息更丰富；② <strong>简单直接</strong>——不需要 Critic、不需要偏好对、不需要组内采样；③ <strong>扩散模型上效果最优</strong>（论文对比 DPO/PPO/GRPO 证明）；④ <strong>计算效率高</strong>——省去 Critic 和组内采样的额外成本；⑤ 多轮迭代逐步提升性能上限</p>
+  <p><strong>缺点/风险：</strong>① <strong>需要高质量 reward model</strong>——RM 的偏差直接影响生成质量（reward hacking 风险）；② 可能过拟合到 RM 的偏差；③ 需要仔细平衡三个维度的权重（论文未披露具体权重）</p>
+</div>
+
+<!-- 差异对比表 -->
+<h4 style="color:#C7000B; margin-top:25px;">四种算法核心差异对比</h4>
+<table>
+  <tr><th>对比维度</th><th>DPO</th><th>PPO</th><th>GRPO</th><th>直接 Reward 最大化（Seedance）</th></tr>
+  <tr>
+    <td><strong>是否需要 RM</strong></td>
+    <td>否（隐式奖励）</td>
+    <td>是</td>
+    <td>是</td>
+    <td>是（三个 RM）</td>
+  </tr>
+  <tr>
+    <td><strong>是否需要 Critic</strong></td>
+    <td>否</td>
+    <td>是（价值网络）</td>
+    <td>否（组内均值代替）</td>
+    <td>否</td>
+  </tr>
+  <tr>
+    <td><strong>是否需要在线采样</strong></td>
+    <td>否（离线偏好对）</td>
+    <td>是</td>
+    <td>是（组内采样）</td>
+    <td>是（模拟推理）</td>
+  </tr>
+  <tr>
+    <td><strong>奖励信号类型</strong></td>
+    <td>二分类偏好</td>
+    <td>连续 reward</td>
+    <td>连续 reward（组内相对）</td>
+    <td>连续 reward（三维度复合）</td>
+  </tr>
+  <tr>
+    <td><strong>显存占用</strong></td>
+    <td>最低</td>
+    <td>最高（+Critic）</td>
+    <td>中等（+组内样本）</td>
+    <td>低</td>
+  </tr>
+  <tr>
+    <td><strong>训练稳定性</strong></td>
+    <td>最稳定</td>
+    <td>不稳定（Actor-Critic震荡）</td>
+    <td>中等（依赖采样多样性）</td>
+    <td>稳定（多轮迭代可控）</td>
+  </tr>
+  <tr>
+    <td><strong>扩散模型效果</strong></td>
+    <td>非最优</td>
+    <td>非最优</td>
+    <td>非最优</td>
+    <td><strong>最优（论文证明）</strong></td>
+  </tr>
+  <tr>
+    <td><strong>核心局限</strong></td>
+    <td>偏好对质量瓶颈</td>
+    <td>Critic成本+不稳定</td>
+    <td>采样成本+多样性依赖</td>
+    <td>RM质量依赖（reward hacking）</td>
+  </tr>
+</table>
+
+<div class="purpose-box"><strong>为什么 Seedance 选择直接 Reward 最大化：</strong>扩散模型的动作空间是连续的（latent 空间），DPO 的二分类偏好信号太弱；PPO 需要 Critic 增加显存且训练不稳定；GRPO 需要组内多样采样且适配流匹配有额外成本。直接 Reward 最大化可以充分利用 Seedance 设计的三维度连续 reward 信号（Foundational/Motion/Aesthetic），简单直接且在扩散模型上效果最优，配合多轮迭代逐步提升性能上限。</div>
+
+<h3 id="rlhf-sr">5.5 超分 RLHF 框架（Super-Resolution RLHF）</h3>
+<div class="detail-card">
+  <p>在 Diffusion Refiner 上也应用 RLHF（可视为基于扩散的条件生成模型）：</p>
+  <ul>
+    <li>低分辨率 VAE latent 空间表示作为超分模型的条件输入</li>
+    <li>生成的高分辨率视频由多个 Reward Model 评估</li>
+    <li>直接最大化这些 reward 信号的线性组合</li>
+    <li><strong>关键：</strong>RLHF 直接应用于<strong>加速后的 Refiner 模型</strong>，在低 NFE 场景下有效增强运动质量和视觉保真度，同时保持计算效率</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span></p>
+  <div class="purpose-box"><strong>设计目的：</strong>Base 模型 RLHF 后到 Refiner 超分会引入新的伪影（超分过程可能放大 Base 的缺陷、或引入锐化/纹理伪影），在加速后的 Refiner 上直接做 RLHF 可以针对超分过程的特有缺陷进行优化，确保最终输出（而非中间 480p 输出）的质量对齐人类偏好，同时在低 NFE（少步去噪）场景下有效增强运动质量和视觉保真度。</div>
+
+  <h4 style="color:#C7000B; margin-top:20px;">Base Model RLHF vs Refiner Model RLHF 关系详解</h4>
+
+  <p><strong>核心结论：是两次独立的 RLHF，级联进行，不是只做一次。</strong></p>
+
+  <p><strong>完整流程（级联两阶段）：</strong></p>
+  <div style="background:white; padding:14px 18px; border-radius:8px; border:1px solid #F5C6CB; margin:10px 0; font-size:13px;">
+    <p><strong>阶段1：Base Model RLHF（480p 内容对齐）</strong></p>
+    <p>Base Model 预训练 → CT → SFT → <strong>Base Model RLHF</strong>（直接最大化三维度复合奖励，多轮迭代）</p>
+    <p style="color:#666; margin-top:4px;">↓ 输出：RLHF 后的 Base Model，生成 480p 视频，内容层面（图文对齐/运动/美学）对齐人类偏好</p>
+    <p style="margin-top:12px;"><strong>阶段2：Refiner Model RLHF（720p/1080p 超分对齐）</strong></p>
+    <p>Refiner 预训练（从 Base 初始化）→ 蒸馏加速 → <strong>Refiner RLHF</strong>（条件输入 = RLHF 后 Base 生成的 480p latent，最大化奖励线性组合）</p>
+    <p style="color:#666; margin-top:4px;">↓ 输出：RLHF 后的加速 Refiner Model，将 480p 超分到 720p/1080p，超分过程对齐人类偏好</p>
+  </div>
+
+  <p><strong>两次 RLHF 对比：</strong></p>
+  <table>
+    <tr><th>对比维度</th><th>Base Model RLHF（4.4.3）</th><th>Refiner Model RLHF（4.4.4）</th></tr>
+    <tr>
+      <td><strong>作用对象</strong></td>
+      <td>Base Model（480p 生成）</td>
+      <td>Diffusion Refiner（720p/1080p 超分）</td>
+    </tr>
+    <tr>
+      <td><strong>解决什么问题</strong></td>
+      <td>内容层面对齐：图文对齐、运动质量、美学质量</td>
+      <td>超分过程对齐：超分伪影、锐化过度、纹理失真</td>
+    </tr>
+    <tr>
+      <td><strong>条件输入</strong></td>
+      <td>无（T2V 无条件生成 / I2V 第一帧条件）</td>
+      <td>低分辨率 VAE latent（来自 Base Model 输出）</td>
+    </tr>
+    <tr>
+      <td><strong>奖励最大化方式</strong></td>
+      <td>直接最大化<strong>复合奖励</strong>（composite rewards）</td>
+      <td>直接最大化奖励的<strong>线性组合</strong>（linear combination）</td>
+    </tr>
+    <tr>
+      <td><strong>特殊点</strong></td>
+      <td>多轮迭代学习（扩散模型 ↔ RM）</td>
+      <td>直接在<strong>加速后的 Refiner</strong>（蒸馏后、低 NFE）上做 RLHF</td>
+    </tr>
+    <tr>
+      <td><strong>顺序</strong></td>
+      <td>先做</td>
+      <td>后做（基于 RLHF 后的 Base 输出）</td>
+    </tr>
+  </table>
+
+  <p><strong>为什么要分两次做？</strong></p>
+  <ul>
+    <li><strong>只做 Base RLHF 不够：</strong>Base 对齐了 480p 内容质量，但 Refiner 超分过程可能引入新伪影（放大 Base 缺陷、锐化过度、纹理失真），最终 1080p 输出质量不一定对齐偏好</li>
+    <li><strong>只做 Refiner RLHF 不够：</strong>如果 Base 的内容质量没对齐（图文不对齐、运动不自然），Refiner 再怎么超分也救不回来——超分只能提升分辨率，不能改变内容</li>
+    <li><strong>两次级联最优：</strong>Base RLHF 确保"内容对"，Refiner RLHF 确保"超分好"，两者配合才能让最终 1080p 输出在内容和画质上都对齐人类偏好</li>
+  </ul>
+
+  <div class="purpose-box"><strong>论文未明确说明的部分（推断标注）：</strong>① Refiner RLHF 的条件输入是来自 <strong>RLHF 前还是 RLHF 后</strong>的 Base Model？论文只说"low-resolution VAE latent serve as conditional inputs"，从工程逻辑推断应该是 RLHF 后的 Base 输出，但论文未明确；② 两次 RLHF 的<strong>严格顺序</strong>（是否 Base RLHF 完全完成后才开始 Refiner RLHF）论文未明确；③ Refiner RLHF 时 Base Model 是否<strong>冻结</strong>（推测是冻结的，只训练 Refiner）论文未明确；④ Refiner RLHF 时使用的 RM 和 Base RLHF 是否相同（推测是同一套三维度 RM）论文未明确。</div>
+</div>
+<h2 id="inference-accel">⑥ 推理加速与蒸馏</h2>
+
+<h3 id="inf-dit">6.1 DiT 模型加速：三阶段蒸馏管线</h3>
+
+<div class="detail-card">
+  <h4>阶段一：TSCD 一致性蒸馏（4x 加速）</h4>
+  <p>采用 <span class="code-inline">Trajectory Segmented Consistency Distillation (TSCD)</span> 技术，最初由 <strong>HyperSD</strong> 提出：</p>
+  <ul>
+    <li>将去噪轨迹<strong>划分为多个片段</strong>（segments）</li>
+    <li>在这些片段之间强制预测状态和目标状态的<strong>一致性</strong></li>
+    <li>使学生模型能用更少步数学习扩散过程的精确近似</li>
+    <li><strong>效果：</strong>DiT 模型实现 <strong>4x 加速</strong>，在速度和保真度之间取得强平衡</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<div class="detail-card">
+  <h4>阶段二：Score Distillation（进一步加速）</h4>
+  <p>引入来自 <strong>RayFlow</strong> 的 <span class="code-inline">Score Distillation</span>：</p>
+  <ul>
+    <li>使用<strong>期望噪声一致性</strong>（expected noise consistency）将学生模型预测的噪声（即 score function）与教师对齐</li>
+    <li>支持每个样本的<strong>轨迹级优化</strong>（trajectory-level optimization）</li>
+    <li>即使在低 NFE 下也能实现更稳定、更自适应的采样</li>
+    <li><strong>效果：</strong>有效改善泛化，减少快速生成时的伪影</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<div class="detail-card">
+  <h4>阶段三：多步对抗蒸馏（质量提升）</h4>
+  <p>将来自 <strong>APT</strong> 的对抗训练策略扩展到<strong>多步蒸馏设置</strong>：</p>
+  <ul>
+    <li>纳入<strong>人类偏好数据</strong>进行监督</li>
+    <li>一个学习到的<strong>判别器</strong>（discriminator）引导学生模型朝向人类判断偏好的输出</li>
+    <li><strong>效果：</strong>有效缓解激进加速带来的伪影，增强感知真实感</li>
+  </ul>
+  <p><strong>最终蒸馏效果：</strong>蒸馏模型在四个专家评估维度（prompt 对齐、运动质量、视觉保真度、源图一致性）上与原始模型取得可比结果。</p>
+  <div class="purpose-box"><strong>设计目的：</strong>为什么用三阶段组合而非单一蒸馏方法：① TSCD（HyperSD）解决"大幅加速但保真度下降"问题，通过轨迹分段一致性实现 4x 加速；② Score Distillation（RayFlow）解决"低 NFE 下采样不稳定"问题，通过期望噪声一致性实现轨迹级优化，减少快速生成伪影；③ 多步对抗蒸馏（APT扩展）解决"激进加速带来感知真实感下降"问题，通过人类偏好数据+学习判别器引导输出朝向人类偏好。三阶段递进：先求速度→再求稳定→最后求感知质量，单一方法无法同时兼顾三者。</div>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<h3 id="inf-vae">6.2 VAE 优化：Thin Decoder（2x 加速）</h3>
+<div class="detail-card">
+  <p><strong>问题发现：</strong>在视频生成任务中，从 latent 空间解码到像素空间的计算成本显著。Profile VAE 解码器发现<strong>靠近像素空间的阶段主导延迟</strong>。</p>
+  <p><strong>解决方案：</strong></p>
+  <ol>
+    <li>在这些阶段<strong>收窄通道宽度</strong>（narrowing the channel widths）</li>
+    <li>设计一个<strong>瘦 VAE 解码器</strong>（thin VAE decoder）</li>
+    <li>使用<strong>固定的预训练编码器</strong>重新训练瘦解码器</li>
+  </ol>
+  <p><strong>效果：</strong>实现 <strong>2x 加速</strong>，端到端视频生成的视觉质量无损失。</p>
+  <p><span class="tag tag-l1">L1</span></p>
+</div>
+
+<h3 id="inf-infra">6.3 推理基础设施优化</h3>
+<div class="detail-card">
+  <table>
+    <tr><th>优化技术</th><th>具体做法</th><th>效果</th></tr>
+    <tr>
+      <td><strong>高性能 Kernel</strong></td>
+      <td>对模型核心模块进行大量 kernel fusion</td>
+      <td>推理吞吐量累计提升 <strong>15%</strong></td>
+    </tr>
+    <tr>
+      <td><strong>量化</strong></td>
+      <td>基于 Seedream 技术方案，为 Attention 和 Gemm 操作实现<strong>细粒度混合精度量化</strong></td>
+      <td>性能与效率最优平衡</td>
+    </tr>
+    <tr>
+      <td><strong>稀疏</strong></td>
+      <td>发现 DiT 的稀疏属性在跨模态和模态内呈现<strong>层次化和块化结构</strong>；扩展 AdaSpa 方法，引入精简调优方案最小化搜索阶段开销；集成优化的细粒度 Attention 量化</td>
+      <td>缓解全量化和稀疏对像素级生成质量的影响</td>
+    </tr>
+    <tr>
+      <td><strong>并行策略</strong></td>
+      <td>定制化自适应混合并行策略有效分割长序列；集成 context parallelism 优化通信；引入 <strong>FP8 通信</strong></td>
+      <td>通信开销降至 Ulysses 的 <strong>1/4</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Async Offloading</strong></td>
+      <td>自动化自适应 AsyncOffloading 策略，解决内存受限设备上的大模型部署问题</td>
+      <td>性能下降 <strong>&lt; 2%</strong></td>
+    </tr>
+    <tr>
+      <td><strong>分布式 VAE</strong></td>
+      <td>自适应混合并行策略，同时沿空间和时间维度划分输入数据，为 Conv3D 计算使用高效集合通信</td>
+      <td>提升并行扩展性能</td>
+    </tr>
+    <tr>
+      <td><strong>PE 流水线</strong></td>
+      <td>kernel fusion、量化、并行、continuous batching、prefix caching 等</td>
+      <td>提升 PE 整体吞吐量</td>
+    </tr>
+  </table>
+  <p><span class="tag tag-l1">L1</span> 推理优化技术完整披露</p>
+</div>
+
+<!-- ==================== H. 长视频/可控性/音频 ==================== -->
+<h2 id="long-video">⑦ 长视频 / 可控性 / 音频</h2>
+
+<div class="two-col">
+  <div class="detail-card">
+    <h4>H1 长视频路线</h4>
+    <p>原生支持 <strong>5 秒</strong>视频生成（1080p）。预训练阶段使用 3-12 秒片段训练，Base 模型生成 480p，Refiner 超分到 720p/1080p。</p>
+    <p>未披露更长时长的续写机制。</p>
+    <p><span class="tag tag-l2">L2</span></p>
+  </div>
+
+  <div class="detail-card">
+    <h4>H2 相机控制</h4>
+    <p>通过<strong>密集 caption 中的相机运动描述</strong>实现相机控制。Caption 系统专门描述"camera movements"作为动态特征的一部分。</p>
+    <p>MM-RoPE 和统一任务公式支持自适应相机控制。</p>
+    <p><span class="tag tag-l2">L2</span></p>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="detail-card">
+    <h4>H3 主体一致性</h4>
+    <p>通过<strong>原生多镜头生成</strong>实现跨时空变换的主体一致性（consistent subject representation across temporal-spatial transformations）。</p>
+    <p>MM-RoPE 支持多镜头训练，每个镜头有独立 caption，镜头间按动作时间顺序组织。</p>
+    <p><span class="tag tag-l1">L1</span></p>
+  </div>
+
+  <div class="detail-card">
+    <h4>H4 多镜头叙事</h4>
+    <p><strong>核心差异化能力。</strong>原生支持连贯多镜头叙事，具有稳定的视角转换，同时在时空变换中维持一致的主体表征。</p>
+    <p>架构基础：MM-RoPE 支持交错序列和多镜头训练；解耦时空层支持帧间全局感受野。</p>
+    <p><span class="tag tag-l1">L1</span></p>
+  </div>
+</div>
+
+<div class="detail-card">
+  <h4>H5 局部编辑与延长</h4>
+  <p>通过<strong>统一任务公式</strong>（noisy input + clean/zero-padded frames + binary mask）天然支持条件生成。I2V 任务本身就是以第一帧为条件的生成。</p>
+  <p>未明确披露 inpainting / outpainting / 视频延长等专用编辑接口。</p>
+  <p><span class="tag tag-l3">L3</span> 架构支持但产品接口未披露</p>
+</div>
+
+<div class="detail-card">
+  <h4>H6 音频联合生成</h4>
+  <p><strong>Seedance 1.0 不支持音频生成。</strong>音频是 Seedance 1.5 pro 新增的核心能力（双分支 DiT + 跨模态联合模块）。</p>
+  <p><span class="tag tag-l1">L1</span> 明确不支持</p>
+</div>
+
+<!-- ==================== I. 安全合规 ==================== -->
+<h2 id="safety">⑧ 安全对齐与合规</h2>
+
+<div class="detail-card">
+  <h4>8.1 数据侧合规</h4>
+  <p>数据管线第三阶段<strong>质量与安全过滤</strong>中明确包含：</p>
+  <ul>
+    <li>高级分类器检测并排除——色情、显性暴力、儿童剥削、显性裸露</li>
+    <li>多样性导向数据获取强调"伦理和法律合规来源"（ethically and legally sourced content）</li>
+  </ul>
+  <p>未披露人脸/肖像处理、版权库等细节。</p>
+  <p><span class="tag tag-l1">L1</span> 安全过滤有明确描述</p>
+</div>
+
+<div class="detail-card">
+  <h4>8.2 模型侧/输出侧/监管适配</h4>
+  <p>未披露 guardrail 微调、水印/C2PA 溯源、备案/安全评估流程等细节。</p>
+  <p>已在豆包、即梦、火山引擎部署，推测已完成国内合规要求。</p>
+  <p><span class="tag tag-l4">L4</span></p>
+</div>
+
+<h2 id="evaluation">⑨ 评测体系</h2>
+
+<div class="detail-card">
+  <h4>9.1 外部公开评测：Artificial Analysis Arena</h4>
+  <p>Seedance 1.0 在 <strong>Artificial Analysis Video Arena</strong> 公开榜单上同时登顶 T2V 和 I2V 两个赛道：</p>
+  <table>
+    <tr><th>赛道</th><th>Seedance 1.0 Elo</th><th>第二名</th><th>第二名 Elo</th><th>领先优势</th></tr>
+    <tr><td>Text-to-Video</td><td><strong>1314</strong></td><td>Veo 3 Preview</td><td>1253</td><td>+61</td></tr>
+    <tr><td>Image-to-Video</td><td><strong>1365</strong></td><td>Veo 3 Preview</td><td>1240</td><td><strong>+125</strong></td></tr>
+  </table>
+  <p>关键意义：Seedance 1.0 用<strong>单一统一模型</strong>同时在两个任务上夺冠，而此前的模型通常在一个任务上表现好、另一个任务上偏弱。</p>
+  <p><span class="tag tag-l1">L1</span> 公开榜单可核查</p>
+</div>
+
+<div class="detail-card">
+  <h4>9.2 内部评测：SeedVideoBench-1.0</h4>
+  <p>字节自研<strong>SeedVideoBench-1.0</strong> 综合评测基准：</p>
+  <ul>
+    <li><strong>规模</strong>：T2V 300 条 prompt + I2V 300 条 prompt</li>
+    <li><strong>评测标准制定</strong>：与<strong>电影导演专家</strong>合作共同开发评测维度和标准</li>
+    <li><strong>评测方式</strong>：详细的人工专家评测，使用 <span class="code-inline">GSB（Good-Same-Bad）</span> 指标进行对比分析</li>
+    <li><strong>评测维度</strong>：与电影导演合作制定四大维度，每维度含细分子项：
+      <ul>
+        <li><strong>Motion Quality（运动质量）</strong>：结构准确性（structural accuracy）、运动合理性（motion plausibility）、运动稳定性（motion stability）、运动生动性（motion vividness）</li>
+        <li><strong>Prompt Following（指令遵循）</strong>：动作响应（action responsiveness）、主体描述保真度（subject description fidelity）、风格一致性（stylistic conformity）、辅助实体融入（incorporation of auxiliary entities）、运动时序对齐（temporal alignment of motion）、相机行为（camera behavior）、环境描绘准确性（environmental depiction accuracy）</li>
+        <li><strong>Aesthetic Quality（美学质量）</strong>：视觉纹理（visual texture）、AI 感可感知度（perceptibility of AI sense）、材质细节保真度（material detail fidelity）、美学意图的艺术表达（artistic expression of aesthetic intent）</li>
+        <li><strong>Preservation（源图一致性，仅 I2V）</strong>：主体一致性（subject consistency）、风格一致性（stylistic coherence）、材质保真度（material fidelity）、视觉内容对齐（visual content alignment）、色彩光照一致性（consistency in color and lighting）</li>
+      </ul>
+    </li>
+    <li><strong>Prompt 分类体系</strong>：Subject（主体）、Subject Description（主体描述）、Action（动作）、Action Description（动作描述）、Camera（相机）、Aesthetic description（美学描述），T2V 和 I2V 各 300 条 prompt 在上述类别中均匀分布</li>
+    <li><strong>应用场景覆盖</strong>：特效（special effects）、电商（e-commerce）、专业生成内容 PGC（professional-generated content）</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span> 评测基准设计和方法有详细描述</p>
+</div>
+
+<div class="detail-card">
+  <h4>9.3 可信度核查：可复现性能数据</h4>
+  <ul>
+    <li><strong>推理性能</strong>：5秒 1080p 视频在 NVIDIA L20 上仅需 41.4 秒（API 端到端）</li>
+    <li><strong>加速比</strong>：~10x 端到端推理加速（相比未加速的 Base 模型）</li>
+    <li><strong>外部榜单</strong>：Artificial Analysis 双榜第一，Elo 分数公开可查</li>
+  </ul>
+  <p><span class="tag tag-l1">L1</span> 性能数据可核查</p>
+</div>
+
+<!-- ==================== C. 数据管线（核心：SVG流程图） ==================== -->
+
+
+<h2 id="innovation-check">⑩ 创新点核查表（含消融实验状态 + 通用/特有标注）</h2>
+
+<table>
+  <tr><th style="width:16%">自称创新</th><th style="width:7%">类型</th><th style="width:9%">通用/特有</th><th style="width:14%">消融实验状态</th><th style="width:19%">前作检查</th><th style="width:9%">第三方验证</th><th>判定</th></tr>
+  <tr>
+    <td><strong>数据管线五步法</strong>（镜头分割→覆盖修正→质量安全过滤→语义去重→分布重平衡）+ 密集Caption系统（Tarsier2动态+静态特征）</td>
+    <td>新数据方法</td>
+    <td><span class="tag tag-spec">特有</span>五步法组合；<span class="tag tag-gen">通用</span>各单步</td>
+    <td>❌ 论文未提供消融<br>无各步骤增量贡献数据<br><span class="tag tag-l4">L4</span></td>
+    <td>结构化Caption在Wan/HunyuanVideo中已有；但Seedance的"动态+静态"密集Caption分类体系和Tarsier2训练方案更系统；五步法策展为组合创新</td>
+    <td>Artificial Analysis双榜第一间接验证数据质量</td>
+    <td><span class="tag tag-l2">L2</span> 方向正确，系统设计有差异化，无消融但有外部榜单验证</td>
+  </tr>
+  <tr>
+    <td><strong>解耦时空层DiT + MMDiT</strong>（空间层多模态自注意力+时间层仅视觉注意力，文本token仅参与空间层）</td>
+    <td>新架构</td>
+    <td><span class="tag tag-gen">通用</span>MMDiT(SD3)；<span class="tag tag-spec">特有</span>解耦时空层组合</td>
+    <td>❌ 论文未提供数值消融<br>MMDiT来自SD3通用方案；解耦时空层是设计选择但无消融对比<br><span class="tag tag-l4">L4</span></td>
+    <td>解耦时空层在其他模型（如CogVideoX）中已有；MMDiT来自SD3/FLUX；但"空间层多模态+时间层仅视觉+文本仅空间层"的组合较新颖</td>
+    <td>产品端可验证T2V/I2V联合能力</td>
+    <td><span class="tag tag-l2">L2</span> 各组件非独创，组合实现T2V/I2V联合是差异化点，无数值消融</td>
+  </tr>
+  <tr>
+    <td><strong>MM-RoPE + Multishot多镜头</strong>（多模态位置编码，支持多镜头token序列原生拼接）</td>
+    <td>新架构+新能力</td>
+    <td><span class="tag tag-spec">特有</span>MM-RoPE设计；<span class="tag tag-gen">通用</span>RoPE基础</td>
+    <td>❌ 论文未提供数值消融<br>但有多镜头定性对比（Figure 14 vs Kling/Veo）<br><span class="tag tag-l2">L2</span></td>
+    <td>RoPE来自LLaMA；MM-RoPE参考Seaweed/LCT；Multishot多镜头原生支持为Seedance特有，其他模型需后处理拼接</td>
+    <td>产品端（即梦）可验证多镜头能力；Figure 14定性对比</td>
+    <td><span class="tag tag-l2">L2</span> MM-RoPE有技术深度，多镜头原生支持是差异化点，有定性对比但无数值消融</td>
+  </tr>
+  <tr>
+    <td><strong>统一任务公式</strong>（T2I/T2V/I2V单一模型统一支持，I2V通过条件注入实现）</td>
+    <td>新训练技巧</td>
+    <td><span class="tag tag-spec">特有</span>三任务统一</td>
+    <td>❌ 论文未提供消融<br>无单任务vs多任务对比数据<br><span class="tag tag-l4">L4</span></td>
+    <td>多任务统一在Sora等模型中也有提及；但Seedance明确给出了统一公式和I2V条件注入方式</td>
+    <td>Artificial Analysis T2V+I2V双榜第一间接验证</td>
+    <td><span class="tag tag-l2">L2</span> 统一任务是趋势，Seedance有明确公式，无消融但双榜第一验证有效性</td>
+  </tr>
+  <tr>
+    <td><strong>Diffusion Refiner级联超分</strong>（480p Base → 720/1080p Refiner，级联扩散超分）</td>
+    <td>新架构</td>
+    <td><span class="tag tag-gen">通用</span>级联超分；<span class="tag tag-spec">特有</span>视频级联+RLHF</td>
+    <td>⚠️ 有定性对比无数值消融<br>Figure 8：480p vs 1080p+SR vs 1080p+SR+RLHF<br><span class="tag tag-l2">L2</span></td>
+    <td>级联超分在图像生成（SDXL Refiner）中已有；视频级联超分较少见；在Refiner上做RLHF为Seedance特有</td>
+    <td>Figure 8定性对比可核查</td>
+    <td><span class="tag tag-l2">L2</span> 级联超分为通用方案，视频适配+RLHF有差异化，有定性对比但无数值消融</td>
+  </tr>
+  <tr>
+    <td><strong>三维度RM + 直接reward最大化</strong>（Foundational VLM架构+Motion专用+Aesthetic关键帧；对比DPO/PPO/GRPO证明最优）</td>
+    <td>新训练技巧</td>
+    <td><span class="tag tag-spec">特有</span>三维度RM设计；<span class="tag tag-gen">通用</span>RLHF框架</td>
+    <td>✅ 有算法对比+Reward曲线<br>论文明确："demonstrate that our reward maximization approach is the most efficient and effective"<br>有DPO/PPO/GRPO对比结论（无具体数字）<br>有Reward曲线图（Figure 7）<br><span class="tag tag-l1">L1</span></td>
+    <td>RLHF在视频生成中是趋势；三维度reward设计（VLM架构+运动专用+关键帧美学）有明确技术细节；直接reward最大化对比DPO/PPO/GRPO证明最优</td>
+    <td>Reward曲线（Figure 7）公开可查；算法对比结论可核查</td>
+    <td><span class="tag tag-l1">L1</span> 三维度RM设计和算法对比有技术深度，Reward曲线可核查，有对比结论但缺具体数字</td>
+  </tr>
+  <tr>
+    <td><strong>三阶段蒸馏推理加速</strong>（TSCD 4×→Score Distillation→多步对抗蒸馏+人类偏好）+ VAE thin decoder + 系统优化</td>
+    <td>工程优化</td>
+    <td><span class="tag tag-gen">通用</span>各蒸馏方法；<span class="tag tag-spec">特有</span>三阶段组合+VAE瘦身</td>
+    <td>✅ 有质量验证结论<br>"comparable results to the original model across four expert-evaluated dimensions"<br>无具体分数数字<br><span class="tag tag-l2">L2</span></td>
+    <td>TSCD来自HyperSD，Score Distillation来自RayFlow，对抗蒸馏扩展自APT；各组件非独创，但三阶段组合蒸馏管线和VAE thin decoder有工程创新</td>
+    <td><span class="highlight">可核查</span>：L20上5s 1080p需41.4s；四维度专家评估结论</td>
+    <td><span class="tag tag-l1">L1</span> 性能数据可核查，蒸馏管线有技术细节，四维度评估证明无质量损失，缺具体分数</td>
+  </tr>
+</table>
+
+<div class="conclusion">
+  <h3 id="innovation-summary">创新点核查总结论</h3>
+  <p><strong>Seedance 1.0 的核心差异化在于"解耦时空层+MMDiT+MM-RoPE的架构组合"和"三维度RM+直接reward最大化的RLHF方案"</strong>，这两点有明确的技术细节和一定的实验支撑（Reward曲线、算法对比结论）。其余创新点（数据管线、统一任务、级联超分、蒸馏加速）多为通用方法的组合创新，有定性对比或性能数据但缺少数值消融。</p>
+  <p><strong>消融实验整体情况：</strong>7个核心创新点中，仅1个（三维度RM+直接reward最大化）有明确的算法对比实验和Reward曲线，1个（级联超分）有定性对比图，1个（蒸馏加速）有质量验证结论，其余4个完全无数值消融。论文的消融实验覆盖不足，无法精确判断各组件的增量贡献。</p>
+  <p><strong>对 V0.1 方案的启示：</strong>① 解耦时空层+MMDiT是经过验证的高效架构组合；② 直接reward最大化在视频生成RLHF中优于DPO/PPO/GRPO；③ 三阶段蒸馏管线是工程落地的可行方案；④ 多镜头原生支持需要MM-RoPE类位置编码设计。</p>
+</div>
+
+<!-- ==================== 总结 ==================== -->
+
+
+<div class="conclusion">
+  <h3 id="v01-revision">⑪ 对 V0.1 从零训练方案的修订建议</h3>
+  <p><strong>对我们最有价值的五条可复用技术：</strong></p>
+  <ol>
+    <li><strong>数据管线五步法</strong>（镜头分割→覆盖修正→质量安全过滤→语义去重→分布重平衡）+ 密集 caption 系统（Tarsier2，动态+静态特征分类），可直接回填 V0.1 方案 C 节</li>
+    <li><strong>解耦时空层 + MMDiT + MM-RoPE 架构</strong>，空间层多模态自注意力（双权重）+ 时间层仅视觉注意力（窗口划分），文本 token 仅参与空间层——这是实现 T2V/I2V 联合和原生多镜头的关键，可回填 V0.1 方案 D 节</li>
+    <li><strong>四阶段渐进式训练课程</strong>（256px T2I → 256px 联合 12fps → 640px → 24fps）+ CT 阶段 I2V 20%→40% + 双 caption 设计（长 caption + 短 caption 仅运动），可回填 V0.1 方案 E 节</li>
+    <li><strong>三维度 Reward Model</strong>（Foundational VLM架构 + Motion 专用 + Aesthetic 关键帧输入）+ 直接 reward 最大化（对比 DPO/PPO/GRPO 最优）+ 多轮迭代学习，可回填 V0.1 方案 F 节</li>
+    <li><strong>三阶段蒸馏管线</strong>（TSCD 4x → Score Distillation → 多步对抗蒸馏+人类偏好）+ VAE thin decoder 2x 加速，可回填 V0.1 方案 G 节</li>
+  </ol>
+  <p><strong>SFT 模型合并技巧</strong>（在不同子集上训练独立模型再合并）和<strong>超分 RLHF</strong>（在加速后的 Refiner 上直接做 RLHF）也是值得跟进的工程技巧。</p>
+</div>
+
+<div class="footer">
+  <p>调研时间：2026-09-07 ｜ 调研标准：《视频生成大模型-技术报告调研标准 V1.0》（深度版） ｜ 论文来源：arXiv:2506.09113（HTML 全文精读）</p>
+  <p>披露等级说明：L1 公开+消融 ｜ L2 公开口径 ｜ L3 结构暗示 ｜ L4 完全保密 ｜ L5 第三方</p>
+  <p>本报告基于论文 HTML 全文（33928 tokens）深度精读，所有技术细节均来自论文原文，非摘要推断。</p>
+</div>
+
+</body>
+</html>

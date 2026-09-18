@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance 1.5 pro 深度技术调研报告</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; padding: 30px 20px; background: #FAFAFA; color: #333333; line-height: 1.75; }
+  h1 { color: #333333; border-bottom: 3px solid #C7000B; padding-bottom: 12px; font-size: 1.8em; }
+  h2 { color: #C7000B; margin-top: 40px; border-left: 5px solid #C7000B; padding-left: 14px; background: linear-gradient(90deg, #FDE8EA 0%, transparent 100%); padding-top: 8px; padding-bottom: 8px; font-size: 1.4em; }
+  h3 { color: #333333; margin-top: 26px; font-size: 1.15em; border-bottom: 1px dashed #F5C6CB; padding-bottom: 4px; }
+  h4 { color: #0066B3; margin-top: 18px; font-size: 1.05em; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-radius: 6px; overflow: hidden; }
+  th { background: #C7000B; color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 0.92em; }
+  td { padding: 10px 14px; border-bottom: 1px solid #EEEEEE; vertical-align: top; font-size: 0.93em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover { background: #FFF0F0; }
+  .meta-box { background: #FDE8EA; border-radius: 10px; padding: 20px 26px; margin: 20px 0; border-left: 4px solid #C7000B; }
+  .meta-box p { margin: 6px 0; }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 0.82em; font-weight: 700; margin-right: 5px; white-space: nowrap; }
+  .tag-l1 { background: #E6F7F0; color: #00875A; }
+  .tag-l2 { background: #FFF8E6; color: #B8860B; }
+  .tag-l3 { background: #FFF8F0; color: #CC5500; }
+  .tag-l4 { background: #FDE8EA; color: #C7000B; }
+  .tag-gen { background: #E8F0FE; color: #1A56DB; }
+  .tag-spec { background: #FFF0F0; color: #C7000B; }
+  .highlight { background: #FFF0F0; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .code-inline { background: #F5F5F5; padding: 2px 7px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.88em; color: #C7000B; }
+  .conclusion { background: #E6F7F0; border-left: 5px solid #00B578; padding: 18px 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+  .conclusion h3 { margin-top: 0; color: #00875A; border: none; }
+  .svg-container { background: white; border-radius: 8px; padding: 20px; margin: 18px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; overflow-x: auto; }
+  .svg-container svg { max-width: 100%; height: auto; }
+  .detail-card { background: white; border-radius: 8px; padding: 16px 20px; margin: 12px 0; border-left: 3px solid #0066B3; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .detail-card h4 { margin-top: 0; color: #C7000B; }
+  .purpose-box { background: #FFF8F0; border-left: 3px solid #FF6B00; padding: 10px 16px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.93em; }
+  .purpose-box strong { color: #CC5500; }
+  .overview-box { background: linear-gradient(135deg, #FDE8EA 0%, #FFF5F5 100%); border-radius: 12px; padding: 24px 28px; margin: 20px 0; border: 2px solid #C7000B; }
+  .overview-box h3 { margin-top: 0; color: #333333; border: none; }
+  .innovation-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .innovation-quick .item { background: white; border-radius: 8px; padding: 14px 16px; border-left: 3px solid #FF6B00; }
+  .innovation-quick .item strong { color: #CC5500; display: block; margin-bottom: 4px; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; color: #999999; font-size: 0.88em; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .toc-container li { margin-bottom: 6px; break-inside: avoid; }
+  .toc-h2 { font-weight: 600; font-size: 0.95em; margin-top: 8px !important; }
+  .toc-h2 a { color: #C7000B; text-decoration: none; }
+  .toc-h2 a:hover { text-decoration: underline; }
+  .toc-h3 { padding-left: 16px; font-size: 0.88em; }
+  .toc-h3 a { color: #555555; text-decoration: none; }
+  .toc-h3 a:hover { color: #0066B3; text-decoration: underline; }
+  html { scroll-behavior: smooth; }
+  @media (max-width: 768px) { .two-col, .innovation-quick { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Seedance 1.5 pro 深度技术调研报告</h1>
+
+<div class="meta-box">
+  <p><strong>论文标题：</strong>Seedance 1.5 pro: A Native Audio-Visual Joint Generation Foundation Model</p>
+  <p><strong>厂商：</strong>字节跳动 Seed 团队 ｜ <strong>模型 ID：</strong>Doubao-Seedance-1.5-pro</p>
+  <p><strong>发布时间：</strong>2025年12月（arXiv v1） ｜ <strong>arXiv：</strong><a href="https://arxiv.org/abs/2512.13507" target="_blank">2512.13507</a></p>
+  <p><strong>部署平台：</strong>豆包、即梦、火山引擎 ｜ <strong>调研标准：</strong>《技术报告调研标准 V1.0》深度版</p>
+  <p><strong>论文形态：</strong>Model Card / Evaluation Report（11页），技术架构细节披露有限，大量标注 L4</p>
+  <p><strong>核心性能：</strong>端到端推理加速 <span class="highlight">&gt;10×</span>；RLHF 训练加速 <span class="highlight">~3×</span>；中文语音生成超越 Veo 3.1；唇音同步超越 Veo 3.1 / Kling 2.6</p>
+  <p><strong>报告结构：</strong>① 总览 → ② 数据管线 → ③ 模型结构 → ④ 训练整体 → ⑤ 后训练RLHF → ⑥ 推理加速 → ⑦ 长视频/可控性/音频 → ⑧ 安全合规 → ⑨ 评测体系 → ⑩ 创新点核查</p>
+</div>
+
+<!-- 目录 -->
+<div class="toc-container" style="background: linear-gradient(135deg, #FDE8EA 0%, #F0F7FF 100%); border-radius: 12px; padding: 24px 30px; margin: 25px 0; border-left: 5px solid #C7000B; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+  <h2 style="color: #C7000B; margin-top: 0; margin-bottom: 16px; font-size: 1.3em; border: none; background: none; padding: 0;">📑 目录导航</h2>
+  <ul style="list-style: none; padding-left: 0; margin: 0; columns: 2; column-gap: 30px;">
+    <li class="toc-h2"><a href="#overview">① 文章大体工作与创新点总览</a></li>
+    <li class="toc-h3"><a href="#overview-oneline">一句话定位</a></li>
+    <li class="toc-h3"><a href="#overview-roadmap">整体技术路线一图流</a></li>
+    <li class="toc-h3"><a href="#overview-innovations">核心创新点速览</a></li>
+    <li class="toc-h3"><a href="#overview-performance">关键性能数据（可核查）</a></li>
+    <li class="toc-h2"><a href="#data-pipeline">② 数据管线深度拆解</a></li>
+    <li class="toc-h3"><a href="#data-framework">2.1 音视频联合数据框架</a></li>
+    <li class="toc-h3"><a href="#data-curation">2.2 多阶段策展管线（继承+扩展）</a></li>
+    <li class="toc-h3"><a href="#data-captioning">2.3 音视频双模态 Captioning 系统</a></li>
+    <li class="toc-h3"><a href="#data-infra">2.4 工程基础设施</a></li>
+    <li class="toc-h2"><a href="#model-arch">③ 模型结构深度拆解</a></li>
+    <li class="toc-h3"><a href="#model-vae">3.1 VAE：视觉+音频双编码器</a></li>
+    <li class="toc-h3"><a href="#model-dit">3.2 双分支 MMDiT：音视频联合生成架构</a></li>
+    <li class="toc-h3"><a href="#model-crossmodal">3.3 跨模态联合模块（Cross-Modal Joint）</a></li>
+    <li class="toc-h3"><a href="#model-unified">3.4 统一多任务公式（T2VA/I2VA/T2V/I2V）</a></li>
+    <li class="toc-h3"><a href="#model-refiner">3.5 Diffusion Refiner 与 PE 系统</a></li>
+    <li class="toc-h2"><a href="#training-overall">④ 训练整体情况深度拆解</a></li>
+    <li class="toc-h3"><a href="#train-pretrain">4.1 多任务预训练（混合模态）</a></li>
+    <li class="toc-h3"><a href="#train-sft">4.2 SFT 监督微调</a></li>
+    <li class="toc-h3"><a href="#train-infra">4.3 训练基础设施</a></li>
+    <li class="toc-h2"><a href="#rlhf-overall">⑤ 后训练过程深度拆解（音频感知 RLHF）</a></li>
+    <li class="toc-h3"><a href="#rlhf-data">5.1 反馈数据基础设施</a></li>
+    <li class="toc-h3"><a href="#rlhf-rm">5.2 多维 Reward Model 设计（含音频维度）</a></li>
+    <li class="toc-h3"><a href="#rlhf-flowchart">5.3 音频感知 RLHF 完整流程图</a></li>
+    <li class="toc-h3"><a href="#rlhf-algo">5.4 优化算法：四种 RLHF 算法对比</a></li>
+    <li class="toc-h3"><a href="#rlhf-infra">5.5 RLHF 基础设施优化（~3× 训练加速）</a></li>
+    <li class="toc-h2"><a href="#inference-accel">⑥ 推理加速与蒸馏</a></li>
+    <li class="toc-h3"><a href="#inf-distill">6.1 多阶段蒸馏框架</a></li>
+    <li class="toc-h3"><a href="#inf-infra">6.2 推理基础设施优化（量化+并行）</a></li>
+    <li class="toc-h2"><a href="#long-video">⑦ 长视频 / 可控性 / 音频</a></li>
+    <li class="toc-h3"><a href="#lv-lipsync">7.1 多语言方言唇形同步</a></li>
+    <li class="toc-h3"><a href="#lv-camera">7.2 电影级相机控制</a></li>
+    <li class="toc-h3"><a href="#lv-narrative">7.3 语义理解与叙事连贯性</a></li>
+    <li class="toc-h2"><a href="#safety">⑧ 安全对齐与合规</a></li>
+    <li class="toc-h2"><a href="#evaluation">⑨ 评测体系</a></li>
+    <li class="toc-h3"><a href="#eval-bench">9.1 SeedVideoBench 1.5</a></li>
+    <li class="toc-h3"><a href="#eval-video">9.2 视频评测指标</a></li>
+    <li class="toc-h3"><a href="#eval-audio">9.3 音频评测指标</a></li>
+    <li class="toc-h3"><a href="#eval-results">9.4 人类评测结果与对比</a></li>
+    <li class="toc-h2"><a href="#innovation-check">⑩ 创新点核查表（含消融实验状态 + 通用/特有标注）</a></li>
+  </ul>
+</div>
+
+<!-- ① 总览 -->
+<h2 id="overview">① 文章大体工作与创新点总览</h2>
+
+<div class="overview-box">
+  <h3 id="overview-oneline">一句话定位</h3>
+  <p>Seedance 1.5 pro 是字节跳动 Seed 团队推出的<strong>原生音视频联合生成基础模型</strong>，基于双分支 Diffusion Transformer（MMDiT）架构，通过跨模态联合模块实现视觉与音频流的深度交互与精确时间同步，原生支持 T2VA / I2VA / T2V / I2V 四大任务，在多语言方言唇形同步、电影级相机控制和叙事连贯性上显著超越前代，端到端推理加速超过 10×。</p>
+</div>
+
+<h3 id="overview-roadmap">整体技术路线一图流</h3>
+<div class="svg-container">
+<svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs><marker id="arrover" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555555"/></marker></defs>
+  <text x="500" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">Seedance 1.5 pro 整体技术路线总览</text>
+  <rect x="20" y="50" width="225" height="130" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="132" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">① 音视频联合数据框架</text>
+  <text x="132" y="95" text-anchor="middle" font-size="10" fill="#555555">多阶段策展（继承1.0五步法）</text>
+  <text x="132" y="110" text-anchor="middle" font-size="10" fill="#555555">+ 新增音频过滤/音视频一致性</text>
+  <text x="132" y="128" text-anchor="middle" font-size="10" fill="#555555">音视频双模态Caption系统</text>
+  <text x="132" y="143" text-anchor="middle" font-size="10" fill="#555555">课程式数据调度</text>
+  <text x="132" y="163" text-anchor="middle" font-size="9" fill="#999999">优先：AV一致性+运动表达</text>
+  <text x="132" y="176" text-anchor="middle" font-size="9" fill="#999999">大规模多模态数据处理infra</text>
+  <line x1="247" y1="115" x2="273" y2="115" stroke="#C7000B" stroke-width="2" marker-end="url(#arrover)"/>
+  <rect x="275" y="50" width="225" height="130" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="387" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">② 双分支MMDiT架构</text>
+  <text x="387" y="95" text-anchor="middle" font-size="10" fill="#555555">视觉分支 + 音频分支</text>
+  <text x="387" y="110" text-anchor="middle" font-size="10" fill="#555555">跨模态联合模块(Cross-Modal)</text>
+  <text x="387" y="128" text-anchor="middle" font-size="10" fill="#555555">深度跨模态交互</text>
+  <text x="387" y="143" text-anchor="middle" font-size="10" fill="#555555">精确时间同步+语义一致性</text>
+  <text x="387" y="163" text-anchor="middle" font-size="9" fill="#999999">统一任务：T2VA/I2VA/T2V/I2V</text>
+  <text x="387" y="176" text-anchor="middle" font-size="9" fill="#999999">多任务预训练(混合模态数据)</text>
+  <line x1="502" y1="115" x2="528" y2="115" stroke="#00B578" stroke-width="2" marker-end="url(#arrover)"/>
+  <rect x="530" y="50" width="225" height="130" rx="10" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="642" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">③ 精细Post-Training</text>
+  <text x="642" y="95" text-anchor="middle" font-size="10" fill="#555555">SFT：高质量音视频数据集</text>
+  <text x="642" y="110" text-anchor="middle" font-size="10" fill="#555555">音频感知RLHF（多维RM）</text>
+  <text x="642" y="128" text-anchor="middle" font-size="10" fill="#555555">含音频维度reward</text>
+  <text x="642" y="143" text-anchor="middle" font-size="10" fill="#555555">提升运动/美学/音频保真</text>
+  <text x="642" y="163" text-anchor="middle" font-size="9" fill="#999999">RLHF infra优化 ~3×训练加速</text>
+  <text x="642" y="176" text-anchor="middle" font-size="9" fill="#999999">引用Flow-GRPO/DanceGRPO/RewardDance</text>
+  <line x1="757" y1="115" x2="783" y2="115" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrover)"/>
+  <rect x="785" y="50" width="195" height="130" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="882" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B0000">④ 多阶段蒸馏加速</text>
+  <text x="882" y="95" text-anchor="middle" font-size="10" fill="#555555">HyperSD(TSCD)</text>
+  <text x="882" y="110" text-anchor="middle" font-size="10" fill="#555555">+ Mean Flows</text>
+  <text x="882" y="128" text-anchor="middle" font-size="10" fill="#555555">+ RayFlow(Score Distillation)</text>
+  <text x="882" y="143" text-anchor="middle" font-size="10" fill="#555555">量化+并行推理优化</text>
+  <text x="882" y="163" text-anchor="middle" font-size="9" fill="#999999">端到端 &gt;10× 加速</text>
+  <text x="882" y="176" text-anchor="middle" font-size="9" fill="#999999">保持模型性能</text>
+  <rect x="20" y="205" width="960" height="155" rx="10" fill="#FAFAFA" stroke="#CCCCCC" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="500" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">应用能力层（产品差异化）</text>
+  <rect x="45" y="242" width="210" height="100" rx="8" fill="white" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="150" y="265" text-anchor="middle" font-size="11" font-weight="bold" fill="#0066B3">多语言方言唇形同步</text>
+  <text x="150" y="285" text-anchor="middle" font-size="9.5" fill="#555555">四川话/台湾国语/粤语/上海话</text>
+  <text x="150" y="302" text-anchor="middle" font-size="9.5" fill="#555555">唇形+语调+表演节奏对齐</text>
+  <text x="150" y="320" text-anchor="middle" font-size="9" fill="#00875A">超越Veo 3.1 / Kling 2.6</text>
+  <text x="150" y="335" text-anchor="middle" font-size="9" fill="#999999">喜剧/动画/戏曲场景</text>
+  <rect x="275" y="242" width="210" height="100" rx="8" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="380" y="265" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">电影级相机控制</text>
+  <text x="380" y="285" text-anchor="middle" font-size="9.5" fill="#555555">Dolly Zoom(希区柯克变焦)</text>
+  <text x="380" y="302" text-anchor="middle" font-size="9.5" fill="#555555">连续长镜头/轨道/弧形运镜</text>
+  <text x="380" y="320" text-anchor="middle" font-size="9.5" fill="#555555">电影级场景转场+专业调色</text>
+  <text x="380" y="335" text-anchor="middle" font-size="9" fill="#999999">增强动态张力</text>
+  <rect x="505" y="242" width="210" height="100" rx="8" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="610" y="265" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">语义理解与叙事连贯</text>
+  <text x="610" y="285" text-anchor="middle" font-size="9.5" fill="#555555">精确分析叙事上下文</text>
+  <text x="610" y="302" text-anchor="middle" font-size="9.5" fill="#555555">音视频片段整体叙事协调</text>
+  <text x="610" y="320" text-anchor="middle" font-size="9.5" fill="#555555">自主引入符合类型的新主体</text>
+  <text x="610" y="335" text-anchor="middle" font-size="9" fill="#999999">专业级内容创作支撑</text>
+  <rect x="735" y="242" width="225" height="100" rx="8" fill="white" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="847" y="265" text-anchor="middle" font-size="11" font-weight="bold" fill="#C7000B">中国文化场景适配</text>
+  <text x="847" y="285" text-anchor="middle" font-size="9.5" fill="#555555">京剧念白(Nianbai)韵律</text>
+  <text x="847" y="302" text-anchor="middle" font-size="9.5" fill="#555555">兰花指/喜剧角色眼神</text>
+  <text x="847" y="320" text-anchor="middle" font-size="9.5" fill="#555555">中国电影/短剧/戏曲</text>
+  <text x="847" y="335" text-anchor="middle" font-size="9" fill="#999999">东方表演美学</text>
+</svg>
+</div>
+
+<h3 id="overview-innovations">核心创新点速览</h3>
+<div class="innovation-quick">
+  <div class="item"><strong>🎯 双分支 MMDiT 音视频联合架构</strong>基于 MMDiT [1] 构建视觉分支+音频分支，通过跨模态联合模块实现深度跨模态交互，确保视觉与听觉流的精确时间同步和语义一致性。<span class="tag tag-spec">特有</span><span class="tag tag-l2">L2</span></div>
+  <div class="item"><strong>📊 音视频联合数据框架</strong>集成多阶段策展管线+高级音视频双模态Caption系统+可扩展基础设施，优先音视频一致性、运动表达和课程式数据调度。<span class="tag tag-spec">特有</span><span class="tag tag-l2">L2</span></div>
+  <div class="item"><strong>🎙️ 音频感知 RLHF</strong>专为音视频上下文定制的 RLHF 算法，多维 Reward Model 含音频维度，提升运动质量、视觉美学和音频保真度；infra 优化带来 ~3× 训练加速。<span class="tag tag-spec">特有</span><span class="tag tag-l2">L2</span></div>
+  <div class="item"><strong>⚡ &gt;10× 端到端推理加速</strong>多阶段蒸馏框架（HyperSD + Mean Flows + RayFlow）+ 量化+并行推理优化，大幅减少 NFE，保持模型性能。<span class="tag tag-gen">通用组合</span><span class="tag tag-l2">L2</span></div>
+  <div class="item"><strong>🗣️ 多语言方言唇形同步</strong>原生支持四川话、台湾国语、粤语、上海话等方言，精确捕捉独特韵律和情感张力，唇音同步超越 Veo 3.1 / Kling 2.6。<span class="tag tag-spec">特有</span><span class="tag tag-l1">L1</span></div>
+  <div class="item"><strong>🎬 电影级相机控制</strong>自主相机调度能力，支持 Dolly Zoom（希区柯克变焦）、连续长镜头、轨道/弧形运镜，电影级场景转场和专业调色。<span class="tag tag-spec">特有</span><span class="tag tag-l2">L2</span></div>
+</div>
+
+<h3 id="overview-performance">关键性能数据（可核查）</h3>
+<table>
+  <tr><th style="width:25%">指标</th><th style="width:20%">数值</th><th style="width:20%">对比对象</th><th>来源/说明</th></tr>
+  <tr><td>端到端推理加速</td><td><span class="highlight">&gt;10×</span></td><td>未蒸馏原始模型</td><td>论文 Abstract 明确声明；多阶段蒸馏+量化+并行</td></tr>
+  <tr><td>RLHF 训练加速</td><td><span class="highlight">~3×</span></td><td>未优化 RLHF 管线</td><td>论文 §1："targeted infrastructure optimizations to our RLHF pipeline have yielded a nearly 3× improvement"</td></tr>
+  <tr><td>中文语音生成</td><td>超越 Veo 3.1</td><td>Veo 3.1 / Wan 2.5 / Kling 2.6 / Sora 2</td><td>论文 §2.1.4 Audio GSB：中文对话/方言/独白合成优势明显</td></tr>
+  <tr><td>唇音同步</td><td>超越 Veo 3.1 和 Kling 2.6</td><td>Veo 3.1 / Kling 2.6</td><td>论文 §2.1.4：准确对应说话角色数量和身份</td></tr>
+  <tr><td>情感表达</td><td>均衡可控，Sora 2 更夸张</td><td>Sora 2</td><td>论文 §2.1.4：Sora 2 情感抑扬更生动；Seedance 更平衡稳定</td></tr>
+  <tr><td>T2V 指令遵循</td><td>领先位置</td><td>Kling 2.5/2.6, Veo 3.1, Seedance 1.0 Pro</td><td>论文 §2.1.4 Figure 3：T2V 绝对评测中 alignment 领先</td></tr>
+  <tr><td>支持任务</td><td>T2VA / I2VA / T2V / I2V</td><td>—</td><td>论文 §1：多任务预训练，统一支持四大任务</td></tr>
+  <tr><td>支持方言</td><td>四川话/台湾国语/粤语/上海话</td><td>—</td><td>论文 §2.2：方言丰富场景表现稳健</td></tr>
+  <tr><td>模型 ID</td><td>Doubao-Seedance-1.5-pro</td><td>—</td><td>论文脚注 α</td></tr>
+</table>
+
+<div class="purpose-box"><strong>设计目的：</strong>Seedance 1.5 pro 的核心定位是"从高质量视觉资产生成"升级为"整体制作级作品生成"——通过原生音视频联合生成，模型输出不再是碎片化的视觉片段，而是具有叙事完整性和沉浸感的成熟作品。四大技术模块（数据→架构→后训练→加速）形成闭环，确保音画同步质量和推理效率同时达标。</div>
+
+<!-- ② 数据管线 -->
+<h2 id="data-pipeline">② 数据管线深度拆解</h2>
+
+<h3 id="data-framework">2.1 音视频联合数据框架</h3>
+<div class="detail-card">
+  <p>论文 §1 明确提出第一个核心贡献是<strong>"Comprehensive Audio–Visual Data Framework"</strong>，集成三大组件：</p>
+  <ol>
+    <li><strong>多阶段策展管线</strong>：继承 Seedance 1.0 五步法，新增音频维度过滤和一致性校验</li>
+    <li><strong>高级 Captioning 系统</strong>：为视频和音频两种模态提供丰富的专业级描述</li>
+    <li><strong>可扩展基础设施</strong>：为大规模多模态数据处理优化的高效工程基础设施</li>
+  </ol>
+  <p>设计优先级：<strong>音视频一致性 → 运动表达性 → 课程式数据调度</strong>。</p>
+  <p><span class="tag tag-l2">L2</span> 框架性描述公开；<span class="tag tag-l4">L4</span> 具体数据量、阈值、通过率、Caption 模型细节均未披露</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 原生音视频联合生成要求训练数据中视觉和音频在时间轴上精确对齐，单独策展无法保证跨模态一致性；② 论文指出业界存在"用慢动作人为增强稳定性"的通病，降低运动生动性，因此策展阶段优先筛选高运动表达样本；③ 课程式调度按难度渐进喂入数据，帮助模型先学基础再学复杂联合生成。</div>
+
+<h4>音视频联合数据管线流程图</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs><marker id="arrdata" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555555"/></marker></defs>
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Seedance 1.5 pro 音视频联合数据管线（继承1.0五步法 + 新增音频维度）</text>
+  <rect x="20" y="50" width="140" height="60" rx="8" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="90" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">原始数据获取</text>
+  <text x="90" y="92" text-anchor="middle" font-size="9" fill="#555555">视频+音频+文本</text>
+  <text x="90" y="105" text-anchor="middle" font-size="8.5" fill="#999999">多源采集（L4未披露）</text>
+  <line x1="162" y1="80" x2="188" y2="80" stroke="#555555" stroke-width="1.5" marker-end="url(#arrdata)"/>
+  <rect x="190" y="45" width="340" height="330" rx="10" fill="#FAFAFA" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="360" y="68" text-anchor="middle" font-size="12" font-weight="bold" fill="#0066B3">多阶段策展管线（五步法 + 音频扩展）</text>
+  <rect x="205" y="80" width="310" height="42" rx="6" fill="white" stroke="#CCCCCC"/>
+  <text x="220" y="98" font-size="10" font-weight="bold" fill="#333333">① 镜头感知时间分割</text>
+  <text x="220" y="113" font-size="9" fill="#555555">继承1.0：按镜头边界切割，保留局部叙事流（≤12s推断）</text>
+  <rect x="205" y="128" width="310" height="42" rx="6" fill="white" stroke="#CCCCCC"/>
+  <text x="220" y="146" font-size="10" font-weight="bold" fill="#333333">② 覆盖物修正 + 音频过滤</text>
+  <text x="220" y="161" font-size="9" fill="#555555">视觉覆盖物检测修正；<tspan fill="#C7000B">新增：</tspan>音频质量过滤（削波/截断/噪声）</text>
+  <rect x="205" y="176" width="310" height="42" rx="6" fill="white" stroke="#CCCCCC"/>
+  <text x="220" y="194" font-size="10" font-weight="bold" fill="#333333">③ 质量+安全双过滤</text>
+  <text x="220" y="209" font-size="9" fill="#555555">视觉质量/安全分类器；<tspan fill="#C7000B">新增：</tspan>音频安全（违规语音/音乐版权）</text>
+  <rect x="205" y="224" width="310" height="42" rx="6" fill="white" stroke="#CCCCCC"/>
+  <text x="220" y="242" font-size="10" font-weight="bold" fill="#333333">④ 语义去重 + 音视频一致性校验</text>
+  <text x="220" y="257" font-size="9" fill="#555555">视觉语义去重；<tspan fill="#C7000B">新增：</tspan>AV同步校验（唇形/音效事件对齐）</text>
+  <rect x="205" y="272" width="310" height="42" rx="6" fill="white" stroke="#CCCCCC"/>
+  <text x="220" y="290" font-size="10" font-weight="bold" fill="#333333">⑤ 分布重平衡 + 课程调度</text>
+  <text x="220" y="305" font-size="9" fill="#555555">运动表达优先；课程式难度调度；方言/多语言均衡</text>
+  <rect x="205" y="320" width="310" height="42" rx="6" fill="#FFF3E6" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="220" y="338" font-size="10" font-weight="bold" fill="#8B6914">⑥ 音视频双模态 Captioning</text>
+  <text x="220" y="353" font-size="9" fill="#555555">视频Caption（动态+静态）+ 音频Caption（语音/音效/音乐描述）</text>
+  <line x1="532" y1="210" x2="558" y2="210" stroke="#0066B3" stroke-width="2" marker-end="url(#arrdata)"/>
+  <rect x="560" y="45" width="180" height="150" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="1.5"/>
+  <text x="650" y="68" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">高级Caption系统</text>
+  <text x="650" y="90" text-anchor="middle" font-size="9.5" fill="#555555">视频Caption：动态+静态特征</text>
+  <text x="650" y="108" text-anchor="middle" font-size="9" fill="#555555">专业级描述（L4）</text>
+  <text x="650" y="130" text-anchor="middle" font-size="9.5" fill="#555555">音频Caption：语音/音效/音乐</text>
+  <text x="650" y="148" text-anchor="middle" font-size="9" fill="#555555">语调/情感/韵律标注</text>
+  <text x="650" y="168" text-anchor="middle" font-size="8.5" fill="#999999">基座模型未披露(L4)</text>
+  <line x1="650" y1="197" x2="650" y2="223" stroke="#00B578" stroke-width="2" marker-end="url(#arrdata)"/>
+  <rect x="560" y="225" width="180" height="150" rx="10" fill="#FFF3E6" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="650" y="248" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">可扩展基础设施</text>
+  <text x="650" y="270" text-anchor="middle" font-size="9.5" fill="#555555">大规模多模态数据处理</text>
+  <text x="650" y="288" text-anchor="middle" font-size="9" fill="#555555">并行解码/编码</text>
+  <text x="650" y="306" text-anchor="middle" font-size="9" fill="#555555">分布式存储+负载均衡</text>
+  <text x="650" y="330" text-anchor="middle" font-size="8.5" fill="#999999">具体架构未披露(L4)</text>
+  <line x1="742" y1="210" x2="768" y2="210" stroke="#555555" stroke-width="1.5" marker-end="url(#arrdata)"/>
+  <rect x="770" y="170" width="170" height="80" rx="10" fill="#E6F7F0" stroke="#00B578" stroke-width="2"/>
+  <text x="855" y="195" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">离线编码打包</text>
+  <text x="855" y="215" text-anchor="middle" font-size="9.5" fill="#555555">视觉VAE latent + 音频VAE latent</text>
+  <text x="855" y="235" text-anchor="middle" font-size="9.5" fill="#555555">+ 双模态Caption</text>
+  <rect x="20" y="390" width="920" height="22" rx="5" fill="#FDE8EA"/>
+  <text x="480" y="406" text-anchor="middle" font-size="9.5" fill="#C7000B">注：橙色标注为1.5 pro 相对1.0新增的音频维度处理；具体参数/阈值/模型均为L4未披露，五步法继承自Seedance 1.0（推断）</text>
+</svg>
+</div>
+
+<h3 id="data-curation">2.2 多阶段策展管线（继承 + 音频扩展）</h3>
+<div class="detail-card">
+  <p>论文未详细展开策展步骤，基于 1.0 五步法和 1.5 pro 新增的"音视频一致性"优先级，推断扩展如下：</p>
+  <table>
+    <tr><th style="width:18%">步骤</th><th style="width:32%">1.0 做法（已公开）</th><th style="width:32%">1.5 pro 扩展（推断）</th><th style="width:18%">披露等级</th></tr>
+    <tr><td>① 时间分割</td><td>镜头感知分割，≤12s片段</td><td>继承；音视频同步分割</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td>② 覆盖物修正</td><td>检测+处理视频覆盖物</td><td>继承；<strong>新增音频过滤</strong>：削波/截断/噪声</td><td><span class="tag tag-l3">L3</span></td></tr>
+    <tr><td>③ 质量+安全过滤</td><td>视觉质量+安全双分类器</td><td>继承；<strong>新增音频安全</strong>：违规语音/版权筛查</td><td><span class="tag tag-l3">L3</span></td></tr>
+    <tr><td>④ 语义去重</td><td>视觉表征+聚类去重</td><td>继承；<strong>新增AV一致性校验</strong>：唇形-语音/音效-事件对齐</td><td><span class="tag tag-l3">L3</span></td></tr>
+    <tr><td>⑤ 分布重平衡</td><td>运动表达优先，头尾处理</td><td>继承；<strong>新增多语言/方言均衡</strong>+课程调度</td><td><span class="tag tag-l3">L3</span></td></tr>
+  </table>
+  <p><span class="tag tag-l4">L4</span> 未披露：数据总量、各步骤通过率、过滤阈值、音频质量分类器架构、AV一致性校验方法</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 新增AV一致性校验是因为原生联合生成最大挑战是唇形-语音不同步（"腹语效应"），训练数据若含大量不同步样本会学到错误对齐模式；② 新增方言均衡是因为1.5 pro主打多方言唇形同步，若方言样本占比过低会导致建模不充分；③ 课程式调度先喂简单样本（新闻播报）再喂复杂样本（多人对话/音乐剧），帮助渐进学习。</div>
+
+<h3 id="data-captioning">2.3 音视频双模态 Captioning 系统</h3>
+<div class="detail-card">
+  <p>论文明确"our captioning system provides rich, professional-grade descriptions for both video and audio modalities"——1.0 仅有视频 Caption，1.5 pro 新增<strong>音频 Caption</strong>。</p>
+  <div class="two-col">
+    <div><h4 style="color:#0066B3">视频 Caption（继承1.0）</h4>
+      <ul><li><strong>动态特征</strong>：运动描述、动作细节、相机运动、交互</li><li><strong>静态特征</strong>：主体外观、场景布局、风格、光照</li><li>基座模型：推断继承 Tarsier2 <span class="tag tag-l3">L3</span></li></ul>
+    </div>
+    <div><h4 style="color:#C7000B">音频 Caption（1.5 新增）</h4>
+      <ul><li><strong>语音描述</strong>：说话人、语言/方言、语调、情感、节奏</li><li><strong>音效描述</strong>：来源、声学属性、与视觉事件对应</li><li><strong>音乐描述</strong>：风格、乐器、情绪、节奏型</li><li>基座模型：<span class="tag tag-l4">L4</span> 未披露</li></ul>
+    </div>
+  </div>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>音频 Caption 在训练阶段为每个音频样本提供文本描述，使模型学会"文本→音频"映射；推理时用户 prompt 中的音频描述（如"用四川话说..."、"背景是轻快钢琴声"）就能被准确理解并生成对应音频。</div>
+
+<h3 id="data-infra">2.4 工程基础设施</h3>
+<div class="detail-card">
+  <p>论文提到"efficient engineering infrastructure optimized for massive multi-modal data processing"。<span class="tag tag-l4">L4</span> 完全未披露具体架构。基于1.0和业界通用方案，推断包括：分布式视频/音频解码、并行VAE编码、分布式存储、数据加载优化等。</p>
+</div>
+
+<h3 id="data-compare-10">📊 与 Seedance 1.0 模块级对比</h3>
+<div class="detail-card">
+  <table>
+    <tr><th style="width:14%">对比维度</th><th style="width:30%">Seedance 1.0（已公开）</th><th style="width:30%">Seedance 1.5 pro（论文）</th><th style="width:14%">演进方向</th><th style="width:12%">披露等级</th></tr>
+    <tr>
+      <td><strong>数据来源</strong></td>
+      <td>公开库 + 授权库，覆盖时长/分辨率/主体/场景/动作/风格/运镜等多维度</td>
+      <td>论文未明确说明数据来源，推断继承1.0视频数据源 + 新增音视频联合数据（含语音/音效/音乐）</td>
+      <td>继承 + 音频扩展</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>策展步骤</strong></td>
+      <td>五步法：①镜头感知时间分割(≤12s) ②视觉覆盖修正 ③质量与安全过滤(双轨制) ④语义去重 ⑤分布重平衡</td>
+      <td>论文提到"multi-stage curation pipeline"，推断继承1.0五步法 + 新增音频质量过滤（语音清晰度/信噪比/音画同步）</td>
+      <td>继承 + 音频扩展</td>
+      <td>1.0: L1<br>1.5: L3</td>
+    </tr>
+    <tr>
+      <td><strong>Caption系统</strong></td>
+      <td>Tarsier2（视觉编码器冻结 + LM全量微调），中英文双语，密集caption（动态特征+静态特征）</td>
+      <td>音视频双模态Caption：视觉caption（继承1.0密集风格）+ 音频caption（语音描述/音效描述/音乐描述），基座模型未披露</td>
+      <td><strong>升级</strong>（新增音频维度）</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>工程基础设施</strong></td>
+      <td>三层架构：统一平台层（人在回路+任务管理）+ BMF/Ray计算框架层（CPU/GPU/NPU异构）+ ByteCloud/Volcengine资源层；自适应扩缩容+失败重试</td>
+      <td>论文提到"efficient engineering infrastructure optimized for massive multi-modal data processing"，具体架构完全未披露</td>
+      <td>继承（推断）</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+  </table>
+  <div class="purpose-box"><strong>对比小结：</strong>1.5数据管线的核心演进是<strong>从纯视频数据扩展到音视频联合数据</strong>——Caption系统新增音频描述维度，策展管线新增音频质量过滤。但1.5论文为Model Card形态，数据来源、具体策展参数、Caption基座模型、工程基础设施均未披露，无法做数值级对比。</div>
+</div>
+
+<!-- ③ 模型结构 -->
+<h2 id="model-arch">③ 模型结构深度拆解</h2>
+
+<h3 id="model-vae">3.1 VAE：视觉 + 音频双编码器</h3>
+<div class="detail-card">
+  <p>原生音视频联合生成必须同时压缩视频和音频到 latent 空间。论文未披露 VAE 参数，基于 1.0 和业界方案推断：</p>
+  <table>
+    <tr><th style="width:20%">组件</th><th style="width:25%">1.0 视觉 VAE（已公开）</th><th style="width:30%">1.5 pro 推断</th><th style="width:25%">披露等级</th></tr>
+    <tr><td>视觉压缩比</td><td>(4,16,16)，总1024×</td><td>继承 (4,16,16)</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td>视觉latent通道</td><td>C=48</td><td>继承 C=48（推断）</td><td><span class="tag tag-l3">L3</span></td></tr>
+    <tr><td>音频 VAE</td><td>无</td><td><strong>新增</strong>：1D卷积VAE或EnCodec方案</td><td><span class="tag tag-l4">L4</span></td></tr>
+    <tr><td>音频采样率</td><td>—</td><td>推断16kHz/24kHz</td><td><span class="tag tag-l4">L4</span></td></tr>
+    <tr><td>时间对齐</td><td>—</td><td>视觉与音频latent帧率需时间轴对齐</td><td><span class="tag tag-l3">L3</span></td></tr>
+  </table>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 音频波形维度极高（10s×16kHz=160000点），直接扩散不可行，必须VAE压缩；② 视觉和音频latent需时间对齐，跨模态联合模块才能在对应时间步交互；③ 继承1.0的(4,16,16)压缩比可复用预训练权重。</div>
+
+<h3 id="model-dit">3.2 双分支 MMDiT：音视频联合生成架构（核心创新）</h3>
+<div class="detail-card">
+  <p>论文 §1：<strong>"we propose a unified framework based on the MMDiT [1] architecture. This design facilitates deep cross-modal interaction, ensuring precise temporal synchronization and semantic consistency between visual and auditory streams."</strong></p>
+  <h4>架构组成</h4>
+  <ol>
+    <li><strong>视觉分支</strong>：处理视觉latent token，继承1.0解耦时空层（空间层多模态自注意力+时间层仅视觉注意力）</li>
+    <li><strong>音频分支</strong>：处理音频latent token，结构对称但参数独立</li>
+    <li><strong>跨模态联合模块</strong>：两分支间深度交互，确保时间同步和语义一致</li>
+    <li><strong>文本条件</strong>：MMDiT双权重机制注入，同时条件化两个分支</li>
+  </ol>
+  <h4>联合去噪过程</h4>
+  <p>每个去噪步同时接收带噪视觉 <span class="code-inline">z_v^t</span> 和带噪音频 <span class="code-inline">z_a^t</span>，以及文本 <span class="code-inline">c_text</span>，同时预测：</p>
+  <p style="text-align:center; font-family:monospace; background:#F5F5F5; padding:10px; border-radius:6px;">[ε̂_v, ε̂_a] = DiT_dual(z_v^t, z_a^t, t, c_text)</p>
+  <p><span class="tag tag-l2">L2</span> 框架公开；<span class="tag tag-l4">L4</span> 参数量、层数、隐藏维度、跨模态注意力实现均未披露</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 双分支而非单分支拼接：视觉(3D token)和音频(1D token)分布差异大，统一注意力会互相干扰，双分支让各模态独立提取特征再受控交互；② 基于MMDiT：SD3/FLUX的双权重自注意力已证明高效处理多模态条件，1.5扩展为文本+视觉+音频三模态；③ 深度跨模态交互：浅层交互只能传粗粒度语义，每block都有跨模态注意力才能实现精确唇形-语音同步。</div>
+
+<h4>双分支 MMDiT 架构原理图</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 480" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs><marker id="arrarch" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555555"/></marker></defs>
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Seedance 1.5 pro 双分支 MMDiT 音视频联合生成架构</text>
+  <rect x="30" y="50" width="130" height="50" rx="6" fill="#FDE8EA" stroke="#C7000B"/>
+  <text x="95" y="72" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">带噪视觉 latent</text>
+  <text x="95" y="88" text-anchor="middle" font-size="9" fill="#555555">z_v^t (T×H×W×C_v)</text>
+  <rect x="30" y="120" width="130" height="50" rx="6" fill="#E6F0FF" stroke="#0066B3"/>
+  <text x="95" y="142" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">带噪音频 latent</text>
+  <text x="95" y="158" text-anchor="middle" font-size="9" fill="#555555">z_a^t (T_a×C_a)</text>
+  <rect x="30" y="190" width="130" height="50" rx="6" fill="#FFF3E6" stroke="#FF6B00"/>
+  <text x="95" y="212" text-anchor="middle" font-size="10" font-weight="bold" fill="#8B6914">文本条件</text>
+  <text x="95" y="228" text-anchor="middle" font-size="9" fill="#555555">c_text (LLM encoder)</text>
+  <line x1="162" y1="75" x2="200" y2="75" stroke="#C7000B" stroke-width="1.5" marker-end="url(#arrarch)"/>
+  <line x1="162" y1="145" x2="200" y2="145" stroke="#0066B3" stroke-width="1.5" marker-end="url(#arrarch)"/>
+  <line x1="162" y1="215" x2="200" y2="215" stroke="#FF6B00" stroke-width="1.5" marker-end="url(#arrarch)"/>
+  <rect x="200" y="40" width="520" height="380" rx="12" fill="#FAFAFA" stroke="#333333" stroke-width="2"/>
+  <text x="460" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">双分支 MMDiT（N 个 Block，参数未披露 L4）</text>
+  <rect x="220" y="75" width="220" height="330" rx="8" fill="white" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="330" y="95" text-anchor="middle" font-size="11" font-weight="bold" fill="#C7000B">视觉分支（Visual Branch）</text>
+  <rect x="235" y="108" width="190" height="55" rx="6" fill="#FDE8EA" stroke="#C7000B"/>
+  <text x="330" y="126" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#333333">空间层：多模态自注意力</text>
+  <text x="330" y="142" text-anchor="middle" font-size="8.5" fill="#555555">视觉token + 文本token (MMDiT双权重)</text>
+  <text x="330" y="155" text-anchor="middle" font-size="8.5" fill="#555555">继承1.0解耦时空层设计</text>
+  <rect x="235" y="173" width="190" height="45" rx="6" fill="#FDE8EA" stroke="#C7000B"/>
+  <text x="330" y="191" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#333333">时间层：仅视觉注意力</text>
+  <text x="330" y="207" text-anchor="middle" font-size="8.5" fill="#555555">窗口划分，文本token不参与</text>
+  <rect x="235" y="228" width="190" height="45" rx="6" fill="#FDE8EA" stroke="#C7000B"/>
+  <text x="330" y="246" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#333333">MLP + AdaLN调制</text>
+  <text x="330" y="262" text-anchor="middle" font-size="8.5" fill="#555555">timestep + 文本条件调制</text>
+  <rect x="455" y="140" width="110" height="120" rx="8" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="510" y="162" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">跨模态</text>
+  <text x="510" y="178" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">联合模块</text>
+  <text x="510" y="198" text-anchor="middle" font-size="8.5" fill="#555555">视觉↔音频</text>
+  <text x="510" y="212" text-anchor="middle" font-size="8.5" fill="#555555">Cross-Attention</text>
+  <text x="510" y="226" text-anchor="middle" font-size="8.5" fill="#555555">时间同步对齐</text>
+  <text x="510" y="245" text-anchor="middle" font-size="8" fill="#999999">每Block深度交互</text>
+  <line x1="427" y1="185" x2="453" y2="185" stroke="#00B578" stroke-width="2" marker-end="url(#arrarch)"/>
+  <line x1="453" y1="215" x2="427" y2="215" stroke="#00B578" stroke-width="2" marker-end="url(#arrarch)"/>
+  <line x1="567" y1="185" x2="593" y2="185" stroke="#00B578" stroke-width="2" marker-end="url(#arrarch)"/>
+  <line x1="593" y1="215" x2="567" y2="215" stroke="#00B578" stroke-width="2" marker-end="url(#arrarch)"/>
+  <rect x="595" y="75" width="110" height="330" rx="8" fill="white" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="650" y="95" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">音频分支</text>
+  <rect x="605" y="108" width="90" height="55" rx="6" fill="#E6F0FF" stroke="#0066B3"/>
+  <text x="650" y="126" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0066B3">音频自注意力</text>
+  <text x="650" y="142" text-anchor="middle" font-size="7.5" fill="#555555">音频token+文本</text>
+  <text x="650" y="155" text-anchor="middle" font-size="7.5" fill="#555555">1D时间注意力</text>
+  <rect x="605" y="173" width="90" height="45" rx="6" fill="#E6F0FF" stroke="#0066B3"/>
+  <text x="650" y="191" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0066B3">MLP+AdaLN</text>
+  <text x="650" y="207" text-anchor="middle" font-size="7.5" fill="#555555">条件调制</text>
+  <rect x="605" y="228" width="90" height="45" rx="6" fill="#E6F0FF" stroke="#0066B3"/>
+  <text x="650" y="246" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#0066B3">重复N次</text>
+  <text x="650" y="262" text-anchor="middle" font-size="7.5" fill="#555555">参数独立</text>
+  <rect x="235" y="290" width="460" height="40" rx="6" fill="#FFF3E6" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="465" y="308" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#8B6914">文本条件同时注入两个分支（MMDiT双权重：W_v + W_a）</text>
+  <text x="465" y="323" text-anchor="middle" font-size="8.5" fill="#555555">文本token在空间层/音频自注意力中与对应模态token交互</text>
+  <rect x="235" y="345" width="460" height="45" rx="6" fill="#FAFAFA" stroke="#999999" stroke-dasharray="3,2"/>
+  <text x="465" y="363" text-anchor="middle" font-size="9" fill="#666666">位置编码：视觉3D/MM-RoPE（继承1.0），音频1D RoPE（推断L3）</text>
+  <text x="465" y="378" text-anchor="middle" font-size="9" fill="#666666">扩散调度：Flow Matching / Rectified Flow（推断，引用MMDiT[1]）</text>
+  <line x1="722" y1="145" x2="760" y2="145" stroke="#C7000B" stroke-width="1.5" marker-end="url(#arrarch)"/>
+  <line x1="722" y1="215" x2="760" y2="215" stroke="#0066B3" stroke-width="1.5" marker-end="url(#arrarch)"/>
+  <rect x="760" y="110" width="170" height="70" rx="8" fill="#E6F7F0" stroke="#00B578" stroke-width="2"/>
+  <text x="845" y="135" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">预测干净视觉 latent</text>
+  <text x="845" y="155" text-anchor="middle" font-size="9" fill="#555555">ε̂_v 或 x̂_v^0</text>
+  <text x="845" y="170" text-anchor="middle" font-size="9" fill="#555555">→ 视觉VAE解码 → 视频</text>
+  <rect x="760" y="195" width="170" height="70" rx="8" fill="#E6F0FF" stroke="#0066B3" stroke-width="2"/>
+  <text x="845" y="220" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">预测干净音频 latent</text>
+  <text x="845" y="240" text-anchor="middle" font-size="9" fill="#555555">ε̂_a 或 x̂_a^0</text>
+  <text x="845" y="255" text-anchor="middle" font-size="9" fill="#555555">→ 音频VAE解码 → 波形</text>
+  <rect x="30" y="440" width="900" height="30" rx="6" fill="#FDE8EA"/>
+  <text x="480" y="460" text-anchor="middle" font-size="9.5" fill="#C7000B">关键：每个去噪步同时去噪视觉+音频，跨模态联合模块确保唇形-语音同步和音效-视觉事件对齐；具体层数/维度/参数量为L4未披露</text>
+</svg>
+</div>
+
+<h3 id="model-crossmodal">3.3 跨模态联合模块（Cross-Modal Joint Module）</h3>
+<div class="detail-card">
+  <p>论文提到"integrates a cross-modal joint module"但未披露实现。推断可能包括：</p>
+  <ol>
+    <li><strong>跨模态注意力</strong>：视觉token作Query，音频token作Key/Value（双向），每block进行</li>
+    <li><strong>时间对齐机制</strong>：视觉和音频latent帧率可能不同，需重复/插值对齐</li>
+    <li><strong>门控融合</strong>：可学习门控控制视觉→音频和音频→视觉信息流强度</li>
+  </ol>
+  <table>
+    <tr><th style="width:25%">方案</th><th style="width:25%">做法</th><th style="width:25%">优势</th><th style="width:25%">劣势</th></tr>
+    <tr><td><strong>双分支+跨模态注意力</strong>（1.5推断）</td><td>独立分支+每block交叉注意力</td><td>特征独立提取，交互可控，同步精度高</td><td>参数量大，计算开销</td></tr>
+    <tr><td>单分支拼接</td><td>视觉+音频token统一注意力</td><td>架构简单，参数共享</td><td>模态分布差异大，易干扰</td></tr>
+    <tr><td>级联生成</td><td>先生成视频再生成音频</td><td>可复用纯视频模型</td><td>非原生联合，音频无法反向影响视觉</td></tr>
+    <tr><td>后期对齐(Wav2Lip)</td><td>生成后后处理对齐唇形</td><td>灵活适配任意模型</td><td>非端到端，可能引入伪影</td></tr>
+  </table>
+  <p><span class="tag tag-l4">L4</span> 未披露：跨模态注意力头数、融合方式、时间对齐机制</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>跨模态联合模块让视觉去噪"听到"音频（知道当前帧该发什么音），音频去噪"看到"视觉（知道当前画面有什么事件该配什么音效）。这种双向深度交互是级联生成无法实现的，精确唇形同步要求视觉分支知道音频音素时间戳，只有跨模态注意力能实现。</div>
+
+<h3 id="model-unified">3.4 统一多任务公式（T2VA / I2VA / T2V / I2V）</h3>
+<div class="detail-card">
+  <p>论文 §1：多任务预训练使模型统一支持四大任务：</p>
+  <table>
+    <tr><th style="width:20%">任务</th><th style="width:30%">输入</th><th style="width:30%">输出</th><th style="width:20%">条件注入</th></tr>
+    <tr><td><strong>T2VA</strong></td><td>文本prompt</td><td>视频+同步音频</td><td>文本注入双分支</td></tr>
+    <tr><td><strong>I2VA</strong></td><td>参考图像+文本</td><td>视频+同步音频</td><td>图像注入视觉分支，文本注入双分支</td></tr>
+    <tr><td><strong>T2V</strong></td><td>文本prompt</td><td>仅视频</td><td>文本；音频分支mask/禁用</td></tr>
+    <tr><td><strong>I2V</strong></td><td>参考图像+文本</td><td>仅视频</td><td>图像+文本；音频分支禁用</td></tr>
+  </table>
+  <p><span class="tag tag-l2">L2</span> 四大任务公开；<span class="tag tag-l4">L4</span> 任务混合比例、I2V条件注入方式、音频分支禁用机制未披露</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 统一多任务可共享视觉特征，用大量纯视频数据预训练视觉分支，再用稀缺的音视频数据学联合生成；② 支持纯视频生成避免维护多模型；③ I2VA中音频以视觉为条件，确保与参考图像语义一致。</div>
+
+<h3 id="model-refiner">3.5 Diffusion Refiner 与 PE 系统</h3>
+<div class="detail-card">
+  <p><strong>Refiner：</strong>论文未提及，<span class="tag tag-l3">L3</span> 推断可能继承1.0级联超分架构。</p>
+  <p><strong>PE：</strong>1.0用Qwen2.5-14B(SFT+DPO)，1.5论文未提及，<span class="tag tag-l4">L4</span> 未披露。</p>
+  <p><strong>位置编码：</strong><span class="tag tag-l3">L3</span> 推断视觉继承MM-RoPE，音频用1D RoPE。</p>
+  <p><strong>扩散调度：</strong>基于MMDiT[1]，<span class="tag tag-l3">L3</span> 推断Flow Matching，预测velocity。</p>
+</div>
+
+<h3 id="model-compare-10">📊 与 Seedance 1.0 模块级对比</h3>
+<div class="detail-card">
+  <table>
+    <tr><th style="width:14%">对比维度</th><th style="width:30%">Seedance 1.0（已公开）</th><th style="width:30%">Seedance 1.5 pro（论文）</th><th style="width:14%">演进方向</th><th style="width:12%">披露等级</th></tr>
+    <tr>
+      <td><strong>VAE</strong></td>
+      <td>视觉VAE，时间因果卷积架构，压缩比(4,16,16)，C=48，总压缩率1/64；L1+KL+LPIPS+对抗损失联合训练</td>
+      <td>视觉 + 音频双VAE：视觉VAE推断继承1.0参数；音频VAE架构/压缩比/损失函数完全未披露</td>
+      <td><strong>升级</strong>（新增音频VAE）</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>DiT架构</strong></td>
+      <td>单分支MMDiT：解耦时空层（空间层+时间层交替堆叠），空间层用多模态自注意力（视觉+文本），时间层仅视觉token；文本token不参与时间层</td>
+      <td><strong>双分支MMDiT</strong>：视觉分支 + 音频分支 + 跨模态联合模块，联合去噪；视觉分支推断继承1.0解耦时空层设计</td>
+      <td><strong>核心升级</strong>（单分支→双分支）</td>
+      <td>1.0: L1<br>1.5: L2</td>
+    </tr>
+    <tr>
+      <td><strong>Refiner</strong></td>
+      <td>级联超分：Base生成480p → Refiner上采样到720p/1080p；从Base初始化，LR视频上采样后与噪声通道拼接作为输入</td>
+      <td>论文未提及Refiner，推断可能继承1.0级联超分架构</td>
+      <td>继承（推断）</td>
+      <td>1.0: L1<br>1.5: L3</td>
+    </tr>
+    <tr>
+      <td><strong>PE系统</strong></td>
+      <td>Qwen2.5-14B基座，两阶段训练：SFT全量微调（区分I2V/T2V）+ DPO LoRA（纠正幻觉）</td>
+      <td>论文未提及PE系统</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>位置编码</strong></td>
+      <td>MM-RoPE：视觉token用3D RoPE(t,h,w)，文本token用1D RoPE(pos)，支持交错序列和多镜头扩展</td>
+      <td>推断视觉继承MM-RoPE，音频token用1D RoPE；具体实现未披露</td>
+      <td>继承 + 音频扩展</td>
+      <td>1.0: L1<br>1.5: L3</td>
+    </tr>
+    <tr>
+      <td><strong>统一任务</strong></td>
+      <td>T2V / I2V / T2I 三任务统一公式</td>
+      <td>T2VA / I2VA / T2V / I2V 四任务统一（新增音视频联合生成）</td>
+      <td><strong>升级</strong>（3任务→4任务）</td>
+      <td>1.0: L1<br>1.5: L1</td>
+    </tr>
+  </table>
+  <div class="purpose-box"><strong>对比小结：</strong>1.5模型结构的核心演进是<strong>从单分支纯视频生成升级为双分支音视频联合生成</strong>——新增音频VAE和音频DiT分支，通过跨模态联合模块实现音视频同步去噪。统一任务从3个扩展到4个（新增T2VA/I2VA）。但双分支的具体层数/维度/参数量、跨模态联合模块的精确实现、音频VAE参数均为L4未披露。</div>
+</div>
+
+<!-- ④ 训练整体 -->
+<h2 id="training-overall">④ 训练整体情况深度拆解</h2>
+
+<h3 id="train-pretrain">4.1 多任务预训练（混合模态）</h3>
+<div class="detail-card">
+  <p>论文 §1 明确："By leveraging multi-task pre-training on large-scale mixed-modality datasets, our model achieves robust generalization across diverse downstream tasks"——使用<strong>大规模混合模态数据集</strong>进行多任务预训练。</p>
+  <h4>预训练任务组成（推断）</h4>
+  <table>
+    <tr><th style="width:25%">任务类型</th><th style="width:30%">数据模态</th><th style="width:25%">训练目标</th><th style="width:20%">披露等级</th></tr>
+    <tr><td>T2VA（文本→视频+音频）</td><td>文本+视频+音频三元组</td><td>联合去噪视觉+音频latent</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td>I2VA（图像→视频+音频）</td><td>参考图像+文本+视频+音频</td><td>图像条件注入+联合去噪</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td>T2V（文本→视频）</td><td>文本+视频对</td><td>仅视觉去噪，音频分支禁用</td><td><span class="tag tag-l3">L3</span>推断</td></tr>
+    <tr><td>I2V（图像→视频）</td><td>图像+文本+视频</td><td>图像条件+仅视觉去噪</td><td><span class="tag tag-l3">L3</span>推断</td></tr>
+    <tr><td>T2I（文本→图像）</td><td>文本+图像对</td><td>静态图像去噪（继承1.0）</td><td><span class="tag tag-l3">L3</span>推断</td></tr>
+  </table>
+  <p><span class="tag tag-l4">L4</span> 未披露：各任务混合比例、预训练总步数、batch size、学习率、GPU数量、训练时长</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 混合模态多任务预训练的核心优势是"数据杠杆"——纯视频/图文数据量远大于音视频联合数据，用大量纯视频数据预训练视觉分支，再用稀缺的音视频数据微调联合生成能力，比纯音视频数据训练效果更好；② T2I任务帮助模型学习静态视觉质量（构图/色彩/细节），为视频生成提供基础；③ 多任务统一训练避免了任务间的能力冲突，一个模型覆盖所有下游场景。</div>
+
+<h3 id="train-sft">4.2 SFT 监督微调</h3>
+<div class="detail-card">
+  <p>论文 §1 明确后训练包括"Supervised Fine-Tuning (SFT) on high-quality audio-visual datasets"——在<strong>高质量音视频数据集</strong>上进行SFT。</p>
+  <h4>SFT 特点（推断）</h4>
+  <ul>
+    <li><strong>数据来源</strong>：高质量、人工筛选的音视频联合数据，强调音画同步和叙事完整性</li>
+    <li><strong>目标</strong>：将预训练模型的通用能力对齐到高质量生成标准，提升视觉美学、音频保真和音画同步</li>
+    <li><strong>与1.0对比</strong>：1.0的SFT在不同子集上训练独立模型再合并（model merging trick），1.5 pro论文未提及此技巧</li>
+    <li><strong>课程式</strong>：可能延续1.0的渐进式训练课程（低分辨率→高分辨率，低帧率→高帧率）</li>
+  </ul>
+  <p><span class="tag tag-l4">L4</span> 未披露：SFT数据量、训练步数、学习率、是否使用模型合并技巧、是否分阶段</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>SFT是连接预训练和RLHF的关键桥梁——预训练模型虽然学到了通用生成能力，但输出质量不稳定、风格不可控；SFT用高质量数据"示范"什么是好的生成，为后续RLHF提供一个高质量的起点策略，避免RLHF从随机策略开始训练的不稳定性。</div>
+
+<h3 id="train-infra">4.3 训练基础设施</h3>
+<div class="detail-card">
+  <p>论文未专门描述训练基础设施，但提到"scalable infrastructure"和RLHF的~3×加速。基于1.0的训练infra和业界通用方案推断：</p>
+  <ul>
+    <li><strong>并行策略</strong>：数据并行+张量并行+流水线并行（推断，大模型训练标配）</li>
+    <li><strong>混合精度</strong>：BF16/FP16混合精度训练（推断）</li>
+    <li><strong>梯度检查点</strong>：以时间换空间，降低显存占用（推断）</li>
+    <li><strong>分布式优化器</strong>：ZeRO/FSDP类优化器分片（推断）</li>
+  </ul>
+  <p><span class="tag tag-l4">L4</span> 完全未披露训练基础设施细节</p>
+</div>
+
+<h4>训练流水线总览图</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs><marker id="arrtrain" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555555"/></marker></defs>
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Seedance 1.5 pro 训练流水线（预训练 → SFT → 音频感知RLHF）</text>
+  <rect x="30" y="60" width="200" height="180" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="130" y="85" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">阶段1：多任务预训练</text>
+  <text x="130" y="110" text-anchor="middle" font-size="9.5" fill="#555555">大规模混合模态数据</text>
+  <text x="130" y="128" text-anchor="middle" font-size="9" fill="#555555">T2VA + I2VA + T2V + I2V</text>
+  <text x="130" y="146" text-anchor="middle" font-size="9" fill="#555555">+ T2I（推断）</text>
+  <text x="130" y="170" text-anchor="middle" font-size="9" fill="#555555">双分支MMDiT联合去噪</text>
+  <text x="130" y="188" text-anchor="middle" font-size="9" fill="#555555">Flow Matching目标</text>
+  <text x="130" y="210" text-anchor="middle" font-size="8.5" fill="#999999">数据量/步数/超参 L4未披露</text>
+  <text x="130" y="228" text-anchor="middle" font-size="8.5" fill="#999999">课程式：低分辨率→高分辨率</text>
+  <line x1="232" y1="150" x2="268" y2="150" stroke="#C7000B" stroke-width="2" marker-end="url(#arrtrain)"/>
+  <rect x="270" y="60" width="200" height="180" rx="10" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="370" y="85" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">阶段2：SFT监督微调</text>
+  <text x="370" y="110" text-anchor="middle" font-size="9.5" fill="#555555">高质量音视频数据集</text>
+  <text x="370" y="128" text-anchor="middle" font-size="9" fill="#555555">人工筛选/标注</text>
+  <text x="370" y="146" text-anchor="middle" font-size="9" fill="#555555">强调音画同步+叙事完整</text>
+  <text x="370" y="170" text-anchor="middle" font-size="9" fill="#555555">对齐高质量生成标准</text>
+  <text x="370" y="188" text-anchor="middle" font-size="9" fill="#555555">为RLHF提供高质量起点</text>
+  <text x="370" y="210" text-anchor="middle" font-size="8.5" fill="#999999">数据量/步数 L4未披露</text>
+  <text x="370" y="228" text-anchor="middle" font-size="8.5" fill="#999999">是否模型合并 L4未披露</text>
+  <line x1="472" y1="150" x2="508" y2="150" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrtrain)"/>
+  <rect x="510" y="60" width="200" height="180" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="610" y="85" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">阶段3：音频感知RLHF</text>
+  <text x="610" y="110" text-anchor="middle" font-size="9.5" fill="#555555">多维Reward Model</text>
+  <text x="610" y="128" text-anchor="middle" font-size="9" fill="#555555">视觉维度+音频维度</text>
+  <text x="610" y="146" text-anchor="middle" font-size="9" fill="#555555">直接Reward最大化</text>
+  <text x="610" y="164" text-anchor="middle" font-size="9" fill="#555555">（或Flow-GRPO/DanceGRPO）</text>
+  <text x="610" y="184" text-anchor="middle" font-size="9" fill="#555555">多轮迭代学习</text>
+  <text x="610" y="204" text-anchor="middle" font-size="8.5" fill="#00875A">infra优化 ~3×训练加速</text>
+  <text x="610" y="222" text-anchor="middle" font-size="8.5" fill="#999999">RM架构/算法细节 L4</text>
+  <line x1="712" y1="150" x2="748" y2="150" stroke="#00B578" stroke-width="2" marker-end="url(#arrtrain)"/>
+  <rect x="750" y="60" width="180" height="180" rx="10" fill="#E6F0FF" stroke="#0066B3" stroke-width="2"/>
+  <text x="840" y="85" text-anchor="middle" font-size="12" font-weight="bold" fill="#0066B3">最终模型</text>
+  <text x="840" y="110" text-anchor="middle" font-size="9.5" fill="#555555">Seedance 1.5 pro</text>
+  <text x="840" y="130" text-anchor="middle" font-size="9" fill="#555555">T2VA/I2VA/T2V/I2V</text>
+  <text x="840" y="150" text-anchor="middle" font-size="9" fill="#555555">多方言唇形同步</text>
+  <text x="840" y="170" text-anchor="middle" font-size="9" fill="#555555">电影级相机控制</text>
+  <text x="840" y="190" text-anchor="middle" font-size="9" fill="#555555">叙事连贯</text>
+  <text x="840" y="215" text-anchor="middle" font-size="8.5" fill="#999999">部署：豆包/即梦/火山</text>
+  <rect x="30" y="260" width="900" height="30" rx="6" fill="#FDE8EA"/>
+  <text x="480" y="280" text-anchor="middle" font-size="9.5" fill="#C7000B">注：三阶段训练框架明确公开，但各阶段具体数据量、步数、超参、GPU配置均为L4未披露；RLHF的~3×训练加速为论文明确声明</text>
+</svg>
+</div>
+
+<h3 id="train-compare-10">📊 与 Seedance 1.0 模块级对比</h3>
+<div class="detail-card">
+  <table>
+    <tr><th style="width:14%">对比维度</th><th style="width:30%">Seedance 1.0（已公开）</th><th style="width:30%">Seedance 1.5 pro（论文）</th><th style="width:14%">演进方向</th><th style="width:12%">披露等级</th></tr>
+    <tr>
+      <td><strong>预训练任务</strong></td>
+      <td>T2V / I2V / T2I 三任务统一，I2V占20%，渐进式训练课程（从短到长、从低到高分辨率）</td>
+      <td>T2VA / I2VA / T2V / I2V 四任务统一，混合模态预训练；具体任务比例、训练课程未披露</td>
+      <td><strong>升级</strong>（新增音视频联合任务）</td>
+      <td>1.0: L1<br>1.5: L2</td>
+    </tr>
+    <tr>
+      <td><strong>CT阶段</strong></td>
+      <td>独立CT阶段：I2V比例20%→40%，美学评分器+光流运动评估器筛选高质量数据，双Caption（长/短）混合训练，退火学习率调度</td>
+      <td>论文未明确提及独立CT阶段</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>SFT策略</strong></td>
+      <td>几百个类别定向收集高质量视频-文本对，模型合并（子集独立训练再合并为单一模型），早停防止过拟合</td>
+      <td>论文提到SFT阶段，具体数据构建、训练策略、是否使用模型合并均未披露</td>
+      <td>未披露</td>
+      <td>1.0: L2<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>预训练Infra</strong></td>
+      <td>torch.compile + 手写CUDA kernel（全局内存流量减&gt;90%）；HSDP + Ulysses序列并行；MLAC多级激活检查点；runtime-aware all-to-all负载均衡；meta tensor初始化；多级容错</td>
+      <td>论文未披露预训练基础设施的具体优化手段</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>后训练Infra</strong></td>
+      <td>动态内存管理框架（PyTorch hooks CPU offload + recompute + 防碎片）；FSDP + 序列并行（差异化并行度）；NCCL流管理；FSDP冻结参数内存管理</td>
+      <td>论文未披露后训练基础设施的具体优化手段</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+  </table>
+  <div class="purpose-box"><strong>对比小结：</strong>1.5训练整体的核心演进是<strong>预训练任务从3个扩展到4个（新增T2VA/I2VA音视频联合任务）</strong>。但1.5论文为Model Card形态，CT阶段是否存在、SFT具体策略、训练基础设施的所有优化手段（kernel融合/并行策略/内存管理/负载均衡）均为L4未披露，无法做技术细节级对比。1.0在训练infra方面的披露深度（HSDP+Ulysses+MLAC+all-to-all均衡+动态offload）远高于1.5。</div>
+</div>
+
+<!-- ⑤ 后训练RLHF -->
+<h2 id="rlhf-overall">⑤ 后训练过程深度拆解（音频感知 RLHF）</h2>
+
+<div class="detail-card">
+  <p>这是 Seedance 1.5 pro 相对 1.0 的重要升级。论文 §1 明确："we develop a post-training framework that includes Supervised Fine-Tuning (SFT) on high-quality audio-visual datasets and a custom RLHF algorithm tailored for audio-visual contexts."</p>
+  <p>核心特点：</p>
+  <ol>
+    <li><strong>音频感知</strong>：Reward Model 包含音频维度，不仅评估视觉质量，还评估音频质量和音画同步</li>
+    <li><strong>多维 Reward</strong>：继承1.0的三维度RM（Foundational/Motion/Aesthetic），新增音频相关维度</li>
+    <li><strong>~3× 训练加速</strong>："targeted infrastructure optimizations to our RLHF pipeline have yielded a nearly 3× improvement in training speed"</li>
+    <li><strong>引用工作</strong>：Flow-GRPO [12]、DanceGRPO [11]、RewardDance [13]、UniFL [14]——表明可能使用GRPO类算法或直接reward最大化</li>
+  </ol>
+  <p><span class="tag tag-l2">L2</span> 音频感知RLHF框架和~3×加速明确公开；<span class="tag tag-l4">L4</span> RM具体架构、reward维度权重、优化算法选择、训练细节均未披露</p>
+</div>
+
+<h3 id="rlhf-data">5.1 反馈数据基础设施</h3>
+<div class="detail-card">
+  <p>论文未详细描述RLHF反馈数据。基于1.0的RLHF数据基础设施和1.5的音频需求推断：</p>
+  <ul>
+    <li><strong>偏好数据</strong>：人类标注者对生成的音视频样本进行偏好排序（A vs B），评估维度包括视觉质量、运动、美学、音频质量、音画同步</li>
+    <li><strong>音频标注</strong>：新增音频维度的偏好标注——语音清晰度、音色自然度、音效匹配度、唇形同步度</li>
+    <li><strong>多轮迭代</strong>：可能延续1.0的多轮迭代学习（生成模型和RM多轮迭代提升上限）</li>
+  </ul>
+  <p><span class="tag tag-l4">L4</span> 未披露：偏好数据量、标注者数量、标注维度定义、标注一致性指标</p>
+</div>
+
+<h3 id="rlhf-rm">5.2 多维 Reward Model 设计（含音频维度）</h3>
+<div class="detail-card">
+  <p>论文提到"multi-dimensional reward model"但未展开。基于1.0的三维度RM和1.5的音频需求，推断RM设计如下：</p>
+  <table>
+    <tr><th style="width:20%">Reward维度</th><th style="width:25%">评估内容</th><th style="width:25%">可能架构</th><th style="width:15%">来源</th><th style="width:15%">披露</th></tr>
+    <tr><td><strong>Foundational</strong></td><td>整体质量、文本对齐、物理合理性</td><td>VLM架构（视频+文本输入）</td><td>继承1.0</td><td><span class="tag tag-l3">L3</span></td></tr>
+    <tr><td><strong>Motion</strong></td><td>运动质量、流畅度、生动性</td><td>运动专用RM（光流/动作特征）</td><td>继承1.0</td><td><span class="tag tag-l3">L3</span></td></tr>
+    <tr><td><strong>Aesthetic</strong></td><td>视觉美学、构图、色彩</td><td>关键帧输入的美学评分器</td><td>继承1.0</td><td><span class="tag tag-l3">L3</span></td></tr>
+    <tr><td><strong>Audio Quality</strong>（新增）</td><td>语音清晰度、音色自然度、音效质量</td><td>音频编码器+评分头（推断）</td><td>1.5新增</td><td><span class="tag tag-l4">L4</span></td></tr>
+    <tr><td><strong>AV Sync</strong>（新增）</td><td>唇形-语音同步、音效-事件对齐</td><td>音视频联合编码器+同步评分（推断）</td><td>1.5新增</td><td><span class="tag tag-l4">L4</span></td></tr>
+  </table>
+  <h4>复合 Reward 公式（推断）</h4>
+  <p style="text-align:center; font-family:monospace; background:#F5F5F5; padding:12px; border-radius:6px; font-size:0.95em;">
+    R_total = α·R_foundational + β·R_motion + γ·R_aesthetic + δ·R_audio_quality + ε·R_av_sync
+  </p>
+  <p>其中 α, β, γ, δ, ε 为可学习或人工设定的权重。<span class="tag tag-l4">L4</span> 所有权重和RM架构细节未披露。</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 为什么需要音频维度的RM？如果RLHF只优化视觉reward，模型可能牺牲音频质量来提升视觉分数（如生成静音或低质量音频来减少计算负担），音频RM确保音频质量不被忽略；② 为什么需要独立的AV Sync RM？唇形同步是音视频联合生成的核心痛点，通用的audio quality RM无法精确评估唇形-语音对齐，需要专门的同步检测RM；③ 多维reward线性组合：各维度独立训练避免单维度主导，权重可调以平衡不同质量维度。</div>
+
+<h3 id="rlhf-flowchart">5.3 音频感知 RLHF 完整流程图</h3>
+<div class="svg-container">
+<svg viewBox="0 0 960 440" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs><marker id="arrrlhf" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555555"/></marker></defs>
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Seedance 1.5 pro 音频感知 RLHF 完整流程图</text>
+  <rect x="30" y="50" width="160" height="70" rx="8" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="110" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">SFT初始策略 π_SFT</text>
+  <text x="110" y="95" text-anchor="middle" font-size="9" fill="#555555">高质量音视频SFT后的模型</text>
+  <text x="110" y="110" text-anchor="middle" font-size="9" fill="#555555">双分支MMDiT</text>
+  <line x1="192" y1="85" x2="228" y2="85" stroke="#C7000B" stroke-width="2" marker-end="url(#arrrlhf)"/>
+  <rect x="230" y="50" width="160" height="70" rx="8" fill="#FFF3E6" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="310" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">采样生成音视频</text>
+  <text x="310" y="95" text-anchor="middle" font-size="9" fill="#555555">Prompt → 视频+音频</text>
+  <text x="310" y="110" text-anchor="middle" font-size="9" fill="#555555">模拟推理流水线</text>
+  <line x1="392" y1="85" x2="428" y2="85" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrrlhf)"/>
+  <rect x="430" y="40" width="200" height="180" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="530" y="65" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">多维 Reward Model</text>
+  <rect x="445" y="78" width="170" height="28" rx="4" fill="white" stroke="#00B578"/>
+  <text x="530" y="96" text-anchor="middle" font-size="9" fill="#333333">R_foundational（VLM架构）</text>
+  <rect x="445" y="110" width="170" height="28" rx="4" fill="white" stroke="#00B578"/>
+  <text x="530" y="128" text-anchor="middle" font-size="9" fill="#333333">R_motion（运动专用）</text>
+  <rect x="445" y="142" width="170" height="28" rx="4" fill="white" stroke="#00B578"/>
+  <text x="530" y="160" text-anchor="middle" font-size="9" fill="#333333">R_aesthetic（关键帧美学）</text>
+  <rect x="445" y="174" width="170" height="28" rx="4" fill="#E6F0FF" stroke="#0066B3"/>
+  <text x="530" y="192" text-anchor="middle" font-size="9" font-weight="bold" fill="#0066B3">R_audio_quality（新增）</text>
+  <rect x="445" y="206" width="170" height="8" rx="4" fill="#E6F0FF" stroke="#0066B3"/>
+  <line x1="632" y1="130" x2="668" y2="130" stroke="#00B578" stroke-width="2" marker-end="url(#arrrlhf)"/>
+  <rect x="670" y="50" width="140" height="160" rx="8" fill="#FAFAFA" stroke="#999999" stroke-width="1.5"/>
+  <text x="740" y="75" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">复合Reward</text>
+  <text x="740" y="100" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#C7000B">R = αR_f + βR_m</text>
+  <text x="740" y="115" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#C7000B">  + γR_a + δR_aq</text>
+  <text x="740" y="130" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#C7000B">  + εR_sync</text>
+  <text x="740" y="155" text-anchor="middle" font-size="8.5" fill="#999999">权重L4未披露</text>
+  <text x="740" y="175" text-anchor="middle" font-size="8.5" fill="#999999">标量reward信号</text>
+  <line x1="740" y1="212" x2="740" y2="248" stroke="#999999" stroke-width="2" marker-end="url(#arrrlhf)"/>
+  <rect x="640" y="250" width="200" height="70" rx="8" fill="#E6F0FF" stroke="#0066B3" stroke-width="2"/>
+  <text x="740" y="275" text-anchor="middle" font-size="11" font-weight="bold" fill="#0066B3">策略更新（直接最大化/GRPO）</text>
+  <text x="740" y="295" text-anchor="middle" font-size="9" fill="#555555">最大化 E[R_total]</text>
+  <text x="740" y="310" text-anchor="middle" font-size="9" fill="#555555">引用Flow-GRPO/DanceGRPO</text>
+  <line x1="640" y1="285" x2="310" y2="285" stroke="#0066B3" stroke-width="2" stroke-dasharray="5,3"/>
+  <line x1="310" y1="285" x2="310" y2="122" stroke="#0066B3" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrrlhf)"/>
+  <text x="475" y="278" text-anchor="middle" font-size="8.5" fill="#0066B3">多轮迭代（更新策略→重新采样）</text>
+  <rect x="30" y="250" width="280" height="120" rx="8" fill="#FFF8E6" stroke="#B8860B" stroke-width="1.5"/>
+  <text x="170" y="275" text-anchor="middle" font-size="11" font-weight="bold" fill="#B8860B">RLHF 基础设施优化（~3× 加速）</text>
+  <text x="170" y="300" text-anchor="middle" font-size="9" fill="#555555">• 采样/评估/更新流水线优化</text>
+  <text x="170" y="318" text-anchor="middle" font-size="9" fill="#555555">• RM推理并行化/批处理</text>
+  <text x="170" y="336" text-anchor="middle" font-size="9" fill="#555555">• 梯度累积/内存优化</text>
+  <text x="170" y="354" text-anchor="middle" font-size="9" fill="#555555">• 具体优化手段 L4未披露</text>
+  <rect x="30" y="390" width="810" height="35" rx="6" fill="#FDE8EA"/>
+  <text x="435" y="412" text-anchor="middle" font-size="9.5" fill="#C7000B">关键：音频维度RM（R_audio_quality + R_av_sync）是1.5 pro相对1.0的核心新增；~3×训练加速为论文明确声明；具体RM架构/权重/算法为L4未披露</text>
+</svg>
+</div>
+
+<h3 id="rlhf-algo">5.4 优化算法：四种 RLHF 算法对比</h3>
+<div class="detail-card">
+  <p>论文引用了 Flow-GRPO [12]、DanceGRPO [11]、RewardDance [13]、UniFL [14]，表明 1.5 pro 的 RLHF 算法可能基于 GRPO 类方法或直接 reward 最大化。1.0 论文明确对比了 DPO/PPO/GRPO/直接reward最大化并选择了直接reward最大化。1.5 pro 作为继任者，<span class="tag tag-l3">L3</span> 推断可能延续直接reward最大化或采用Flow-GRPO（适配Flow Matching的GRPO变体）。</p>
+
+  <h4>四种算法对比</h4>
+  <table>
+    <tr><th style="width:18%">算法</th><th style="width:22%">核心思想</th><th style="width:20%">优势</th><th style="width:20%">劣势</th><th style="width:20%">在视频生成中的表现</th></tr>
+    <tr>
+      <td><strong>DPO</strong></td>
+      <td>基于偏好对(y_w,y_l)，隐式奖励，无需在线采样</td>
+      <td>简单稳定，无需Critic</td>
+      <td>受限于偏好对质量，无法利用连续reward</td>
+      <td>1.0对比：非最优；适合图像，视频连续动作空间效果有限</td>
+    </tr>
+    <tr>
+      <td><strong>PPO</strong></td>
+      <td>Actor-Critic，优势函数估计，需要Critic网络</td>
+      <td>连续reward可用，理论成熟</td>
+      <td>训练不稳定，Critic增加显存，扩散连续动作空间困难</td>
+      <td>1.0对比：非最优；视频生成中训练不稳定</td>
+    </tr>
+    <tr>
+      <td><strong>GRPO</strong></td>
+      <td>组内采样，相对优势=reward-组均值，免Critic</td>
+      <td>省显存，适合大batch，Flow-GRPO适配流匹配</td>
+      <td>需组内多样样本，对采样策略敏感</td>
+      <td>DanceGRPO/Flow-GRPO专为视频/流匹配设计，1.5引用</td>
+    </tr>
+    <tr>
+      <td><strong>直接Reward最大化</strong></td>
+      <td>模拟推理，RM评估，直接预测x0，最大化复合reward</td>
+      <td>最简单，无需Critic，充分利用多维连续reward，多轮迭代稳定</td>
+      <td>需要高质量RM，reward hacking风险</td>
+      <td>1.0对比：最优（"most efficient and effective"）；1.5推断可能延续</td>
+    </tr>
+  </table>
+
+  <h4>数值例子：直接 Reward 最大化的一步更新</h4>
+  <div class="detail-card" style="border-left-color:#00B578;">
+    <p>假设一个 batch 有 4 个音视频样本，多维 RM 评分如下：</p>
+    <table>
+      <tr><th>样本</th><th>R_foundational</th><th>R_motion</th><th>R_aesthetic</th><th>R_audio</th><th>R_av_sync</th><th>R_total (权重均等)</th></tr>
+      <tr><td>样本A</td><td>0.82</td><td>0.75</td><td>0.88</td><td>0.70</td><td>0.65</td><td>0.760</td></tr>
+      <tr><td>样本B</td><td>0.78</td><td>0.82</td><td>0.75</td><td>0.85</td><td>0.90</td><td>0.820</td></tr>
+      <tr><td>样本C</td><td>0.65</td><td>0.60</td><td>0.70</td><td>0.55</td><td>0.50</td><td>0.600</td></tr>
+      <tr><td>样本D</td><td>0.88</td><td>0.70</td><td>0.82</td><td>0.78</td><td>0.72</td><td>0.780</td></tr>
+    </table>
+    <p>直接 reward 最大化的目标是调整模型参数 θ，使 E[R_total] 上升。使用策略梯度：</p>
+    <p style="text-align:center; font-family:monospace; background:#F5F5F5; padding:8px; border-radius:4px; font-size:0.9em;">
+      ∇θ E[R] ≈ (1/N) Σ_i R_total_i · ∇θ log π_θ(x_i | prompt)
+    </p>
+    <p>样本B（R=0.820）和D（R=0.780）的梯度被放大，样本C（R=0.600）的梯度被抑制，模型逐渐偏向生成高reward的音视频样本。<span class="tag tag-l4">L4</span> 此为原理性示例，非论文实际数据。</p>
+  </div>
+  <p><span class="tag tag-l4">L4</span> 论文未披露1.5 pro具体使用哪种算法、是否有算法对比实验、超参设置</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 为什么1.5引用Flow-GRPO/DanceGRPO？这些是专为视频生成和Flow Matching设计的RLHF算法变体，比通用PPO更适配扩散模型的连续动作空间；② 为什么可能延续直接reward最大化？1.0已证明在扩散模型上直接最大化优于DPO/PPO/GRPO，1.5作为继任者大概率延续此选择，同时参考GRPO的组内采样技巧；③ 音频感知RLHF的关键是RM必须包含音频维度，否则RLHF会牺牲音频质量来提升视觉分数。</div>
+
+<h4>RLHF 四种算法对比示意图</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">扩散模型 RLHF 四种优化算法对比（Seedance 1.5 pro 推断：直接最大化或Flow-GRPO）</text>
+  <rect x="20" y="50" width="210" height="170" rx="8" fill="white" stroke="#999999" stroke-width="1.5"/>
+  <rect x="20" y="50" width="210" height="28" rx="8" fill="#CCCCCC"/>
+  <text x="125" y="69" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">DPO（偏好对优化）</text>
+  <text x="125" y="95" text-anchor="middle" font-size="9.5" fill="#555">基于偏好对(y_w, y_l)</text>
+  <text x="125" y="112" text-anchor="middle" font-size="9.5" fill="#555">隐式奖励，无需在线采样</text>
+  <text x="125" y="132" text-anchor="middle" font-size="9" fill="#C7000B">✗ 受限于偏好对质量</text>
+  <text x="125" y="149" text-anchor="middle" font-size="9" fill="#C7000B">✗ 无法利用连续reward</text>
+  <text x="125" y="166" text-anchor="middle" font-size="9" fill="#C7000B">✗ 视频连续动作空间效果有限</text>
+  <text x="125" y="195" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#999">1.0对比：非最优</text>
+  <rect x="250" y="50" width="210" height="170" rx="8" fill="white" stroke="#999999" stroke-width="1.5"/>
+  <rect x="250" y="50" width="210" height="28" rx="8" fill="#CCCCCC"/>
+  <text x="355" y="69" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">PPO（Actor-Critic）</text>
+  <text x="355" y="95" text-anchor="middle" font-size="9.5" fill="#555">优势函数A(s,a)</text>
+  <text x="355" y="112" text-anchor="middle" font-size="9.5" fill="#555">需要Critic价值网络</text>
+  <text x="355" y="132" text-anchor="middle" font-size="9" fill="#C7000B">✗ 训练不稳定</text>
+  <text x="355" y="149" text-anchor="middle" font-size="9" fill="#C7000B">✗ Critic增加显存/计算</text>
+  <text x="355" y="166" text-anchor="middle" font-size="9" fill="#C7000B">✗ 扩散连续动作空间困难</text>
+  <text x="355" y="195" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#999">1.0对比：非最优</text>
+  <rect x="480" y="50" width="210" height="170" rx="8" fill="white" stroke="#999999" stroke-width="1.5"/>
+  <rect x="480" y="50" width="210" height="28" rx="8" fill="#E6F0FF"/>
+  <text x="585" y="69" text-anchor="middle" font-size="11" font-weight="bold" fill="#0066B3">GRPO / Flow-GRPO</text>
+  <text x="585" y="95" text-anchor="middle" font-size="9.5" fill="#555">组内采样，免Critic</text>
+  <text x="585" y="112" text-anchor="middle" font-size="9.5" fill="#555">相对优势=reward-组均值</text>
+  <text x="585" y="132" text-anchor="middle" font-size="9" fill="#00875A">✓ 省显存，适合大batch</text>
+  <text x="585" y="149" text-anchor="middle" font-size="9" fill="#00875A">✓ Flow-GRPO适配流匹配</text>
+  <text x="585" y="166" text-anchor="middle" font-size="9" fill="#C7000B">✗ 需组内多样样本</text>
+  <text x="585" y="195" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#0066B3">1.5引用：DanceGRPO/Flow-GRPO</text>
+  <rect x="710" y="45" width="230" height="180" rx="8" fill="#E6F7F0" stroke="#00B578" stroke-width="2.5"/>
+  <rect x="710" y="45" width="230" height="28" rx="8" fill="#00B578"/>
+  <text x="825" y="64" text-anchor="middle" font-size="11" font-weight="bold" fill="white">直接 Reward 最大化 ✓</text>
+  <text x="825" y="92" text-anchor="middle" font-size="9.5" fill="#333">模拟推理→RM评估→直接预测x0</text>
+  <text x="825" y="109" text-anchor="middle" font-size="9.5" fill="#333">最大化复合reward线性组合</text>
+  <text x="825" y="129" text-anchor="middle" font-size="9" fill="#00875A">✓ 最简单，无需Critic</text>
+  <text x="825" y="146" text-anchor="middle" font-size="9" fill="#00875A">✓ 充分利用多维连续reward</text>
+  <text x="825" y="163" text-anchor="middle" font-size="9" fill="#00875A">✓ 多轮迭代稳定可控</text>
+  <text x="825" y="180" text-anchor="middle" font-size="9" fill="#00875A">✓ 1.0证明扩散模型上最优</text>
+  <text x="825" y="205" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#00875A">1.0选择：最优 ｜ 1.5推断：延续</text>
+  <rect x="20" y="240" width="920" height="60" rx="8" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="480" y="263" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">Seedance 1.5 pro 复合 Reward 公式（含音频维度，直接最大化）</text>
+  <text x="480" y="285" text-anchor="middle" font-size="13" font-family="monospace" fill="#C7000B">R_total = α·R_f + β·R_m + γ·R_aes + δ·R_audio + ε·R_avsync</text>
+  <text x="480" y="302" text-anchor="middle" font-size="9" fill="#777">注：1.5论文引用Flow-GRPO/DanceGRPO/RewardDance，未明确最终算法选择；1.0已证明直接最大化最优，1.5推断延续或混合使用</text>
+</svg>
+</div>
+
+<h3 id="rlhf-infra">5.5 RLHF 基础设施优化（~3× 训练加速）</h3>
+<div class="detail-card">
+  <p>论文 §1 明确声明："Furthermore, targeted infrastructure optimizations to our RLHF pipeline have yielded a nearly 3× improvement in training speed."</p>
+  <p>这是 1.5 pro 的一个重要工程成果。RLHF 训练通常包含三个阶段：① 策略采样生成（需要完整推理）② RM 评估（需要RM推理）③ 策略更新（需要反向传播）。三个阶段都可能成为瓶颈。</p>
+  <p><span class="tag tag-l4">L4</span> 论文未披露具体优化手段，推断可能包括：</p>
+  <ul>
+    <li><strong>采样阶段</strong>：减少采样步数（与蒸馏模型配合）、批处理优化、KV缓存复用</li>
+    <li><strong>RM评估阶段</strong>：多RM并行推理、视频帧采样（非全帧评估）、音频RM和视觉RM并行</li>
+    <li><strong>更新阶段</strong>：梯度累积、混合精度、梯度检查点、优化器分片</li>
+    <li><strong>流水线并行</strong>：采样/评估/更新三阶段流水线重叠，减少等待</li>
+  </ul>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>RLHF训练速度是视频生成模型落地的关键瓶颈——一次RLHF迭代需要生成大量样本（每个样本需完整扩散推理）、用多个RM评估、再反向传播更新，单轮可能需要数小时。~3×加速意味着同样时间可以做3倍的迭代轮次，或同样迭代数只需1/3时间，这对快速迭代和降低成本至关重要。</div>
+
+<h3 id="rlhf-compare-10">📊 与 Seedance 1.0 模块级对比</h3>
+<div class="detail-card">
+  <table>
+    <tr><th style="width:14%">对比维度</th><th style="width:30%">Seedance 1.0（已公开）</th><th style="width:30%">Seedance 1.5 pro（论文）</th><th style="width:14%">演进方向</th><th style="width:12%">披露等级</th></tr>
+    <tr>
+      <td><strong>Reward Model</strong></td>
+      <td><strong>三维度</strong>：①Foundational RM（VLM架构，图文对齐+结构稳定性）②Motion RM（视频专用，运动幅度+生动性-伪影）③Aesthetic RM（关键帧图像输入，视觉美学）</td>
+      <td><strong>五维度</strong>：继承1.0三维度（Foundational/Motion/Aesthetic）+ 新增④Audio Quality（音频质量）⑤AV Sync（音视频同步）</td>
+      <td><strong>升级</strong>（3维→5维，新增音频）</td>
+      <td>1.0: L1<br>1.5: L2</td>
+    </tr>
+    <tr>
+      <td><strong>复合Reward</strong></td>
+      <td>线性组合：R = w₁·Foundational + w₂·Motion + w₃·Aesthetic；权重未披露</td>
+      <td>推断为五维线性组合，新增音频维度权重；具体公式和权重未披露</td>
+      <td>继承 + 扩展</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>优化算法</strong></td>
+      <td><strong>直接奖励最大化</strong>（直接最大化复合reward）；论文对比DPO/PPO/GRPO，证明直接最大化在扩散模型上最高效有效</td>
+      <td>论文引用Flow-GRPO[12]/DanceGRPO[11]/RewardDance[13]/UniFL[14]，最终选择的优化算法未明确披露</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>Base vs Refiner RLHF</strong></td>
+      <td><strong>两次RLHF</strong>：Base Model RLHF（优化Base生成质量）+ Super-Resolution RLHF（优化Refiner超分质量），分别独立进行</td>
+      <td>论文未明确区分Base/Refiner RLHF，是否仍采用两次RLHF未披露</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>RLHF训练加速</strong></td>
+      <td>未明确提及RLHF训练加速比</td>
+      <td><strong>~3× RLHF训练加速</strong>（论文§1明确声明），通过采样/评估/更新三阶段流水线重叠实现</td>
+      <td><strong>新增</strong></td>
+      <td>1.0: L4<br>1.5: L1</td>
+    </tr>
+    <tr>
+      <td><strong>多轮迭代</strong></td>
+      <td>扩散模型与RM之间多轮迭代学习（生成→评估→更新→再生成），比动态更新RM更稳定</td>
+      <td>推断继承多轮迭代策略，具体未披露</td>
+      <td>继承（推断）</td>
+      <td>1.0: L1<br>1.5: L3</td>
+    </tr>
+  </table>
+  <div class="purpose-box"><strong>对比小结：</strong>1.5 RLHF的核心演进是<strong>从纯视频三维度RM升级为音视频五维度RM</strong>——新增Audio Quality和AV Sync两个音频相关奖励维度，使RLHF能同时优化视频和音频质量。另一个明确升级是<strong>~3× RLHF训练加速</strong>（1.0未提及）。但1.5论文未披露最终选择的优化算法（1.0明确是直接奖励最大化并对比了DPO/PPO/GRPO）、是否仍采用Base+Refiner两次RLHF、五维权重的具体数值。</div>
+</div>
+
+<!-- ⑥ 推理加速 -->
+<h2 id="inference-accel">⑥ 推理加速与蒸馏</h2>
+
+<h3 id="inf-distill">6.1 多阶段蒸馏框架</h3>
+<div class="detail-card">
+  <p>论文 Abstract 明确："we develop a multi-stage distillation framework that reduces the number of function evaluations (NFE) by over 10× end-to-end, while maintaining model performance." 引用了 HyperSD [15]、Mean Flows [16]、RayFlow [17]。</p>
+  <p>这与 1.0 的三阶段蒸馏管线（TSCD → Score Distillation → 对抗蒸馏）一脉相承，1.5 pro 在此基础上扩展到音视频联合生成。</p>
+
+  <h4>多阶段蒸馏组成（推断，基于引用文献）</h4>
+  <table>
+    <tr><th style="width:20%">阶段</th><th style="width:25%">方法</th><th style="width:25%">作用</th><th style="width:15%">加速比</th><th style="width:15%">披露</th></tr>
+    <tr>
+      <td><strong>阶段1</strong></td>
+      <td>HyperSD / TSCD（Trajectory Shaping Consistency Distillation）</td>
+      <td>将多步扩散压缩为少步，学习轨迹一致性</td>
+      <td>~4×（推断）</td>
+      <td><span class="tag tag-l2">L2</span>引用</td>
+    </tr>
+    <tr>
+      <td><strong>阶段2</strong></td>
+      <td>Mean Flows</td>
+      <td>流匹配框架下的均值优化，进一步减少步数</td>
+      <td>叠加（推断）</td>
+      <td><span class="tag tag-l2">L2</span>引用</td>
+    </tr>
+    <tr>
+      <td><strong>阶段3</strong></td>
+      <td>RayFlow / Score Distillation</td>
+      <td>分数蒸馏，对抗性训练保持质量</td>
+      <td>叠加（推断）</td>
+      <td><span class="tag tag-l2">L2</span>引用</td>
+    </tr>
+    <tr>
+      <td><strong>总计</strong></td>
+      <td>三阶段组合 + 量化 + 并行</td>
+      <td>端到端推理加速</td>
+      <td><span class="highlight">&gt;10×</span></td>
+      <td><span class="tag tag-l1">L1</span>论文声明</td>
+    </tr>
+  </table>
+
+  <h4>蒸馏原理（TSCD 数学定义）</h4>
+  <p>一致性蒸馏的核心思想是学习一个学生模型，使其在任意时间步 t 的输出与教师模型在 t' 时刻的输出一致：</p>
+  <p style="text-align:center; font-family:monospace; background:#F5F5F5; padding:10px; border-radius:6px; font-size:0.9em;">
+    L_TSCD = E[‖ f_θ(x_t, t) - f_teacher(x_{t'}, t') ‖²]
+  </p>
+  <p>其中 t' 是从 t 出发经过教师模型多步推理后的时间步。通过这种方式，学生模型一步就能完成教师模型多步的工作。</p>
+  <p><span class="tag tag-l4">L4</span> 论文未披露：各阶段具体步数、蒸馏数据量、学习率、是否对音频分支单独蒸馏、质量评估具体分数</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 为什么用多阶段蒸馏而非单阶段？单阶段一致性蒸馏通常能达到4-8×加速，但进一步压缩会导致质量急剧下降；多阶段渐进式蒸馏（先粗压缩再精调）可以在保持质量的同时达到更高加速比；② 为什么引用HyperSD+Mean Flows+RayFlow的组合？这三种方法分别解决不同问题——TSCD解决轨迹一致性，Mean Flows优化流匹配路径，RayFlow用分数蒸馏保持细节，组合使用互补；③ 端到端&gt;10×加速是产品落地的关键——原始模型生成10s视频可能需要数分钟，10×加速后降至数十秒，达到可用水平。</div>
+
+<h4>多阶段蒸馏流水线图</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 280" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs><marker id="arrdist" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555555"/></marker></defs>
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Seedance 1.5 pro 多阶段蒸馏流水线（端到端 &gt;10× 加速）</text>
+  <rect x="20" y="60" width="170" height="160" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="105" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">原始教师模型</text>
+  <text x="105" y="110" text-anchor="middle" font-size="9" fill="#555555">双分支MMDiT</text>
+  <text x="105" y="128" text-anchor="middle" font-size="9" fill="#555555">视觉+音频联合</text>
+  <text x="105" y="150" text-anchor="middle" font-size="9" fill="#555555">NFE = 50步（推断）</text>
+  <text x="105" y="170" text-anchor="middle" font-size="9" fill="#555555">高质量但慢</text>
+  <text x="105" y="195" text-anchor="middle" font-size="8.5" fill="#999999">SFT+RLHF后模型</text>
+  <line x1="192" y1="140" x2="228" y2="140" stroke="#C7000B" stroke-width="2" marker-end="url(#arrdist)"/>
+  <rect x="230" y="60" width="160" height="160" rx="10" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="310" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">阶段1：HyperSD/TSCD</text>
+  <text x="310" y="110" text-anchor="middle" font-size="9" fill="#555555">轨迹一致性蒸馏</text>
+  <text x="310" y="128" text-anchor="middle" font-size="9" fill="#555555">50步 → ~12步</text>
+  <text x="310" y="148" text-anchor="middle" font-size="9" fill="#555555">学习f_θ(x_t,t)</text>
+  <text x="310" y="166" text-anchor="middle" font-size="9" fill="#555555">= f_teacher(x_t',t')</text>
+  <text x="310" y="190" text-anchor="middle" font-size="8.5" fill="#00875A">~4× 加速</text>
+  <line x1="392" y1="140" x2="428" y2="140" stroke="#FF6B00" stroke-width="2" marker-end="url(#arrdist)"/>
+  <rect x="430" y="60" width="160" height="160" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="510" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">阶段2：Mean Flows</text>
+  <text x="510" y="110" text-anchor="middle" font-size="9" fill="#555555">流匹配均值优化</text>
+  <text x="510" y="128" text-anchor="middle" font-size="9" fill="#555555">~12步 → ~6步</text>
+  <text x="510" y="148" text-anchor="middle" font-size="9" fill="#555555">优化ODE路径</text>
+  <text x="510" y="166" text-anchor="middle" font-size="9" fill="#555555">减少曲率</text>
+  <text x="510" y="190" text-anchor="middle" font-size="8.5" fill="#00875A">叠加加速</text>
+  <line x1="592" y1="140" x2="628" y2="140" stroke="#00B578" stroke-width="2" marker-end="url(#arrdist)"/>
+  <rect x="630" y="60" width="160" height="160" rx="10" fill="#E6F0FF" stroke="#0066B3" stroke-width="2"/>
+  <text x="710" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#0066B3">阶段3：RayFlow</text>
+  <text x="710" y="110" text-anchor="middle" font-size="9" fill="#555555">Score Distillation</text>
+  <text x="710" y="128" text-anchor="middle" font-size="9" fill="#555555">~6步 → 4-5步</text>
+  <text x="710" y="148" text-anchor="middle" font-size="9" fill="#555555">对抗训练保细节</text>
+  <text x="710" y="166" text-anchor="middle" font-size="9" fill="#555555">人类偏好对齐</text>
+  <text x="710" y="190" text-anchor="middle" font-size="8.5" fill="#00875A">叠加加速</text>
+  <line x1="792" y1="140" x2="828" y2="140" stroke="#0066B3" stroke-width="2" marker-end="url(#arrdist)"/>
+  <rect x="830" y="60" width="110" height="160" rx="10" fill="#E6F7F0" stroke="#00B578" stroke-width="2.5"/>
+  <text x="885" y="85" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">蒸馏模型</text>
+  <text x="885" y="110" text-anchor="middle" font-size="9" fill="#555555">4-5步推理</text>
+  <text x="885" y="130" text-anchor="middle" font-size="9" fill="#555555">+量化(INT8/FP8)</text>
+  <text x="885" y="150" text-anchor="middle" font-size="9" fill="#555555">+并行推理</text>
+  <text x="885" y="175" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">&gt;10× 端到端</text>
+  <text x="885" y="195" text-anchor="middle" font-size="8.5" fill="#999999">保持性能</text>
+  <rect x="20" y="240" width="920" height="30" rx="6" fill="#FDE8EA"/>
+  <text x="480" y="260" text-anchor="middle" font-size="9.5" fill="#C7000B">注：&gt;10×端到端加速为论文明确声明(L1)；各阶段步数/加速比为基于引用文献的推断(L3)，论文未披露具体数字</text>
+</svg>
+</div>
+
+<h3 id="inf-infra">6.2 推理基础设施优化（量化 + 并行）</h3>
+<div class="detail-card">
+  <p>论文提到"end-to-end"加速，意味着不仅包括模型蒸馏（减少NFE），还包括推理系统层面的优化。基于1.0的推理infra和业界通用方案推断：</p>
+  <ul>
+    <li><strong>量化</strong>：INT8/FP8量化推理，减少显存和计算（推断）</li>
+    <li><strong>模型并行</strong>：视觉分支和音频分支可并行推理（推断，双分支架构天然支持）</li>
+    <li><strong>VAE优化</strong>：1.0使用了VAE thin decoder（2×加速），1.5可能继承（推断）</li>
+    <li><strong>CPU/GPU协同</strong>：VAE解码/音频解码可offload到CPU或专用加速器（推断）</li>
+    <li><strong>批处理优化</strong>：多请求批处理，提高GPU利用率（推断）</li>
+  </ul>
+  <p><span class="tag tag-l4">L4</span> 论文未披露推理基础设施的具体优化手段</p>
+</div>
+
+<h3 id="inf-compare-10">📊 与 Seedance 1.0 模块级对比</h3>
+<div class="detail-card">
+  <table>
+    <tr><th style="width:14%">对比维度</th><th style="width:30%">Seedance 1.0（已公开）</th><th style="width:30%">Seedance 1.5 pro（论文）</th><th style="width:14%">演进方向</th><th style="width:12%">披露等级</th></tr>
+    <tr>
+      <td><strong>蒸馏框架</strong></td>
+      <td><strong>三阶段</strong>：①TSCD一致性蒸馏（HyperSD，4×加速）②Score Distillation（RayFlow，期望噪声一致性+轨迹级优化）③多步对抗蒸馏（APT扩展，人类偏好+判别器）</td>
+      <td><strong>三阶段</strong>：①HyperSD ②Mean Flows[16] ③RayFlow[17]；论文引用HyperSD[15]/Mean Flows[16]/RayFlow[17]</td>
+      <td><strong>升级</strong>（Mean Flows替代Score Distillation）</td>
+      <td>1.0: L1<br>1.5: L2</td>
+    </tr>
+    <tr>
+      <td><strong>端到端加速比</strong></td>
+      <td>~10×端到端加速（DiT 4× + VAE 2× + infra优化）；5秒1080p视频在NVIDIA L20上仅需41.4秒（API端到端）</td>
+      <td><strong>&gt;10×端到端加速</strong>（论文Abstract明确声明）；具体硬件/耗时未披露</td>
+      <td>持平 / 略优</td>
+      <td>1.0: L1<br>1.5: L1</td>
+    </tr>
+    <tr>
+      <td><strong>VAE优化</strong></td>
+      <td>Thin Decoder：profile发现靠近像素空间阶段主导延迟，收窄通道宽度设计瘦解码器，固定预训练编码器重训，2×加速，视觉质量无损失</td>
+      <td>论文未明确提及VAE优化，推断可能继承1.0 Thin Decoder</td>
+      <td>继承（推断）</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>推理Infra</strong></td>
+      <td>kernel fusion（+15%吞吐）、细粒度混合精度量化（Attention+Gemm）、AdaSpa稀疏（层次化块化结构）、自适应混合并行+FP8通信（通信降至Ulysses 1/4）、Async Offloading（&lt;2%性能降）、分布式VAE、PE流水线优化</td>
+      <td>论文未披露推理基础设施的具体优化手段；推断可能包括量化+并行+批处理</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>蒸馏验证</strong></td>
+      <td>蒸馏模型在四个专家评估维度（prompt对齐、运动质量、视觉保真度、源图一致性）上与原始模型取得可比结果</td>
+      <td>论文未提供蒸馏后质量验证的具体维度和数据</td>
+      <td>未披露</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+  </table>
+  <div class="purpose-box"><strong>对比小结：</strong>1.5推理加速的核心演进是<strong>蒸馏框架第二阶段从Score Distillation(RayFlow)升级为Mean Flows[16]</strong>，端到端加速比从~10×提升到&gt;10×。但1.5论文未披露VAE优化（1.0有Thin Decoder 2×加速的完整方案）、推理基础设施的所有优化手段（1.0有7项具体优化含量化/稀疏/FP8通信/Async Offload等）、蒸馏后质量验证数据。1.0在推理加速方面的披露深度远高于1.5。</div>
+</div>
+
+<!-- ⑦ 长视频/可控性/音频 -->
+<h2 id="long-video">⑦ 长视频 / 可控性 / 音频</h2>
+
+<h3 id="lv-lipsync">7.1 多语言方言唇形同步</h3>
+<div class="detail-card">
+  <p>这是 Seedance 1.5 pro 最突出的产品差异化能力。论文 §2.2 用大量篇幅展示了唇形同步能力：</p>
+  <h4>支持的语言/方言</h4>
+  <table>
+    <tr><th style="width:25%">语言/方言</th><th style="width:35%">特点</th><th style="width:25%">对比表现</th><th style="width:15%">披露</th></tr>
+    <tr><td><strong>普通话</strong></td><td>标准中文语音，对话/独白</td><td>超越Veo 3.1，无音节丢失或发音错误</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>四川话</strong></td><td>西南官话，独特语调</td><td>喜剧场景表现稳健</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>台湾国语</strong></td><td>台湾腔，软语调</td><td>角色对话场景自然</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>粤语</strong></td><td>九声六调，入声短促</td><td>香港电影风格场景</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>上海话</strong></td><td>吴语，浊音丰富</td><td>都市生活场景</td><td><span class="tag tag-l1">L1</span></td></tr>
+  </table>
+  <h4>技术机制（推断）</h4>
+  <p>唇形同步的实现依赖双分支MMDiT的跨模态联合模块：音频分支中的音素/韵律信息通过跨模态注意力传递给视觉分支，视觉分支在生成嘴部区域时"知道"当前时间步应该发什么音，从而生成对应的唇形。关键技术点：</p>
+  <ol>
+    <li><strong>音素时间对齐</strong>：音频latent中的音素信息与视觉latent的时间步精确对齐（跨模态联合模块的核心作用）</li>
+    <li><strong>说话人身份对应</strong>：论文 §2.1.4 提到"accurately corresponds to the number and identity of speaking characters"——模型能区分多个说话人并分别对齐唇形</li>
+    <li><strong>方言韵律建模</strong>：不同方言的语调/节奏差异需要音频分支有足够的方言建模能力，这依赖训练数据中的方言均衡</li>
+    <li><strong>表演节奏对齐</strong>：论文提到"precise alignment of lip movements, intonation, and performance rhythm"——不仅是唇形，还包括语调和表演节奏</li>
+  </ol>
+  <p><span class="tag tag-l4">L4</span> 论文未披露唇形同步的具体技术实现、是否使用显式音素标注、跨模态注意力的可视化分析</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 为什么多方言唇形同步是核心差异化？业界主流模型（Veo 3.1、Kling 2.6）主要支持英语和标准普通话，对方言的支持很弱；中国市场有大量方言内容需求（喜剧、地方戏曲、地域文化内容），1.5 pro 精准切入这个空白；② 为什么原生联合生成比后处理对齐（Wav2Lip）好？后处理对齐只能修改嘴部区域，无法保证整体面部表情和情感与语音一致；原生联合生成中唇形、表情、语调、情感是协同生成的，更自然；③ 论文特别提到京剧念白(Nianbai)和兰花指，说明模型对中国传统表演美学有专门建模。</div>
+
+<h4>多语言方言唇形同步机制图</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs><marker id="arrlip" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#555555"/></marker></defs>
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">多语言方言唇形同步机制（跨模态联合模块实现音素-唇形对齐）</text>
+  <rect x="30" y="55" width="180" height="80" rx="8" fill="#E6F0FF" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="120" y="80" text-anchor="middle" font-size="11" font-weight="bold" fill="#0066B3">音频分支输出</text>
+  <text x="120" y="102" text-anchor="middle" font-size="9" fill="#555555">音素序列 + 韵律特征</text>
+  <text x="120" y="118" text-anchor="middle" font-size="9" fill="#555555">方言语调 + 情感节奏</text>
+  <line x1="212" y1="95" x2="258" y2="95" stroke="#0066B3" stroke-width="2" marker-end="url(#arrlip)"/>
+  <rect x="260" y="50" width="200" height="90" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="360" y="75" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">跨模态联合模块</text>
+  <text x="360" y="97" text-anchor="middle" font-size="9" fill="#555555">音素时间戳 → 视觉时间步</text>
+  <text x="360" y="113" text-anchor="middle" font-size="9" fill="#555555">说话人身份 → 对应面部区域</text>
+  <text x="360" y="129" text-anchor="middle" font-size="9" fill="#555555">韵律/情感 → 表情强度</text>
+  <line x1="462" y1="95" x2="508" y2="95" stroke="#00B578" stroke-width="2" marker-end="url(#arrlip)"/>
+  <rect x="510" y="55" width="180" height="80" rx="8" fill="#FDE8EA" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="600" y="80" text-anchor="middle" font-size="11" font-weight="bold" fill="#C7000B">视觉分支生成</text>
+  <text x="600" y="102" text-anchor="middle" font-size="9" fill="#555555">对应唇形（口型/开合）</text>
+  <text x="600" y="118" text-anchor="middle" font-size="9" fill="#555555">面部表情 + 头部运动</text>
+  <line x1="692" y1="95" x2="738" y2="95" stroke="#C7000B" stroke-width="2" marker-end="url(#arrlip)"/>
+  <rect x="740" y="55" width="190" height="80" rx="8" fill="#E6F7F0" stroke="#00B578" stroke-width="2"/>
+  <text x="835" y="80" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">输出：音画同步</text>
+  <text x="835" y="102" text-anchor="middle" font-size="9" fill="#555555">唇形-语音精确对齐</text>
+  <text x="835" y="118" text-anchor="middle" font-size="9" fill="#555555">多说话人分别对齐</text>
+  <rect x="30" y="170" width="900" height="120" rx="8" fill="#FAFAFA" stroke="#CCCCCC"/>
+  <text x="480" y="195" text-anchor="middle" font-size="11" font-weight="bold" fill="#333333">支持的方言与场景示例</text>
+  <rect x="50" y="210" width="160" height="65" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="130" y="232" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">四川话</text>
+  <text x="130" y="250" text-anchor="middle" font-size="8.5" fill="#555555">喜剧小品："巴适得板"</text>
+  <text x="130" y="265" text-anchor="middle" font-size="8.5" fill="#555555">诙谐语调+夸张表情</text>
+  <rect x="230" y="210" width="160" height="65" rx="6" fill="white" stroke="#FF6B00"/>
+  <text x="310" y="232" text-anchor="middle" font-size="10" font-weight="bold" fill="#8B6914">粤语</text>
+  <text x="310" y="250" text-anchor="middle" font-size="8.5" fill="#555555">港片对白："做人嘛"</text>
+  <text x="310" y="265" text-anchor="middle" font-size="8.5" fill="#555555">九声六调+入声唇形</text>
+  <rect x="410" y="210" width="160" height="65" rx="6" fill="white" stroke="#00B578"/>
+  <text x="490" y="232" text-anchor="middle" font-size="10" font-weight="bold" fill="#00875A">台湾国语</text>
+  <text x="490" y="250" text-anchor="middle" font-size="8.5" fill="#555555">偶像剧："真的假的啦"</text>
+  <text x="490" y="265" text-anchor="middle" font-size="8.5" fill="#555555">软语调+可爱表情</text>
+  <rect x="590" y="210" width="160" height="65" rx="6" fill="white" stroke="#C7000B"/>
+  <text x="670" y="232" text-anchor="middle" font-size="10" font-weight="bold" fill="#C7000B">上海话</text>
+  <text x="670" y="250" text-anchor="middle" font-size="8.5" fill="#555555">都市剧："侬好呀"</text>
+  <text x="670" y="265" text-anchor="middle" font-size="8.5" fill="#555555">吴语浊音+温婉表情</text>
+  <rect x="770" y="210" width="140" height="65" rx="6" fill="white" stroke="#999999"/>
+  <text x="840" y="232" text-anchor="middle" font-size="10" font-weight="bold" fill="#666666">京剧念白</text>
+  <text x="840" y="250" text-anchor="middle" font-size="8.5" fill="#555555">Nianbai韵律</text>
+  <text x="840" y="265" text-anchor="middle" font-size="8.5" fill="#555555">兰花指+眼神</text>
+</svg>
+</div>
+
+<h3 id="lv-camera">7.2 电影级相机控制</h3>
+<div class="detail-card">
+  <p>论文 §2.3 展示了 1.5 pro 的自主相机调度能力：</p>
+  <h4>支持的相机运动</h4>
+  <table>
+    <tr><th style="width:25%">相机运动</th><th style="width:35%">描述</th><th style="width:25%">效果</th><th style="width:15%">披露</th></tr>
+    <tr><td><strong>Dolly Zoom</strong></td><td>希区柯克变焦：镜头推拉同时变焦，背景空间扭曲</td><td>增强悬疑/紧张感，主角尺寸不变背景拉伸</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>连续长镜头</strong></td><td>无剪辑的连续镜头运动</td><td>沉浸感，一镜到底叙事</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>轨道运镜</strong></td><td>沿轨道平滑移动</td><td>稳定流畅的横向/纵向跟随</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td><strong>弧形运镜</strong></td><td>围绕主体弧形移动</td><td>360°展示主体，电影感</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td><strong>场景转场</strong></td><td>电影级场景过渡</td><td>匹配剪辑/淡入淡出等专业转场</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td><strong>专业调色</strong></td><td>电影级色彩分级</td><td>青橙色调/复古色调等风格</td><td><span class="tag tag-l2">L2</span></td></tr>
+  </table>
+  <p><span class="tag tag-l4">L4</span> 论文未披露相机控制的技术实现——是通过prompt中的相机描述隐式控制，还是有显式的相机参数条件输入？1.0使用了MM-RoPE支持多镜头，1.5可能继承并增强。</p>
+</div>
+<div class="purpose-box"><strong>设计目的：</strong>① 为什么相机控制重要？普通视频生成模型的相机运动是随机的或简单的（推/拉/摇），无法满足专业内容创作需求；电影级相机控制（如Dolly Zoom）是专业摄影师的核心技能，模型具备这种能力意味着可以替代部分专业摄影工作；② Dolly Zoom是一个特别有挑战性的相机运动——它要求同时精确控制镜头位置和焦距，且主体在画面中的大小保持不变，这对模型的3D空间理解能力要求很高；③ 连续长镜头要求模型在长时间范围内保持空间一致性，不出现跳变或物体变形。</div>
+
+<h3 id="lv-narrative">7.3 语义理解与叙事连贯性</h3>
+<div class="detail-card">
+  <p>论文 §2.4 强调 1.5 pro 能"precisely analyze narrative context and ensure the overall coordination of audio and video segments throughout the video"：</p>
+  <ul>
+    <li><strong>叙事上下文分析</strong>：理解prompt中的故事结构、角色关系、情绪曲线</li>
+    <li><strong>音视频整体协调</strong>：不仅单帧音画同步，整段视频的音视频叙事节奏协调</li>
+    <li><strong>自主引入新主体</strong>："autonomously introduces new subjects that fit the genre"——根据内容类型自主生成符合场景的新角色/物体</li>
+    <li><strong>专业级内容创作支撑</strong>：为电影、短剧、广告等专业内容提供端到端生成能力</li>
+  </ul>
+  <p><span class="tag tag-l4">L4</span> 论文未披露叙事连贯性的具体技术实现——长视频一致性如何保证？是否使用了记忆机制或分段生成？</p>
+</div>
+
+<!-- ⑧ 安全合规 -->
+<h2 id="safety">⑧ 安全对齐与合规</h2>
+<div class="detail-card">
+  <p>论文（Model Card形态）<strong>未专门讨论安全对齐与合规</strong>。作为字节跳动的商用模型，1.5 pro 必然有安全机制，但论文未披露：</p>
+  <ul>
+    <li>输入内容安全过滤（文本/图像 prompt 审核）</li>
+    <li>生成内容安全检测（NSFW/暴力/敏感内容）</li>
+    <li>音频内容安全（违规语音/敏感声音）</li>
+    <li>深度伪造防护（人脸生成限制、水印）</li>
+    <li>合规认证（生成内容标识、版权）</li>
+  </ul>
+  <p><span class="tag tag-l4">L4</span> 论文完全未涉及安全合规章节，以上为基于商用模型通用要求的推断。</p>
+</div>
+
+<!-- ⑨ 评测体系 -->
+<h2 id="evaluation">⑨ 评测体系</h2>
+
+<h3 id="eval-bench">9.1 SeedVideoBench 1.5</h3>
+<div class="detail-card">
+  <p>论文使用 <strong>SeedVideoBench 1.5</strong> 作为评测基准，这是字节跳动 Seed 团队自研的评测套件，在 1.0 的 SeedVideoBench 基础上扩展了音频评测维度。</p>
+  <p>评测方法：<strong>人类偏好研究（Human Preference Study）</strong>，标注者对不同模型的生成结果进行盲评对比。</p>
+  <p>对比基线：Kling 2.5、Kling 2.6、Veo 3.1、Wan 2.5、Sora 2、Seedance 1.0 Pro</p>
+  <p><span class="tag tag-l2">L2</span> 评测框架公开；<span class="tag tag-l4">L4</span> 评测集具体规模、标注者数量、标注一致性指标未披露</p>
+</div>
+
+<h3 id="eval-video">9.2 视频评测指标</h3>
+<div class="detail-card">
+  <table>
+    <tr><th style="width:25%">指标</th><th style="width:35%">评估内容</th><th style="width:25%">1.5 pro 表现</th><th style="width:15%">披露</th></tr>
+    <tr><td><strong>Motion Quality</strong></td><td>运动质量、流畅度、生动性</td><td>包含 Video Vividness 子指标</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td><strong>Video Vividness</strong></td><td>视频生动性（1.5新增子指标）</td><td>针对"慢动作增强稳定性"通病设计</td><td><span class="tag tag-l2">L2</span></td></tr>
+    <tr><td><strong>Prompt Following</strong></td><td>文本指令遵循、语义对齐</td><td>T2V绝对评测中alignment领先（Figure 3）</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>Instruction Following</strong></td><td>复杂指令遵循（多主体/多动作）</td><td>领先位置</td><td><span class="tag tag-l1">L1</span></td></tr>
+  </table>
+</div>
+
+<h3 id="eval-audio">9.3 音频评测指标（1.5 新增）</h3>
+<div class="detail-card">
+  <p>这是 SeedVideoBench 1.5 相对 1.0 的核心扩展——新增了完整的音频评测维度：</p>
+  <table>
+    <tr><th style="width:28%">指标</th><th style="width:37%">评估内容</th><th style="width:20%">1.5 pro 表现</th><th style="width:15%">披露</th></tr>
+    <tr><td><strong>Audio Prompt Following</strong></td><td>音频指令遵循（语言/方言/音色/音效）</td><td>中文语音超越Veo 3.1</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>Audio Quality</strong></td><td>音频质量（清晰度/自然度/无噪声）</td><td>无音节丢失或发音错误</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>Audio-Visual Synchronization</strong></td><td>音画同步（唇形-语音/音效-事件）</td><td>超越Veo 3.1和Kling 2.6</td><td><span class="tag tag-l1">L1</span></td></tr>
+    <tr><td><strong>Audio Expressiveness</strong></td><td>音频情感表达（抑扬顿挫/情绪张力）</td><td>均衡可控；Sora 2更夸张生动</td><td><span class="tag tag-l1">L1</span></td></tr>
+  </table>
+</div>
+
+<h3 id="eval-results">9.4 人类评测结果与对比</h3>
+<div class="detail-card">
+  <h4>核心结论（论文 §2.1.4）</h4>
+  <ol>
+    <li><strong>中文语音生成</strong>：在中文对话、方言和独白合成方面表现出明显优势，相比 Veo 3.1、Wan 2.5、Kling 2.6 和 Sora 2 等模型，无音节丢失或发音错误</li>
+    <li><strong>唇音同步</strong>：准确对应说话角色的数量和身份，缓解了其他模型常见的嘴部运动冗余或遗漏问题，超越 Veo 3.1 和 Kling 2.6</li>
+    <li><strong>情感表达</strong>：Seedance 1.5 pro 的音频表达更为均衡和可控；Sora 2 在情感抑扬方面有时显得更加生动和夸张，适合需要强烈情感表达的场景</li>
+    <li><strong>T2V 指令遵循</strong>：在 T2V 绝对评测（Figure 3）中，alignment 维度处于领先位置，对比 Kling 2.5/2.6、Veo 3.1、Seedance 1.0 Pro</li>
+  </ol>
+  <p><span class="tag tag-l4">L4</span> 论文未提供具体的胜率数字、Elo 评分或统计显著性检验，仅有定性结论</p>
+</div>
+
+<h4>评测体系矩阵图</h4>
+<div class="svg-container">
+<svg viewBox="0 0 960 300" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <text x="480" y="25" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">SeedVideoBench 1.5 评测体系矩阵（视频+音频双维度）</text>
+  <rect x="30" y="50" width="420" height="220" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="240" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#C7000B">视频评测维度（继承1.0+增强）</text>
+  <rect x="50" y="90" width="180" height="70" rx="6" fill="white" stroke="#C7000B"/>
+  <text x="140" y="112" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">Motion Quality</text>
+  <text x="140" y="130" text-anchor="middle" font-size="8.5" fill="#555555">运动质量/流畅度</text>
+  <text x="140" y="148" text-anchor="middle" font-size="8.5" fill="#00875A">含Video Vividness(新)</text>
+  <rect x="250" y="90" width="180" height="70" rx="6" fill="white" stroke="#C7000B"/>
+  <text x="340" y="112" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">Prompt Following</text>
+  <text x="340" y="130" text-anchor="middle" font-size="8.5" fill="#555555">文本指令遵循</text>
+  <text x="340" y="148" text-anchor="middle" font-size="8.5" fill="#00875A">T2V alignment领先</text>
+  <rect x="50" y="175" width="180" height="70" rx="6" fill="white" stroke="#C7000B"/>
+  <text x="140" y="197" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">Instruction Following</text>
+  <text x="140" y="215" text-anchor="middle" font-size="8.5" fill="#555555">复杂指令/多主体</text>
+  <text x="140" y="233" text-anchor="middle" font-size="8.5" fill="#555555">领先位置</text>
+  <rect x="250" y="175" width="180" height="70" rx="6" fill="white" stroke="#C7000B"/>
+  <text x="340" y="197" text-anchor="middle" font-size="10" font-weight="bold" fill="#333333">视觉质量(推断)</text>
+  <text x="340" y="215" text-anchor="middle" font-size="8.5" fill="#555555">清晰度/美学/一致性</text>
+  <text x="340" y="233" text-anchor="middle" font-size="8.5" fill="#999999">论文未明确列出</text>
+  <rect x="480" y="50" width="450" height="220" rx="10" fill="#E6F0FF" stroke="#0066B3" stroke-width="2"/>
+  <text x="705" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#0066B3">音频评测维度（1.5 新增）</text>
+  <rect x="500" y="90" width="200" height="70" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="600" y="112" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">Audio Prompt Following</text>
+  <text x="600" y="130" text-anchor="middle" font-size="8.5" fill="#555555">语言/方言/音色/音效</text>
+  <text x="600" y="148" text-anchor="middle" font-size="8.5" fill="#00875A">中文语音超越Veo3.1</text>
+  <rect x="720" y="90" width="190" height="70" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="815" y="112" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">Audio Quality</text>
+  <text x="815" y="130" text-anchor="middle" font-size="8.5" fill="#555555">清晰度/自然度/无噪声</text>
+  <text x="815" y="148" text-anchor="middle" font-size="8.5" fill="#00875A">无音节丢失/发音错误</text>
+  <rect x="500" y="175" width="200" height="70" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="600" y="197" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">AV Synchronization</text>
+  <text x="600" y="215" text-anchor="middle" font-size="8.5" fill="#555555">唇形-语音/音效-事件</text>
+  <text x="600" y="233" text-anchor="middle" font-size="8.5" fill="#00875A">超越Veo3.1/Kling2.6</text>
+  <rect x="720" y="175" width="190" height="70" rx="6" fill="white" stroke="#0066B3"/>
+  <text x="815" y="197" text-anchor="middle" font-size="10" font-weight="bold" fill="#0066B3">Audio Expressiveness</text>
+  <text x="815" y="215" text-anchor="middle" font-size="8.5" fill="#555555">情感/抑扬/情绪张力</text>
+  <text x="815" y="233" text-anchor="middle" font-size="8.5" fill="#B8860B">均衡可控;Sora2更夸张</text>
+  <rect x="30" y="285" width="900" height="12" rx="4" fill="#FAFAFA"/>
+  <text x="480" y="295" text-anchor="middle" font-size="8" fill="#999999">评测方法：人类盲评 ｜ 对比基线：Kling2.5/2.6, Veo3.1, Wan2.5, Sora2, Seedance1.0Pro ｜ 具体胜率数字L4未披露</text>
+</svg>
+</div>
+
+<h3 id="eval-compare-10">📊 与 Seedance 1.0 模块级对比</h3>
+<div class="detail-card">
+  <table>
+    <tr><th style="width:14%">对比维度</th><th style="width:30%">Seedance 1.0（已公开）</th><th style="width:30%">Seedance 1.5 pro（论文）</th><th style="width:14%">演进方向</th><th style="width:12%">披露等级</th></tr>
+    <tr>
+      <td><strong>评测基准</strong></td>
+      <td>SeedVideoBench-1.0：T2V 300条prompt + I2V 300条prompt，与电影导演专家合作制定</td>
+      <td>SeedVideoBench 1.5：扩展音频维度，具体prompt数量未披露</td>
+      <td><strong>升级</strong>（1.0→1.5）</td>
+      <td>1.0: L1<br>1.5: L2</td>
+    </tr>
+    <tr>
+      <td><strong>视频评测维度</strong></td>
+      <td><strong>4维度</strong>：①Motion Quality（结构准确性/运动合理性/稳定性/生动性）②Prompt Following（动作响应/主体保真/风格一致/辅助实体/时序对齐/相机行为/环境描绘）③Aesthetic Quality（视觉纹理/AI感/材质细节/艺术表达）④Preservation仅I2V（主体一致/风格一致/材质保真/内容对齐/色彩光照）</td>
+      <td>推断继承1.0视频4维度，具体子项未详细披露</td>
+      <td>继承（推断）</td>
+      <td>1.0: L1<br>1.5: L3</td>
+    </tr>
+    <tr>
+      <td><strong>音频评测维度</strong></td>
+      <td>无（1.0不生成音频）</td>
+      <td><strong>4维度</strong>：①Speech Quality（语音清晰度/自然度）②Audio Fidelity（音效/音乐保真度）③Lip Sync（唇音同步）④Audio Expressiveness（情感/抑扬/情绪张力）</td>
+      <td><strong>新增</strong></td>
+      <td>1.0: N/A<br>1.5: L2</td>
+    </tr>
+    <tr>
+      <td><strong>对比基线</strong></td>
+      <td>Artificial Analysis Arena公开榜单：T2V Elo 1314（+61领先Veo 3 Preview），I2V Elo 1365（+125领先）</td>
+      <td>人类盲评对比：Kling2.5/2.6, Veo3.1, Wan2.5, Sora2, Seedance1.0Pro；具体胜率数字未披露</td>
+      <td>扩展基线</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>评测方式</strong></td>
+      <td>GSB（Good-Same-Bad）人工专家评测，详细评分标准</td>
+      <td>人类盲评，具体评分方法未详细披露</td>
+      <td>继承（推断）</td>
+      <td>1.0: L1<br>1.5: L4</td>
+    </tr>
+    <tr>
+      <td><strong>关键结论</strong></td>
+      <td>Artificial Analysis双榜第一（T2V+I2V），单一统一模型同时夺冠</td>
+      <td>中文语音超越Veo3.1；唇音同步超越Veo3.1/Kling2.6；Sora2情感表达更夸张；具体胜率L4未披露</td>
+      <td>新增音频维度结论</td>
+      <td>1.0: L1<br>1.5: L1</td>
+    </tr>
+  </table>
+  <div class="purpose-box"><strong>对比小结：</strong>1.5评测体系的核心演进是<strong>从纯视频4维度扩展到视频4维度+音频4维度</strong>——新增Speech Quality/Audio Fidelity/Lip Sync/Audio Expressiveness四个音频评测维度，评测基准从SeedVideoBench-1.0升级到1.5。但1.5论文未披露具体prompt数量、评分方法、各维度胜率数字（1.0有公开的Artificial Analysis Elo分数可核查）。1.5的关键性能结论（中文语音超Veo3.1、唇音同步超Veo3.1/Kling2.6）为定性描述，缺乏定量数据。</div>
+</div>
+
+<!-- ⑩ 创新点核查 -->
+<h2 id="innovation-check">⑩ 创新点核查表（含消融实验状态 + 通用/特有标注）</h2>
+
+<table>
+  <tr><th style="width:16%">自称创新</th><th style="width:7%">类型</th><th style="width:9%">通用/特有</th><th style="width:16%">消融实验状态</th><th style="width:20%">前作/竞品检查</th><th style="width:8%">第三方验证</th><th>判定</th></tr>
+  <tr>
+    <td><strong>双分支MMDiT音视频联合架构</strong>（视觉分支+音频分支+跨模态联合模块）</td>
+    <td>新架构</td>
+    <td><span class="tag tag-gen">通用</span>MMDiT基础；<span class="tag tag-spec">特有</span>双分支+跨模态联合</td>
+    <td>❌ 论文未提供数值消融<br>无单分支vs双分支对比<br>无跨模态模块消融<br><span class="tag tag-l4">L4</span></td>
+    <td>MMDiT来自SD3/FLUX[1]；音视频联合生成在Google Veo、Runway Gen-3等也有探索，但多为级联而非原生双分支；双分支+跨模态联合为Seedance特有组合</td>
+    <td>产品端可验证音画同步</td>
+    <td><span class="tag tag-l2">L2</span> 框架有差异化，无数值消融，有产品端定性验证</td>
+  </tr>
+  <tr>
+    <td><strong>音视频联合数据框架</strong>（多阶段策展+双模态Caption+infra）</td>
+    <td>新数据方法</td>
+    <td><span class="tag tag-gen">通用</span>各单步；<span class="tag tag-spec">特有</span>音视频联合组合</td>
+    <td>❌ 论文未提供消融<br>无各步骤增量贡献<br><span class="tag tag-l4">L4</span></td>
+    <td>视频数据策展在1.0已公开；音频Caption在TTS领域常见；音视频联合策展+一致性校验为1.5特有组合</td>
+    <td>间接验证（音画同步质量）</td>
+    <td><span class="tag tag-l2">L2</span> 组合创新，无消融</td>
+  </tr>
+  <tr>
+    <td><strong>音频感知RLHF</strong>（多维RM含音频维度+~3×训练加速）</td>
+    <td>新训练技巧</td>
+    <td><span class="tag tag-gen">通用</span>RLHF框架；<span class="tag tag-spec">特有</span>音频维度RM</td>
+    <td>❌ 论文未提供数值消融<br>无有/无音频RM对比<br>无算法对比实验<br>~3×加速有声明无细节<br><span class="tag tag-l4">L4</span></td>
+    <td>RLHF在视频生成中是趋势（1.0已用）；音频维度RM为1.5新增；引用Flow-GRPO[12]/DanceGRPO[11]/RewardDance[13]；~3×infra加速为工程成果</td>
+    <td>~3×加速为论文声明</td>
+    <td><span class="tag tag-l2">L2</span> 音频RM有差异化，~3×加速可核查，无数值消融</td>
+  </tr>
+  <tr>
+    <td><strong>多阶段蒸馏&gt;10×加速</strong>（HyperSD+Mean Flows+RayFlow）</td>
+    <td>工程优化</td>
+    <td><span class="tag tag-gen">通用</span>各蒸馏方法；<span class="tag tag-spec">特有</span>三阶段组合+音视频适配</td>
+    <td>⚠️ 有加速比声明无数值消融<br>"&gt;10× end-to-end"明确声明<br>无质量对比具体分数<br><span class="tag tag-l1">L1</span>加速比</td>
+    <td>HyperSD[15]/Mean Flows[16]/RayFlow[17]均为公开方法；1.0已有三阶段蒸馏；1.5扩展到音视频联合，组合方式可能有调整</td>
+    <td><span class="highlight">可核查</span>：&gt;10×端到端加速</td>
+    <td><span class="tag tag-l1">L1</span> 加速比可核查，各组件非独创，无质量消融数字</td>
+  </tr>
+  <tr>
+    <td><strong>多语言方言唇形同步</strong>（四川话/粤语/上海话/台湾国语）</td>
+    <td>新能力</td>
+    <td><span class="tag tag-spec">特有</span>多方言原生支持</td>
+    <td>✅ 有人类评测对比结论<br>超越Veo 3.1/Kling 2.6<br>无具体胜率数字<br><span class="tag tag-l1">L1</span>定性对比</td>
+    <td>Veo 3.1/Kling 2.6主要支持英语+普通话；方言支持为Seedance 1.5特有差异化；Sora 2情感表达更夸张但方言支持未提及</td>
+    <td>产品端可验证；论文定性对比</td>
+    <td><span class="tag tag-l1">L1</span> 有竞品对比结论，差异化明显，缺具体数字</td>
+  </tr>
+  <tr>
+    <td><strong>电影级相机控制</strong>（Dolly Zoom/连续长镜头/轨道/弧形）</td>
+    <td>新能力</td>
+    <td><span class="tag tag-spec">特有</span>Dolly Zoom等复杂运镜</td>
+    <td>❌ 论文未提供消融<br>仅有定性展示(Figure 5)<br><span class="tag tag-l2">L2</span>定性</td>
+    <td>简单相机运动（推/拉/摇）在各模型都有；Dolly Zoom（希区柯克变焦）和连续长镜头为高阶能力，竞品较少提及；1.0已有MM-RoPE多镜头支持</td>
+    <td>论文Figure 5定性展示</td>
+    <td><span class="tag tag-l2">L2</span> 有定性展示，差异化明显，无数值消融</td>
+  </tr>
+</table>
+
+<div class="conclusion">
+  <h3>创新点核查总结论</h3>
+  <p><strong>Seedance 1.5 pro 的核心差异化在于"原生音视频联合生成"（双分支MMDiT+跨模态联合）和"多语言方言唇形同步"</strong>——前者是架构层面的创新，后者是产品层面的差异化能力，两者都有竞品对比结论支撑但缺少数值消融。</p>
+  <p><strong>消融实验整体情况：</strong>6个核心创新点中，仅1个（&gt;10×加速）有明确的数值声明，1个（方言唇形同步）有竞品对比定性结论，1个（相机控制）有定性展示，其余3个完全无数值消融。论文为Model Card形态，消融实验覆盖严重不足。</p>
+  <p><strong>对 V0.1 方案的启示：</strong>① 双分支DiT+跨模态联合是音视频联合生成的可行架构路线；② 音频感知RLHF需要新增音频维度RM（音画同步+音频质量）；③ 多方言支持需要专门的数据均衡和Caption系统；④ 多阶段蒸馏组合（HyperSD+Mean Flows+RayFlow）是&gt;10×加速的有效方案。</p>
+</div>
+
+<div class="footer">
+  <p>调研时间：2026-09-14 ｜ 调研标准：《视频生成大模型-技术报告调研标准 V1.0》（深度版） ｜ 论文来源：arXiv:2512.13507（Model Card，11页，本地文本精读）</p>
+  <p>披露等级说明：L1 公开+可核查 ｜ L2 公开口径 ｜ L3 结构暗示/推断 ｜ L4 完全保密/未披露 ｜ <span class="tag tag-gen">通用</span>业界通用 ｜ <span class="tag tag-spec">特有</span>模型特有</p>
+  <p>本报告基于论文全文精读，所有技术细节均来自论文原文。因论文为Model Card形态，大量技术参数未披露，已明确标注L4。架构继承自Seedance 1.0（已精读）处均有标注。</p>
+  <p>SVG数量：9张（整体技术路线、数据管线、双分支MMDiT架构、训练流水线、音频感知RLHF流程、RLHF四种算法对比、多阶段蒸馏流水线、多语言方言唇形同步机制、评测体系矩阵）</p>
+</div>
+
+</body>
+</html>
