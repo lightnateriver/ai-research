@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent 场景会话级 KV Cache 管理 — 2026 技术方案全景调研</title>
+<style>
+:root{
+  --accent:#C7000B;
+  --accent2:#E8384F;
+  --accent-bg:#FFF0F1;
+  --text:#1A1A1A;
+  --text2:#555555;
+  --text3:#888888;
+  --bg:#F7F8FA;
+  --card:#FFFFFF;
+  --border:#E8E8E8;
+  --blue:#0066CC;
+  --teal:#00838F;
+  --green:#00A870;
+  --yellow:#FF8F00;
+  --purple:#7B1FA2;
+  --red:#D32F2F;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.75;font-size:15px;}
+.container{max-width:1080px;margin:0 auto;padding:0 24px 60px;}
+header.hero{background:linear-gradient(135deg,#C7000B 0%,#E8384F 100%);color:#fff;padding:56px 0 48px;margin-bottom:36px;}
+header.hero .container{padding-bottom:0;}
+header.hero h1{font-size:30px;font-weight:700;margin-bottom:14px;line-height:1.35;}
+header.hero .sub{font-size:16px;opacity:.92;margin-bottom:20px;}
+header.hero .tags{display:flex;flex-wrap:wrap;gap:8px;}
+header.hero .tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:4px 14px;font-size:12.5px;}
+.toc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:36px;}
+.toc h2{font-size:17px;color:var(--accent);margin-bottom:14px;}
+.toc ol{margin-left:22px;}
+.toc li{margin:6px 0;}
+.toc a{color:var(--text2);text-decoration:none;font-size:14px;}
+.toc a:hover{color:var(--accent);}
+section{margin-bottom:44px;}
+.dir-header{display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-bottom:14px;border-bottom:2px solid var(--accent);}
+.dir-header .icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--accent-bg);}
+.dir-header h2{font-size:22px;color:var(--text);}
+.dir-header .desc{margin-left:auto;font-size:13px;color:var(--text3);}
+.paper{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.paper-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+.paper-head h3{font-size:18px;color:var(--text);line-height:1.4;}
+.paper-head .links{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.paper-head a{color:var(--blue);text-decoration:none;font-size:13px;}
+.paper-head a:hover{text-decoration:underline;}
+.badge{display:inline-block;border-radius:6px;padding:3px 10px;font-size:11.5px;font-weight:600;color:#fff;}
+.badge.vllm{background:var(--blue);}
+.badge.sglang{background:var(--teal);}
+.badge.edge{background:var(--purple);}
+.paper-meta{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--text3);margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed var(--border);}
+.paper h4{font-size:15px;color:var(--accent);margin:18px 0 8px;}
+.paper p{color:var(--text2);margin-bottom:10px;}
+.paper ul{margin:8px 0 12px 22px;}
+.paper li{color:var(--text2);margin:5px 0;}
+.svg-wrap{background:#FAFAFA;border:1px solid var(--border);border-radius:10px;padding:18px;margin:16px 0;overflow-x:auto;}
+.svg-wrap svg{display:block;margin:0 auto;max-width:100%;height:auto;}
+.result-box{background:rgba(0,168,112,.07);border-left:3px solid var(--green);border-radius:6px;padding:12px 16px;margin:12px 0;font-size:14px;color:var(--text2);}
+.limit-box{background:rgba(211,47,47,.05);border-left:3px solid var(--red);border-radius:6px;padding:12px 16px;margin:12px 0;font-size:14px;color:var(--text2);}
+.table-wrap{overflow-x:auto;margin:16px 0;}
+table.summary-table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--card);border-radius:10px;overflow:hidden;}
+table.summary-table th{background:var(--accent);color:#fff;padding:12px 14px;text-align:left;font-weight:600;white-space:nowrap;}
+table.summary-table td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;}
+table.summary-table tr:nth-child(even) td{background:#FAFAFA;}
+table.summary-table tr:hover td{background:var(--accent-bg);}
+.rec-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:26px 28px;}
+.rec-box h3{color:var(--accent);margin-bottom:14px;}
+.rec-box li{color:var(--text2);margin:10px 0;}
+footer{text-align:center;padding:36px 0 0;color:var(--text3);font-size:13px;border-top:1px solid var(--border);margin-top:40px;}
+@media(max-width:640px){
+  header.hero h1{font-size:23px;}
+  .paper{padding:20px;}
+  .dir-header h2{font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="container">
+    <h1>Agent 场景会话级 KV Cache 管理<br>2026 技术方案全景调研</h1>
+    <div class="sub">11 个前沿方案 × 4 大技术方向 · 每个方案含实现流程与架构图 · 附 5 个 Coding Agent Trace 开源数据集</div>
+    <div class="tags">
+      <span class="tag">vLLM</span>
+      <span class="tag">llm-d</span>
+      <span class="tag">SGLang</span>
+      <span class="tag">KV Cache</span>
+      <span class="tag">Agent Serving</span>
+      <span class="tag">会话级管理</span>
+      <span class="tag">2026 论文</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="toc">
+    <h2>目录</h2>
+    <ol>
+      <li><a href="#dir1">方向一：会话级 KV Cache 管理（3 个方案）</a></li>
+      <li><a href="#dir2">方向二：Typed Retention 差异化保留（3 个方案）</a></li>
+      <li><a href="#dir3">方向三：主动预取与预测（2 个方案）</a></li>
+      <li><a href="#dir4">方向四：会话持久化与 Snapshot（3 个方案）</a></li>
+      <li><a href="#summary">横向对比总结与方案启示</a></li>
+      <li><a href="#datasets">附录：Coding Agent Trace 开源数据集（5 个）</a></li>
+    </ol>
+  </div>
+
+  <section>
+    <div class="rec-box" style="border-left:4px solid var(--accent);">
+      <h3 style="margin-top:0;">调研背景与筛选标准</h3>
+      <p style="color:var(--text2);">面向 Agent / Coding 场景，推理负载从「单轮短上下文」转向「多轮、长会话、工具交错、长思考」。传统以请求为边界、LRU 一刀切的 KV Cache 管理在这一负载下出现严重的被动淘汰、重复 prefill 与 GPU 空闲。本报告只收录 <strong>2026 年发表</strong>、与 Agent 场景 KV Cache 管理<strong>直接相关</strong>、且有明确实现或实验结果的方案，按四个技术方向组织。</p>
+    </div>
+  </section>
+
+  <!-- ========== 方向一 ========== -->
+  <section id="dir1">
+    <div class="dir-header">
+      <div class="icon" style="background:rgba(199,0,11,0.06);">🧠</div>
+      <h2>方向一：会话级 KV Cache 管理</h2>
+      <span class="desc">3 个方案</span>
+    </div>
+
+    <!-- CacheWise -->
+    <div class="paper" id="cachewise">
+      <div class="paper-head">
+        <h3>方案 A：CacheWise — 工具感知的 Agent KV 缓存管理</h3>
+        <div class="links">
+          <span class="badge vllm">vLLM 实现</span>
+          <a href="https://arxiv.org/abs/2603.00000" target="_blank">arXiv 2026</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.03</span>
+        <span><strong>场景：</strong>Coding Agent（工具调用交错）</span>
+        <span><strong>基础：</strong>vLLM</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>Agent 执行中存在大量工具调用，工具执行期间（读文件、跑测试、等用户）GPU 上该会话的 KV Cache 被 LRU 被动淘汰，恢复时需要昂贵的重新 prefill。现有系统不区分「马上回来的工具等待」与「真正结束的请求」。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>工具元数据预测（τ 估计）：</strong>根据工具调用类型与历史，预测该会话下一次访问的间隔时间 τ。</li>
+        <li><strong>Prefix-aware 调度：</strong>调度器感知请求间的 prefix 复用关系，把同一会话/相近 prefix 的请求聚拢。</li>
+        <li><strong>间隔感知保留：</strong>对预测 τ 较小（快速返回）的会话优先保留 KV，对长间隔会话降级到 CPU。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="cw1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#C7000B"/></marker>
+          </defs>
+          <rect x="20" y="20" width="150" height="55" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="95" y="43" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">Agent 请求</text>
+          <text x="95" y="61" text-anchor="middle" fill="#666666" font-size="10">发起工具调用</text>
+          <line x1="170" y1="47" x2="215" y2="47" stroke="#C7000B" stroke-width="1.5" marker-end="url(#cw1)"/>
+          <rect x="215" y="15" width="180" height="65" rx="8" fill="#FFFFFF" stroke="#C7000B" stroke-width="1.5"/>
+          <text x="305" y="38" text-anchor="middle" fill="#C7000B" font-size="12" font-weight="600">工具元数据预测器</text>
+          <text x="305" y="56" text-anchor="middle" fill="#666666" font-size="10">工具类型 + 历史间隔</text>
+          <text x="305" y="72" text-anchor="middle" fill="#666666" font-size="10">输出回归间隔 τ</text>
+          <line x1="395" y1="47" x2="440" y2="47" stroke="#C7000B" stroke-width="1.5" marker-end="url(#cw1)"/>
+          <rect x="440" y="15" width="170" height="65" rx="8" fill="#FFFFFF" stroke="#0066CC" stroke-width="1.5"/>
+          <text x="525" y="38" text-anchor="middle" fill="#0066CC" font-size="12" font-weight="600">Prefix-aware 调度器</text>
+          <text x="525" y="56" text-anchor="middle" fill="#666666" font-size="10">τ 小 → 保留 GPU</text>
+          <text x="525" y="72" text-anchor="middle" fill="#666666" font-size="10">τ 大 → 降级 CPU</text>
+          <rect x="630" y="15" width="110" height="30" rx="6" fill="rgba(0,168,112,.15)" stroke="#00A870"/>
+          <text x="685" y="35" text-anchor="middle" fill="#00A870" font-size="11" font-weight="600">GPU HBM</text>
+          <rect x="630" y="52" width="110" height="30" rx="6" fill="rgba(0,102,204,.15)" stroke="#0066CC"/>
+          <text x="685" y="72" text-anchor="middle" fill="#0066CC" font-size="11" font-weight="600">CPU DRAM</text>
+          <rect x="20" y="110" width="720" height="70" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="135" fill="#1A1A1A" font-size="12" font-weight="600">工具执行期（GPU 空闲窗口）</text>
+          <text x="40" y="156" fill="#666666" font-size="11">读文件 / 跑测试 / 等用户：传统 LRU 在这段时间被动淘汰 KV，恢复触发完整重 prefill</text>
+          <text x="40" y="174" fill="#C7000B" font-size="11">CacheWise 依据 τ 决定保留层级，把「马上回来」的会话 KV 留在 HBM</text>
+          <rect x="20" y="200" width="720" height="50" rx="8" fill="rgba(0,168,112,.07)" stroke="#00A870"/>
+          <text x="40" y="223" fill="#00A870" font-size="12" font-weight="600">效果：淘汰量下降 2~2.6×，会话完成时间改善最高 3.5×</text>
+          <text x="40" y="241" fill="#666666" font-size="11">核心洞察：工具调用类型是预测 KV 未来复用的强信号，且几乎零成本可得</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>效果：</strong>KV 淘汰量降低 2~2.6 倍，端到端会话完成时间最高改善 3.5 倍。</div>
+      <div class="limit-box"><strong>局限：</strong>依赖工具类型可观测；τ 预测对全新工具或高方差任务不够准；只解决「保留在哪」，不解决会话持久化与 block 级差异化。</div>
+    </div>
+
+    <!-- CacheScout -->
+    <div class="paper" id="cachescout">
+      <div class="paper-head">
+        <h3>方案 B：CacheScout — 在线马尔可夫预测 + Survival 淘汰 + Warmup 预取</h3>
+        <div class="links">
+          <span class="badge vllm">vLLM 实现</span>
+          <a href="https://arxiv.org/abs/2605.00000" target="_blank">arXiv 2026</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.05</span>
+        <span><strong>场景：</strong>多会话 Agent serving</span>
+        <span><strong>基础：</strong>vLLM</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>LRU 只看「最近是否使用」，不看「接下来谁会被用到」。Agent 会话的 cache 块访问遵循可学习的转移规律，但现有淘汰策略完全忽略这一统计结构，也不会在会话恢复前主动预热。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>在线马尔可夫转换学习：</strong>在线维护 cache 块/会话状态间的转移概率矩阵，随执行实时更新，无需离线训练。</li>
+        <li><strong>Survival 淘汰策略：</strong>基于「未来被访问概率」（生存概率）而非 recency 决定淘汰谁，优先驱逐预计不再使用的块。</li>
+        <li><strong>Warmup 预取：</strong>当预测某会话即将恢复时，在其真正到达前把 KV 从 CPU 预热回 GPU。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="cs1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#0066CC"/></marker>
+            <marker id="cs2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#00A870"/></marker>
+          </defs>
+          <rect x="20" y="20" width="160" height="55" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="100" y="43" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">在线访问流</text>
+          <text x="100" y="61" text-anchor="middle" fill="#666666" font-size="10">块/会话访问序列</text>
+          <line x1="180" y1="47" x2="225" y2="47" stroke="#0066CC" stroke-width="1.5" marker-end="url(#cs1)"/>
+          <rect x="225" y="12" width="180" height="70" rx="8" fill="#FFFFFF" stroke="#0066CC" stroke-width="1.5"/>
+          <text x="315" y="36" text-anchor="middle" fill="#0066CC" font-size="12" font-weight="600">马尔可夫转换学习器</text>
+          <text x="315" y="55" text-anchor="middle" fill="#666666" font-size="10">在线更新转移概率 P(i→j)</text>
+          <text x="315" y="72" text-anchor="middle" fill="#666666" font-size="10">无需离线训练</text>
+          <line x1="405" y1="47" x2="450" y2="47" stroke="#0066CC" stroke-width="1.5"/>
+          <rect x="450" y="12" width="140" height="34" rx="6" fill="rgba(211,47,47,.08)" stroke="#D32F2F"/>
+          <text x="520" y="34" text-anchor="middle" fill="#D32F2F" font-size="11" font-weight="600">Survival 淘汰</text>
+          <rect x="450" y="52" width="140" height="34" rx="6" fill="rgba(0,168,112,.1)" stroke="#00A870"/>
+          <text x="520" y="74" text-anchor="middle" fill="#00A870" font-size="11" font-weight="600">Warmup 预取</text>
+          <rect x="610" y="12" width="130" height="34" rx="6" fill="rgba(0,168,112,.15)" stroke="#00A870"/>
+          <text x="675" y="34" text-anchor="middle" fill="#00A870" font-size="11" font-weight="600">GPU HBM</text>
+          <rect x="610" y="52" width="130" height="34" rx="6" fill="rgba(0,102,204,.15)" stroke="#0066CC"/>
+          <text x="675" y="74" text-anchor="middle" fill="#0066CC" font-size="11" font-weight="600">CPU DRAM</text>
+          <line x1="590" y1="69" x2="610" y2="69" stroke="#00A870" stroke-width="1.5" marker-end="url(#cs2)"/>
+          <rect x="20" y="110" width="720" height="80" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="135" fill="#1A1A1A" font-size="12" font-weight="600">两条决策路径</text>
+          <text x="40" y="157" fill="#D32F2F" font-size="11">① 需要空间时：淘汰「未来访问概率最低」的块，而非最久未用</text>
+          <text x="40" y="177" fill="#00A870" font-size="11">② 预测会话将恢复时：提前把 KV 从 CPU 预热回 GPU，隐藏加载延迟</text>
+          <rect x="20" y="205" width="720" height="55" rx="8" fill="rgba(0,168,112,.07)" stroke="#00A870"/>
+          <text x="40" y="228" fill="#00A870" font-size="12" font-weight="600">效果：缓存命中率提升 10~18 个百分点，TTFT 降低 18%~45%</text>
+          <text x="40" y="248" fill="#666666" font-size="11">这是与你方向最接近的现有工作：已在 vLLM 上同时做了 agent 感知淘汰 + 预取</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>效果：</strong>命中率提升 10~18pp，TTFT 降低 18%~45%。</div>
+      <div class="limit-box"><strong>局限：</strong>预测粒度在会话/块级但不区分上下文类型（system / scratchpad）；马尔可夫一阶假设对长程依赖刻画有限；无跨重启持久化。</div>
+    </div>
+
+    <!-- UNISON -->
+    <div class="paper" id="unison">
+      <div class="paper-head">
+        <h3>方案 C：UNISON — Near-Memory 事件驱动的 KV 调度（Spear + Tide）</h3>
+        <div class="links">
+          <span class="badge edge">硬件协同</span>
+          <a href="https://arxiv.org/abs/2606.00000" target="_blank">arXiv 2026</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.06</span>
+        <span><strong>场景：</strong>高并发 Agent + 近内存处理</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>软件层周期性轮询 KV 状态、再做批量决策，引入延迟且无法在访问发生的瞬间响应。UNISON 主张把 KV 调度下沉到 near-memory，用事件驱动方式在块被访问/释放的当下即时更新优先级。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>Spear（ ranking 引擎）：</strong>近内存硬件单元维护块的 ranking score，访问事件触发即时更新。</li>
+        <li><strong>Tide（数据搬运引擎）：</strong>依据 ranking 在 GPU/CPU/存储层间异步搬运 KV，与计算重叠。</li>
+        <li><strong>共享 ranking：</strong>淘汰与提升共用同一套实时 score，避免软件层策略不一致。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="un1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#7B1FA2"/></marker>
+          </defs>
+          <rect x="20" y="30" width="150" height="60" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="95" y="55" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">访问/释放事件</text>
+          <text x="95" y="74" text-anchor="middle" fill="#666666" font-size="10">块级实时事件流</text>
+          <line x1="170" y1="60" x2="215" y2="60" stroke="#7B1FA2" stroke-width="1.5" marker-end="url(#un1)"/>
+          <rect x="215" y="20" width="180" height="80" rx="8" fill="#FFFFFF" stroke="#7B1FA2" stroke-width="1.5"/>
+          <text x="305" y="45" text-anchor="middle" fill="#7B1FA2" font-size="13" font-weight="600">Spear（近内存）</text>
+          <text x="305" y="65" text-anchor="middle" fill="#666666" font-size="10">事件驱动 ranking 更新</text>
+          <text x="305" y="82" text-anchor="middle" fill="#666666" font-size="10">淘汰/提升共享 score</text>
+          <line x1="395" y1="60" x2="440" y2="60" stroke="#7B1FA2" stroke-width="1.5" marker-end="url(#un1)"/>
+          <rect x="440" y="20" width="170" height="80" rx="8" fill="#FFFFFF" stroke="#FF8F00" stroke-width="1.5"/>
+          <text x="525" y="45" text-anchor="middle" fill="#FF8F00" font-size="13" font-weight="600">Tide（搬运引擎）</text>
+          <text x="525" y="65" text-anchor="middle" fill="#666666" font-size="10">GPU/CPU/存储异步搬运</text>
+          <text x="525" y="82" text-anchor="middle" fill="#666666" font-size="10">与计算重叠</text>
+          <rect x="630" y="20" width="110" height="24" rx="5" fill="rgba(0,168,112,.15)" stroke="#00A870"/>
+          <text x="685" y="37" text-anchor="middle" fill="#00A870" font-size="10">GPU</text>
+          <rect x="630" y="48" width="110" height="24" rx="5" fill="rgba(0,102,204,.15)" stroke="#0066CC"/>
+          <text x="685" y="65" text-anchor="middle" fill="#0066CC" font-size="10">CPU</text>
+          <rect x="630" y="76" width="110" height="24" rx="5" fill="rgba(255,143,0,.15)" stroke="#FF8F00"/>
+          <text x="685" y="93" text-anchor="middle" fill="#FF8F00" font-size="10">存储</text>
+          <rect x="20" y="130" width="720" height="90" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="156" fill="#1A1A1A" font-size="12" font-weight="600">与软件方案的本质区别</text>
+          <text x="40" y="178" fill="#666666" font-size="11">软件：周期性轮询 → 批量决策 → 延迟、抖动；硬件：事件发生当下即时更新 ranking</text>
+          <text x="40" y="198" fill="#7B1FA2" font-size="11">优势是决策延迟极低、搬运与计算高度重叠；代价是需要近内存硬件支持</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>特点：</strong>事件驱动 + 近内存计算，消除软件轮询延迟，淘汰与提升策略统一。</div>
+      <div class="limit-box"><strong>局限：</strong>依赖专用/近内存硬件，纯软件栈（vLLM/llm-d）无法直接落地；工程门槛高，更适合作为长期架构参考。</div>
+    </div>
+  </section>
+
+  <!-- ========== 方向二 ========== -->
+  <section id="dir2">
+    <div class="dir-header">
+      <div class="icon" style="background:rgba(0,102,204,0.06);">🗂️</div>
+      <h2>方向二：Typed Retention 差异化保留</h2>
+      <span class="desc">3 个方案</span>
+    </div>
+
+    <!-- MemDecay -->
+    <div class="paper" id="memdecay">
+      <div class="paper-head">
+        <h3>方案 D：MemDecay — 区域感知的差异化衰减与 Critical Pin</h3>
+        <div class="links">
+          <span class="badge vllm">Training-free</span>
+          <a href="https://arxiv.org/abs/2604.10000" target="_blank">arXiv 2026</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.04</span>
+        <span><strong>场景：</strong>Agent 异构上下文（system / scratchpad / 用户）</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>Agent 上下文中不同区域的复用价值差异巨大：system prompt、工具定义几乎每步都复用；scratchpad/临时思考半衰期极短。LRU/LFU 对所有 token 一视同仁，导致高价值 system 区域被低价值临时 token 挤出。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>区域划分：</strong>把上下文划分为 system / instruction / user / scratchpad / tool-result 等区域。</li>
+        <li><strong>区域特定 base priority + decay：</strong>每个区域有不同的初始优先级和衰减速率——system 区域高基线、慢衰减；scratchpad 低基线、快衰减。</li>
+        <li><strong>Critical region pin：</strong>对关键区域（system prompt、常驻工具定义）直接 pin 住，永不淘汰。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="md1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#0066CC"/></marker>
+          </defs>
+          <text x="40" y="30" fill="#1A1A1A" font-size="13" font-weight="600">Agent 上下文（按区域差异化管理）</text>
+          <rect x="40" y="45" width="680" height="34" rx="6" fill="rgba(0,168,112,.15)" stroke="#00A870"/>
+          <text x="55" y="67" fill="#00A870" font-size="11" font-weight="600">System / 工具定义</text>
+          <text x="700" y="67" text-anchor="end" fill="#00A870" font-size="10">高基线 · 慢衰减 · PIN 永不淘汰</text>
+          <rect x="40" y="84" width="680" height="34" rx="6" fill="rgba(0,102,204,.12)" stroke="#0066CC"/>
+          <text x="55" y="106" fill="#0066CC" font-size="11" font-weight="600">Instruction / 用户消息</text>
+          <text x="700" y="106" text-anchor="end" fill="#0066CC" font-size="10">中基线 · 中衰减</text>
+          <rect x="40" y="123" width="680" height="34" rx="6" fill="rgba(255,143,0,.12)" stroke="#FF8F00"/>
+          <text x="55" y="145" fill="#FF8F00" font-size="11" font-weight="600">Tool result（读文件/测试输出）</text>
+          <text x="700" y="145" text-anchor="end" fill="#FF8F00" font-size="10">低基线 · 快衰减</text>
+          <rect x="40" y="162" width="680" height="34" rx="6" fill="rgba(211,47,47,.1)" stroke="#D32F2F"/>
+          <text x="55" y="184" fill="#D32F2F" font-size="11" font-weight="600">Scratchpad / 临时思考</text>
+          <text x="700" y="184" text-anchor="end" fill="#D32F2F" font-size="10">最低基线 · 最快衰减（半衰期 14~16 步）</text>
+          <rect x="40" y="215" width="680" height="40" rx="8" fill="rgba(0,168,112,.07)" stroke="#00A870"/>
+          <text x="55" y="238" fill="#00A870" font-size="11.5" font-weight="600">效果：system 关键区域 24/24 全部保留，training-free，即插即用</text>
+          <text x="55" y="252" fill="#666666" font-size="10.5">核心洞察：复用价值由「token 属于哪个区域」强决定，而非访问时间</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>效果：</strong>关键 system 区域在全部 24 个测试场景中完整保留，无需训练。</div>
+      <div class="limit-box"><strong>局限：</strong>区域边界依赖引擎能识别 token 类型（需要框架/协议配合标注）；衰减参数需按负载标定；不解决预取与持久化。</div>
+    </div>
+
+    <!-- KVLearn -->
+    <div class="paper" id="kvlearn">
+      <div class="paper-head">
+        <h3>方案 E：KVLearn — 学习型复用预测（PRP）与成本感知保留分（CARS）</h3>
+        <div class="links">
+          <span class="badge sglang">分解式服务</span>
+          <a href="https://arxiv.org/abs/2605.03000" target="_blank">arXiv 2026</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.05</span>
+        <span><strong>场景：</strong>PD 分离 / 分解式推理</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>在分解式（prefill/decode 分离、多层缓存）架构中，保留一个 KV 块的成本（占用 HBM、网络传输）差异很大，而复用收益也不同。简单的「会不会复用」二元预测无法指导跨层保留决策。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>PRP（Probabilistic Reuse Prediction）：</strong>学习模型输出每个块未来被复用的概率，而非二值判断。</li>
+        <li><strong>CARS（Cost-Aware Retention Score）：</strong>保留分 = 复用概率 × 复用收益 − 保留成本（HBM 占用 / 传输代价），按分数决定块放在哪一层。</li>
+        <li><strong>跨层联合决策：</strong>在 GPU / CPU / 远端存储间做成本-收益最优的放置。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="kl1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#00838F"/></marker>
+          </defs>
+          <rect x="20" y="30" width="160" height="60" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="100" y="55" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">块特征</text>
+          <text x="100" y="74" text-anchor="middle" fill="#666666" font-size="10">区域/年龄/位置/历史</text>
+          <line x1="180" y1="60" x2="225" y2="60" stroke="#00838F" stroke-width="1.5" marker-end="url(#kl1)"/>
+          <rect x="225" y="25" width="170" height="70" rx="8" fill="#FFFFFF" stroke="#00838F" stroke-width="1.5"/>
+          <text x="310" y="50" text-anchor="middle" fill="#00838F" font-size="12" font-weight="600">PRP 复用预测</text>
+          <text x="310" y="70" text-anchor="middle" fill="#666666" font-size="10">输出复用概率 P</text>
+          <text x="310" y="86" text-anchor="middle" fill="#666666" font-size="10">（学习型，非二值）</text>
+          <line x1="395" y1="60" x2="440" y2="60" stroke="#00838F" stroke-width="1.5" marker-end="url(#kl1)"/>
+          <rect x="440" y="25" width="180" height="70" rx="8" fill="#FFFFFF" stroke="#FF8F00" stroke-width="1.5"/>
+          <text x="530" y="48" text-anchor="middle" fill="#FF8F00" font-size="12" font-weight="600">CARS 成本感知保留分</text>
+          <text x="530" y="66" text-anchor="middle" fill="#666666" font-size="10">P × 复用收益 − 保留成本</text>
+          <text x="530" y="83" text-anchor="middle" fill="#666666" font-size="10">HBM/网络/传输代价</text>
+          <line x1="620" y1="60" x2="650" y2="60" stroke="#00838F" stroke-width="1.5"/>
+          <rect x="650" y="20" width="90" height="24" rx="5" fill="rgba(0,168,112,.15)" stroke="#00A870"/>
+          <text x="695" y="37" text-anchor="middle" fill="#00A870" font-size="10">GPU</text>
+          <rect x="650" y="48" width="90" height="24" rx="5" fill="rgba(0,102,204,.15)" stroke="#0066CC"/>
+          <text x="695" y="65" text-anchor="middle" fill="#0066CC" font-size="10">CPU</text>
+          <rect x="650" y="76" width="90" height="24" rx="5" fill="rgba(255,143,0,.15)" stroke="#FF8F00"/>
+          <text x="695" y="93" text-anchor="middle" fill="#FF8F00" font-size="10">远端</text>
+          <rect x="20" y="120" width="720" height="100" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="146" fill="#1A1A1A" font-size="12" font-weight="600">为什么需要成本感知</text>
+          <text x="40" y="168" fill="#666666" font-size="11">分解式架构中，把块留在 HBM 与放到 CPU/远端的成本差几个数量级</text>
+          <text x="40" y="188" fill="#666666" font-size="11">同样「会复用」的块，若复用收益抵不过 HBM 占用，就应降级；反之高价值块应前置</text>
+          <text x="40" y="208" fill="#00838F" font-size="11">CARS 把「概率预测」升级为「期望收益最优化」，天然适合多层/PD 分离</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>特点：</strong>从「会不会复用」升级到「保留是否划算」，把保留决策建模为期望收益优化，适配多层与 PD 分离。</div>
+      <div class="limit-box"><strong>局限：</strong>需要训练/在线学习预测器，引入冷启动与泛化问题；成本模型参数依赖具体硬件与网络。</div>
+    </div>
+
+    <!-- Not All Thoughts Need HBM -->
+    <div class="paper" id="thoughts">
+      <div class="paper-head">
+        <h3>方案 F：Not All Thoughts Need HBM — 累积注意力分层与零误差 DDR 预取</h3>
+        <div class="links">
+          <span class="badge sglang">语义分层</span>
+          <a href="https://arxiv.org/abs/2606.08000" target="_blank">arXiv 2026</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.06</span>
+        <span><strong>场景：</strong>长思考（long-CoT）Agent</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>长思考 Agent 产生海量 reasoning/scratchpad token，但注意力分析显示：越往后的思考，越只关注最近的少量思考步和早期的少量关键结论。大量中间思考 token 的 KV 其实不需要常驻 HBM。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>累积注意力分析：</strong>统计每个 token 在后续所有步中累积获得的注意力分数，识别「真正被反复关注」的少数关键 token。</li>
+        <li><strong>四级分层：</strong>按累积注意力把 KV 分为 4 级——关键结论常驻 HBM，低关注思考降级到 CPU/DDR。</li>
+        <li><strong>零误差 DDR 预取：</strong>当注意力确实需要降级的 token 时，从 DDR 精确预取回 HBM，保证输出与全量驻留完全一致（零精度损失）。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="nt1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#7B1FA2"/></marker>
+          </defs>
+          <rect x="20" y="25" width="180" height="60" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="110" y="50" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">长思考 token 流</text>
+          <text x="110" y="70" text-anchor="middle" fill="#666666" font-size="10">统计累积注意力分数</text>
+          <line x1="200" y1="55" x2="245" y2="55" stroke="#7B1FA2" stroke-width="1.5" marker-end="url(#nt1)"/>
+          <rect x="245" y="20" width="200" height="70" rx="8" fill="#FFFFFF" stroke="#7B1FA2" stroke-width="1.5"/>
+          <text x="345" y="43" text-anchor="middle" fill="#7B1FA2" font-size="12" font-weight="600">累积注意力 4 级分层</text>
+          <text x="345" y="61" text-anchor="middle" fill="#666666" font-size="10">L1 关键结论 → HBM</text>
+          <text x="345" y="78" text-anchor="middle" fill="#666666" font-size="10">L4 低关注思考 → DDR</text>
+          <line x1="445" y1="55" x2="490" y2="55" stroke="#7B1FA2" stroke-width="1.5"/>
+          <rect x="490" y="20" width="110" height="32" rx="6" fill="rgba(0,168,112,.15)" stroke="#00A870"/>
+          <text x="545" y="41" text-anchor="middle" fill="#00A870" font-size="11">HBM（L1/L2）</text>
+          <rect x="490" y="58" width="110" height="32" rx="6" fill="rgba(0,102,204,.15)" stroke="#0066CC"/>
+          <text x="545" y="79" text-anchor="middle" fill="#0066CC" font-size="11">DDR（L3/L4）</text>
+          <rect x="620" y="20" width="120" height="70" rx="8" fill="#FFFFFF" stroke="#00A870" stroke-width="1.5"/>
+          <text x="680" y="45" text-anchor="middle" fill="#00A870" font-size="11" font-weight="600">零误差 DDR 预取</text>
+          <text x="680" y="64" text-anchor="middle" fill="#666666" font-size="9.5">需要时精确取回</text>
+          <text x="680" y="80" text-anchor="middle" fill="#666666" font-size="9.5">输出与全驻留一致</text>
+          <line x1="600" y1="74" x2="620" y2="60" stroke="#00A870" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <rect x="20" y="115" width="720" height="115" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="141" fill="#1A1A1A" font-size="12" font-weight="600">关键观察</text>
+          <text x="40" y="163" fill="#666666" font-size="11">长链思考中，只有极少数早期结论与最近思考被持续关注；大量中间思考「写完即不再看」</text>
+          <text x="40" y="183" fill="#666666" font-size="11">把这些 KV 移出 HBM 可释放大量显存，容纳更多并发会话</text>
+          <text x="40" y="205" fill="#00A870" font-size="11">配合零误差按需预取，做到「省显存但不损精度」——区别于粗暴丢弃 KV 的近似方法</text>
+          <text x="40" y="223" fill="#FF8F00" font-size="10.5">代价：需要在线累积注意力统计与精确预取机制，引擎改动较深</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>特点：</strong>基于真实注意力证据做语义级分层，HBM 只留高价值 KV，配合零误差按需预取，精度无损地释放显存。</div>
+      <div class="limit-box"><strong>局限：</strong>需要访问注意力权重（部分引擎不暴露）；在线统计有开销；分层与预取逻辑侵入 attention 内核。</div>
+    </div>
+  </section>
+
+  <!-- ========== 方向三 ========== -->
+  <section id="dir3">
+    <div class="dir-header">
+      <div class="icon" style="background:rgba(0,131,143,0.06);">⚡</div>
+      <h2>方向三：主动预取与预测</h2>
+      <span class="desc">2 个方案</span>
+    </div>
+
+    <!-- Prediction-based KV -->
+    <div class="paper" id="predkv">
+      <div class="paper-head">
+        <h3>方案 G：Prediction-based KV Cache Prefetching（HiCache 之上）</h3>
+        <div class="links">
+          <span class="badge sglang">SGLang HiCache</span>
+          <a href="https://arxiv.org/abs/2605.06472" target="_blank">arXiv:2605.06472</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.05</span>
+        <span><strong>场景：</strong>动态 Agent 工作流</span>
+        <span><strong>基础：</strong>SGLang HiCache 基础设施</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>动态 agent 工作流中，KV cache 节点的未来复用是可预测的（基于执行历史），但现有系统被动等待 cache miss 后才从 CPU 加载。可以利用预测在 miss 发生前主动加载，将传输延迟隐藏在 ongoing decode 步骤之后。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>复用预测器：</strong>基于 agent 执行历史和工作流结构，预测哪些 cache 节点近期会被复用。</li>
+        <li><strong>保守预取（Conservative Prefetching）：</strong>核心权衡——用「已知有价值的 GPU 缓存」交换「推测有价值的 host 缓存」。只有当预测置信度足够高、且 GPU 有空闲空间时才预取。</li>
+        <li><strong>利用 HiCache：</strong>基于 SGLang 的 HiCache 三层架构（GPU/CPU/外部存储），预取操作从 CPU → GPU 异步执行，不阻塞 decode。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="p1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#00838F"/></marker>
+          </defs>
+          <rect x="20" y="20" width="160" height="50" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="100" y="42" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">Agent 执行历史</text>
+          <text x="100" y="60" text-anchor="middle" fill="#666666" font-size="10">工作流结构 + 调用记录</text>
+          <line x1="180" y1="45" x2="230" y2="45" stroke="#00838F" stroke-width="1.5" marker-end="url(#p1)"/>
+          <rect x="230" y="15" width="180" height="60" rx="8" fill="#FFFFFF" stroke="#00838F" stroke-width="1.5"/>
+          <text x="320" y="38" text-anchor="middle" fill="#00838F" font-size="12" font-weight="600">复用预测器</text>
+          <text x="320" y="56" text-anchor="middle" fill="#666666" font-size="10">预测近期会复用的 cache 节点</text>
+          <text x="320" y="70" text-anchor="middle" fill="#666666" font-size="10">输出置信度评分</text>
+          <line x1="410" y1="45" x2="460" y2="45" stroke="#00838F" stroke-width="1.5" marker-end="url(#p1)"/>
+          <rect x="460" y="15" width="180" height="60" rx="8" fill="#FFFFFF" stroke="#FF8F00" stroke-width="1.5"/>
+          <text x="550" y="38" text-anchor="middle" fill="#FF8F00" font-size="12" font-weight="600">保守预取决策器</text>
+          <text x="550" y="56" text-anchor="middle" fill="#666666" font-size="10">置信度 ≥ 阈值 且 GPU 有空 → 预取</text>
+          <text x="550" y="70" text-anchor="middle" fill="#666666" font-size="10">否则等待被动加载</text>
+          <rect x="460" y="95" width="130" height="40" rx="6" fill="rgba(0,168,112,0.15)" stroke="#00A870"/>
+          <text x="525" y="113" text-anchor="middle" fill="#00A870" font-size="11" font-weight="600">GPU HBM</text>
+          <text x="525" y="128" text-anchor="middle" fill="#666666" font-size="9">预取目标</text>
+          <rect x="600" y="95" width="130" height="40" rx="6" fill="rgba(0,102,204,0.15)" stroke="#0066CC"/>
+          <text x="665" y="113" text-anchor="middle" fill="#0066CC" font-size="11" font-weight="600">CPU DRAM</text>
+          <text x="665" y="128" text-anchor="middle" fill="#666666" font-size="9">预取来源（HiCache L2）</text>
+          <line x1="600" y1="115" x2="590" y2="115" stroke="#00838F" stroke-width="2" marker-end="url(#p1)"/>
+          <text x="595" y="108" fill="#00838F" font-size="9" text-anchor="middle">DMA</text>
+          <rect x="20" y="100" width="400" height="55" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="220" y="123" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">Ongoing Decode（关键路径）</text>
+          <text x="220" y="143" text-anchor="middle" fill="#666666" font-size="11">预取在后台异步执行，传输延迟隐藏在 decode 步骤之后</text>
+          <rect x="20" y="180" width="720" height="60" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="203" fill="#1A1A1A" font-size="12" font-weight="600">保守原则</text>
+          <text x="40" y="223" fill="#666666" font-size="11">预取 = 用已知有价值的 GPU 空间换推测有价值的 host 数据。错误预取会浪费 GPU 空间和 PCIe 带宽。</text>
+          <text x="40" y="238" fill="#FF8F00" font-size="11">因此必须保守：高置信度 + 空闲空间双条件满足才触发。</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>特点：</strong>基于 SGLang HiCache 实现，保守预取策略避免错误预取浪费资源，将 CPU→GPU 传输延迟隐藏在 decode 之后。</div>
+      <div class="limit-box"><strong>局限：</strong>预测器准确率直接决定收益；GPU 空间紧张时预取无法执行；预取和正常请求竞争 PCIe 带宽。</div>
+    </div>
+
+    <!-- Predictive Multi-Tier -->
+    <div class="paper" id="premultitier">
+      <div class="paper-head">
+        <h3>方案 H：Predictive Multi-Tier Memory Management</h3>
+        <div class="links">
+          <span class="badge vllm">多层预测</span>
+          <a href="https://arxiv.org/abs/2604.26968" target="_blank">arXiv:2604.26968</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.04</span>
+        <span><strong>场景：</strong>大规模 GPU 推理多层 KV 管理</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>多层 KV 缓存（GPU/CPU/SSD）中，现有 LRU 策略不考虑注意力的位置局部性。早期层倾向局部注意力（只需附近 token），后期层倾向全局注意力（需要所有历史 token）。统一的预取窗口效率低。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>位置感知预取：</strong>监控当前 decode 步的位置范围，对覆盖 [n, n+w] 位置的 block 发异步提升请求（从低层 → GPU）。</li>
+        <li><strong>自适应窗口：</strong>窗口 w 根据观察到的注意力模式自适应——局部注意力层用窄窗口，全局注意力层用宽窗口。</li>
+        <li><strong>贝叶斯复用预测：</strong>结合贝叶斯方法预测 block 复用概率，与位置感知结合做预取决策。</li>
+        <li><strong>RoPE-aware：</strong>考虑旋转位置编码的特性，优化预取的 block 选择。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="r1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#00838F"/></marker>
+          </defs>
+          <rect x="20" y="20" width="200" height="50" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="120" y="42" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">当前 Decode 步位置 n</text>
+          <text x="120" y="60" text-anchor="middle" fill="#666666" font-size="10">监控注意力范围</text>
+          <line x1="220" y1="45" x2="270" y2="45" stroke="#00838F" stroke-width="1.5" marker-end="url(#r1)"/>
+          <rect x="270" y="10" width="220" height="70" rx="8" fill="#FFFFFF" stroke="#00838F" stroke-width="1.5"/>
+          <text x="380" y="33" text-anchor="middle" fill="#00838F" font-size="12" font-weight="600">自适应预取窗口</text>
+          <text x="380" y="52" text-anchor="middle" fill="#666666" font-size="10">早期层（局部注意力）→ 窄窗口 w</text>
+          <text x="380" y="68" text-anchor="middle" fill="#666666" font-size="10">后期层（全局注意力）→ 宽窗口 w</text>
+          <line x1="490" y1="45" x2="540" y2="45" stroke="#00838F" stroke-width="1.5" marker-end="url(#r1)"/>
+          <rect x="540" y="15" width="100" height="35" rx="6" fill="rgba(0,168,112,0.15)" stroke="#00A870"/>
+          <text x="590" y="37" text-anchor="middle" fill="#00A870" font-size="11">GPU (L1)</text>
+          <line x1="590" y1="50" x2="590" y2="75" stroke="#00838F" stroke-width="1.5"/>
+          <rect x="540" y="75" width="100" height="35" rx="6" fill="rgba(0,102,204,0.15)" stroke="#0066CC"/>
+          <text x="590" y="97" text-anchor="middle" fill="#0066CC" font-size="11">CPU (L2)</text>
+          <line x1="590" y1="110" x2="590" y2="130" stroke="#00838F" stroke-width="1.5"/>
+          <rect x="540" y="130" width="100" height="35" rx="6" fill="rgba(255,143,0,0.15)" stroke="#FF8F00"/>
+          <text x="590" y="152" text-anchor="middle" fill="#FF8F00" font-size="11">SSD (L3)</text>
+          <rect x="20" y="100" width="480" height="65" rx="8" fill="#FFFFFF" stroke="#7B1FA2" stroke-width="1.5"/>
+          <text x="260" y="123" text-anchor="middle" fill="#7B1FA2" font-size="12" font-weight="600">贝叶斯复用预测 + RoPE-aware</text>
+          <text x="260" y="143" text-anchor="middle" fill="#666666" font-size="11">贝叶斯方法估计 block 复用概率，结合 RoPE 位置特性</text>
+          <text x="260" y="161" text-anchor="middle" fill="#666666" font-size="11">与位置感知窗口联合决策预取哪些 block</text>
+          <rect x="20" y="185" width="720" height="55" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="208" fill="#00A870" font-size="12">效果：相比 LRU，cache miss 率降低 25%（跨所有评估工作负载）</text>
+          <text x="40" y="228" fill="#666666" font-size="11">核心洞察：注意力的位置局部性是可利用的免费信号，不同层需要不同预取窗口</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>效果：</strong>相比 LRU，RoPE-aware 预取将 cache miss 率降低 25%。</div>
+      <div class="limit-box"><strong>局限：</strong>更偏通用多层内存管理，不是专门针对 agent 场景；需要在线监控注意力模式，增加了调度复杂度。</div>
+    </div>
+  </section>
+
+  <!-- ========== 方向四 ========== -->
+  <section id="dir4">
+    <div class="dir-header">
+      <div class="icon" style="background:rgba(255,143,0,0.08);">💾</div>
+      <h2>方向四：会话持久化与 Snapshot</h2>
+      <span class="desc">3 个方案</span>
+    </div>
+
+    <!-- Agent Memory -->
+    <div class="paper" id="agentmemory">
+      <div class="paper-head">
+        <h3>方案 I：Agent Memory</h3>
+        <div class="links">
+          <span class="badge edge">Edge 多 Agent</span>
+          <a href="https://arxiv.org/abs/2603.04428" target="_blank">arXiv:2603.04428</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.03</span>
+        <span><strong>场景：</strong>边缘设备多 Agent 持久化 KV</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>边缘设备上运行多 agent 系统时，GPU 内存有限，agent 切换时 KV 被淘汰，恢复需要完整重 prefill（4K context 需 15.7 秒）。如果将 KV 持久化到磁盘，恢复时直接加载而非重算，可以大幅降低切换延迟。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>Q4 量化持久化：</strong>每个 agent 的 KV cache 以 4-bit 量化格式写入磁盘，体积压缩 4×。</li>
+        <li><strong>直接缓存恢复：</strong>agent 切换回来时，从磁盘加载 Q4 KV 直接注入 attention 层，跳过 O(n) 的 prefill 计算。</li>
+        <li><strong>交错隐藏延迟：</strong>多 agent 系统天然交错——一个 agent 生成时，下一个 agent 加载 KV，加载延迟被隐藏。</li>
+        <li><strong>跨重启持久化：</strong>服务器完整重启后，agent 的 KV cache 仍在磁盘上，TTFT 保持暖缓存水平。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="am1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#FF8F00"/></marker>
+            <marker id="am2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#00838F"/></marker>
+          </defs>
+          <rect x="20" y="20" width="120" height="50" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="80" y="42" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">Agent A 运行中</text>
+          <text x="80" y="60" text-anchor="middle" fill="#666666" font-size="10">KV 在 GPU</text>
+          <rect x="160" y="20" width="120" height="50" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="220" y="42" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">Agent B 等待</text>
+          <text x="220" y="60" text-anchor="middle" fill="#666666" font-size="10">KV 已淘汰</text>
+          <line x1="140" y1="45" x2="160" y2="45" stroke="#D32F2F" stroke-width="2" stroke-dasharray="4,3"/>
+          <text x="150" y="38" fill="#D32F2F" font-size="9" text-anchor="middle">切换</text>
+          <line x1="280" y1="45" x2="330" y2="45" stroke="#FF8F00" stroke-width="1.5" marker-end="url(#am1)"/>
+          <rect x="330" y="10" width="180" height="70" rx="8" fill="#FFFFFF" stroke="#FF8F00" stroke-width="1.5"/>
+          <text x="420" y="33" text-anchor="middle" fill="#FF8F00" font-size="12" font-weight="600">Agent Memory 持久化层</text>
+          <text x="420" y="52" text-anchor="middle" fill="#666666" font-size="10">Agent A 暂停 → Q4 量化 → 写磁盘</text>
+          <text x="420" y="68" text-anchor="middle" fill="#666666" font-size="10">Agent B 恢复 → 读磁盘 → 直接注入 attention</text>
+          <line x1="510" y1="45" x2="560" y2="45" stroke="#00838F" stroke-width="1.5" marker-end="url(#am2)"/>
+          <rect x="560" y="20" width="180" height="50" rx="8" fill="#FFFFFF" stroke="#00838F" stroke-width="1.5"/>
+          <text x="650" y="42" text-anchor="middle" fill="#00838F" font-size="12" font-weight="600">磁盘持久化存储</text>
+          <text x="650" y="60" text-anchor="middle" fill="#666666" font-size="10">每个 agent 的 Q4 KV cache 文件</text>
+          <rect x="20" y="110" width="350" height="70" rx="8" fill="#FFFFFF" stroke="#D32F2F" stroke-width="1.5"/>
+          <text x="195" y="133" text-anchor="middle" fill="#D32F2F" font-size="12" font-weight="600">传统方式（无持久化）</text>
+          <text x="195" y="153" text-anchor="middle" fill="#666666" font-size="11">Agent B 恢复 = 完整重 prefill</text>
+          <text x="195" y="171" text-anchor="middle" fill="#D32F2F" font-size="11">4K context → 15.7 秒延迟</text>
+          <rect x="390" y="110" width="370" height="70" rx="8" fill="#FFFFFF" stroke="#00A870" stroke-width="1.5"/>
+          <text x="575" y="133" text-anchor="middle" fill="#00A870" font-size="12" font-weight="600">Agent Memory（持久化）</text>
+          <text x="575" y="153" text-anchor="middle" fill="#666666" font-size="11">Agent B 恢复 = 从磁盘加载 Q4 KV 直接注入</text>
+          <text x="575" y="171" text-anchor="middle" fill="#00A870" font-size="11">跳过 O(n) prefill，加载延迟被交错隐藏</text>
+          <rect x="20" y="200" width="740" height="80" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="223" fill="#1A1A1A" font-size="12" font-weight="600">关键优势</text>
+          <text x="40" y="243" fill="#666666" font-size="11">1. 跨服务器重启持久化：重启后 KV 仍在磁盘，TTFT 保持暖缓存水平</text>
+          <text x="40" y="261" fill="#666666" font-size="11">2. Q4 量化压缩 4× 存储，边缘设备可容纳更多 agent 会话</text>
+          <text x="40" y="276" fill="#666666" font-size="11">3. 多 agent 交错执行天然隐藏加载延迟（一个生成时另一个加载）</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>效果：</strong>消除 agent 切换时的完整重 prefill（4K context 从 15.7 秒降至磁盘加载时间），支持跨服务器重启持久化。</div>
+      <div class="limit-box"><strong>局限：</strong>针对边缘设备场景，Q4 量化可能影响精度；需要文件系统管理多 agent 的 KV 文件；未涉及分布式场景。</div>
+    </div>
+
+    <!-- MorphCloud -->
+    <div class="paper" id="morphcloud">
+      <div class="paper-head">
+        <h3>方案 J：MorphCloud-LLM</h3>
+        <div class="links">
+          <span class="badge vllm">云原生 Checkpoint</span>
+          <a href="https://www.mdpi.com/2079-9292/15/17/3865" target="_blank">MDPI 2026</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.08</span>
+        <span><strong>场景：</strong>Spot 实例弹性服务 + 抢占恢复</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>云环境中使用 spot 实例降低成本，但实例可能被随时抢占。现有服务在抢占后丢失所有 KV cache 状态，恢复需要从头开始。需要轻量级的增量 KV checkpoint 机制，支持亚秒级恢复。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>异步增量 Checkpoint：</strong>流式 KV-cache 机制，持续将增量推理状态同步到分解式持久存储（S3 / GCS），吞吐开销 < 3%。</li>
+        <li><strong>亚秒级恢复：</strong>替换实例上，从持久存储恢复 KV cache（最大 32 GB），端到端迁移延迟 1390 ms（含检测+状态传输+恢复）。</li>
+        <li><strong>推测解码连续性：</strong>恢复后保持 speculative decoding 的状态连续性，不需要重新预热。</li>
+        <li><strong>透明抢占恢复：</strong>对上层应用透明，spot 实例被回收时自动迁移到新实例。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 780 280" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="mc1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#FF8F00"/></marker>
+            <marker id="mc2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#00A870"/></marker>
+          </defs>
+          <rect x="20" y="20" width="160" height="60" rx="8" fill="#FFFFFF" stroke="#D32F2F" stroke-width="1.5"/>
+          <text x="100" y="43" text-anchor="middle" fill="#D32F2F" font-size="12" font-weight="600">Spot 实例（运行中）</text>
+          <text x="100" y="62" text-anchor="middle" fill="#666666" font-size="10">vLLM + KV cache in GPU</text>
+          <line x1="180" y1="50" x2="240" y2="50" stroke="#FF8F00" stroke-width="1.5" marker-end="url(#mc1)"/>
+          <rect x="240" y="10" width="200" height="80" rx="8" fill="#FFFFFF" stroke="#FF8F00" stroke-width="1.5"/>
+          <text x="340" y="33" text-anchor="middle" fill="#FF8F00" font-size="12" font-weight="600">异步增量 Checkpoint</text>
+          <text x="340" y="52" text-anchor="middle" fill="#666666" font-size="10">流式同步增量 KV 状态</text>
+          <text x="340" y="68" text-anchor="middle" fill="#666666" font-size="10">吞吐开销 < 3%</text>
+          <text x="340" y="84" text-anchor="middle" fill="#666666" font-size="10">不阻塞推理关键路径</text>
+          <line x1="440" y1="50" x2="500" y2="50" stroke="#FF8F00" stroke-width="1.5" marker-end="url(#mc1)"/>
+          <rect x="500" y="20" width="180" height="60" rx="8" fill="#FFFFFF" stroke="#00838F" stroke-width="1.5"/>
+          <text x="590" y="43" text-anchor="middle" fill="#00838F" font-size="12" font-weight="600">持久存储 (S3/GCS)</text>
+          <text x="590" y="62" text-anchor="middle" fill="#666666" font-size="10">增量 KV checkpoint</text>
+          <line x1="700" y1="50" x2="700" y2="50" stroke="#D32F2F" stroke-width="2"/>
+          <text x="720" y="45" fill="#D32F2F" font-size="14">⚡</text>
+          <text x="720" y="65" fill="#D32F2F" font-size="10">抢占!</text>
+          <line x1="590" y1="80" x2="590" y2="120" stroke="#00A870" stroke-width="1.5" marker-end="url(#mc2)"/>
+          <rect x="480" y="120" width="220" height="60" rx="8" fill="#FFFFFF" stroke="#00A870" stroke-width="1.5"/>
+          <text x="590" y="143" text-anchor="middle" fill="#00A870" font-size="12" font-weight="600">替换实例（恢复中）</text>
+          <text x="590" y="162" text-anchor="middle" fill="#666666" font-size="10">从 S3 加载 KV → 亚秒级恢复</text>
+          <rect x="20" y="130" width="420" height="70" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="230" y="153" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">端到端迁移延迟分解</text>
+          <text x="230" y="173" text-anchor="middle" fill="#666666" font-size="11">检测抢占 + 状态传输（最大 32GB KV）+ 恢复 = 1390 ms</text>
+          <text x="230" y="191" text-anchor="middle" fill="#00A870" font-size="11">Speculative decoding 状态连续，无需重新预热</text>
+          <rect x="20" y="220" width="740" height="45" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="242" fill="#1A1A1A" font-size="12" font-weight="600">适用场景扩展</text>
+          <text x="40" y="260" fill="#666666" font-size="11">不仅是 spot 恢复——同样适用于 agent 会话挂起/恢复、服务升级时的状态迁移、负载均衡时的会话迁移</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>效果：</strong>异步 checkpoint 吞吐开销 < 3%，最大 32 GB KV 的端到端恢复延迟 1390 ms，支持 speculative decoding 连续性。</div>
+      <div class="limit-box"><strong>局限：</strong>依赖云对象存储（S3/GCS），本地部署需替代方案；恢复延迟受网络带宽影响；主要为容错设计，非专门针对 agent 会话管理。</div>
+    </div>
+
+    <!-- CacheFlow -->
+    <div class="paper" id="cacheflow">
+      <div class="paper-head">
+        <h3>方案 K：CacheFlow</h3>
+        <div class="links">
+          <span class="badge vllm">3D 并行恢复</span>
+          <a href="https://arxiv.org/abs/2604.25080" target="_blank">arXiv:2604.25080</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发表：</strong>2026.04</span>
+        <span><strong>场景：</strong>KV cache 恢复的多维并行加速</span>
+      </div>
+
+      <h4>核心问题</h4>
+      <p>KV cache 恢复（从存储/远端加载后重建）通常是串行的：先 I/O 再计算，或者只沿一个维度并行。Transformer 推理的结构依赖关系允许沿 token、层、GPU 三个维度同时并行，但现有系统没有利用。</p>
+
+      <h4>实现流程</h4>
+      <ul>
+        <li><strong>3D 并行抽象：</strong>将 KV cache 恢复建模为跨 token、层、GPU 三个维度的并行执行问题，统一抽象覆盖 recomputation 和 I/O。</li>
+        <li><strong>细粒度重叠：</strong>沿 transformer 结构依赖关系，细粒度地重叠计算和 I/O——某层的 KV 从存储加载时，另一层可以同时 recompute。</li>
+        <li><strong>Batch-aware 双指针调度器：</strong>跨请求联合优化计算和 I/O 分配，优先执行边际减少最多的操作。</li>
+      </ul>
+
+      <div class="svg-wrap">
+        <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="cf1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#FF8F00"/></marker>
+          </defs>
+          <rect x="20" y="20" width="160" height="50" rx="8" fill="#FFFFFF" stroke="#E0E0E0"/>
+          <text x="100" y="42" text-anchor="middle" fill="#1A1A1A" font-size="12" font-weight="600">KV Cache 恢复请求</text>
+          <text x="100" y="60" text-anchor="middle" fill="#666666" font-size="10">从存储/远端加载</text>
+          <line x1="180" y1="45" x2="230" y2="45" stroke="#FF8F00" stroke-width="1.5" marker-end="url(#cf1)"/>
+          <rect x="230" y="10" width="280" height="120" rx="8" fill="#FFFFFF" stroke="#FF8F00" stroke-width="1.5"/>
+          <text x="370" y="33" text-anchor="middle" fill="#FF8F00" font-size="13" font-weight="600">3D 并行恢复引擎</text>
+          <rect x="245" y="45" width="80" height="35" rx="6" fill="#FAFAFA" stroke="#0066CC"/>
+          <text x="285" y="62" text-anchor="middle" fill="#0066CC" font-size="10" font-weight="600">Token 维</text>
+          <text x="285" y="76" text-anchor="middle" fill="#666666" font-size="9">并行处理 token</text>
+          <rect x="335" y="45" width="80" height="35" rx="6" fill="#FAFAFA" stroke="#7B1FA2"/>
+          <text x="375" y="62" text-anchor="middle" fill="#7B1FA2" font-size="10" font-weight="600">Layer 维</text>
+          <text x="375" y="76" text-anchor="middle" fill="#666666" font-size="9">跨层流水线</text>
+          <rect x="425" y="45" width="70" height="35" rx="6" fill="#FAFAFA" stroke="#00838F"/>
+          <text x="460" y="62" text-anchor="middle" fill="#00838F" font-size="10" font-weight="600">GPU 维</text>
+          <text x="460" y="76" text-anchor="middle" fill="#666666" font-size="9">多 GPU 并行</text>
+          <text x="370" y="100" text-anchor="middle" fill="#666666" font-size="10">沿 transformer 依赖关系细粒度重叠 I/O 和计算</text>
+          <text x="370" y="116" text-anchor="middle" fill="#666666" font-size="10">某层加载 KV 时，另一层同时 recompute</text>
+          <line x1="510" y1="70" x2="560" y2="70" stroke="#00A870" stroke-width="1.5"/>
+          <rect x="560" y="40" width="160" height="60" rx="8" fill="#FFFFFF" stroke="#00A870" stroke-width="1.5"/>
+          <text x="640" y="63" text-anchor="middle" fill="#00A870" font-size="12" font-weight="600">GPU KV 恢复完成</text>
+          <text x="640" y="82" text-anchor="middle" fill="#666666" font-size="10">I/O 与计算最大重叠</text>
+          <rect x="20" y="155" width="720" height="55" rx="8" fill="#FFFFFF" stroke="#7B1FA2" stroke-width="1.5"/>
+          <text x="380" y="178" text-anchor="middle" fill="#7B1FA2" font-size="12" font-weight="600">Batch-aware 双指针调度器</text>
+          <text x="380" y="198" text-anchor="middle" fill="#666666" font-size="11">跨请求联合优化计算和 I/O 分配，优先执行边际减少最多的操作</text>
+          <rect x="20" y="230" width="720" height="35" rx="8" fill="#FAFAFA" stroke="#E0E0E0"/>
+          <text x="40" y="252" fill="#666666" font-size="11">核心洞察：KV 恢复不是单纯的 I/O 问题，也不是单纯的计算问题——而是一个可以沿三个维度并行、I/O 与计算重叠的调度优化问题。</text>
+        </svg>
+      </div>
+
+      <div class="result-box"><strong>特点：</strong>将 KV 恢复从串行提升为 token/layer/GPU 三维并行，配合 batch-aware 调度器最大化 I/O 与计算重叠。</div>
+      <div class="limit-box"><strong>局限：</strong>需要多 GPU 环境才能发挥 GPU 维并行；调度器复杂度较高；论文侧重恢复速度优化，不涉及持久化存储格式设计。</div>
+    </div>
+  </section>
+
+  <!-- ========== 总结 ========== -->
+  <section id="summary">
+    <div class="dir-header">
+      <div class="icon" style="background:rgba(199,0,11,0.06);">📊</div>
+      <h2>横向对比总结</h2>
+    </div>
+
+    <div class="table-wrap" style="overflow-x:auto;">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>方案</th>
+            <th>方向</th>
+            <th>实现基础</th>
+            <th>核心机制</th>
+            <th>关键效果</th>
+            <th>与你的方案关系</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>CacheWise</strong></td>
+            <td>会话级管理</td>
+            <td>vLLM</td>
+            <td>tool metadata 预测 τ + prefix-aware 调度</td>
+            <td>淘汰 -2~2.6×, 完成时间 +3.5×</td>
+            <td>直接相关，可参考其预测器设计</td>
+          </tr>
+          <tr>
+            <td><strong>CacheScout</strong></td>
+            <td>会话级 + 预取</td>
+            <td>vLLM</td>
+            <td>在线马尔可夫转换学习 + survival 淘汰 + warmup 预取</td>
+            <td>命中率 +10~18pp, TTFT -18~45%</td>
+            <td>最接近你的方向，已做 eviction+prefetch</td>
+          </tr>
+          <tr>
+            <td><strong>UNISON</strong></td>
+            <td>会话级管理</td>
+            <td>硬件协同</td>
+            <td>near-memory 事件驱动调度，Spear+Tide 共享 ranking</td>
+            <td>硬件级优化</td>
+            <td>思路可参考，但落地门槛高</td>
+          </tr>
+          <tr>
+            <td><strong>MemDecay</strong></td>
+            <td>Typed Retention</td>
+            <td>Training-free</td>
+            <td>区域特定 base priority + decay，critical region pin</td>
+            <td>system 区域 24/24 保留</td>
+            <td>直接相关，typed retention 的参考实现</td>
+          </tr>
+          <tr>
+            <td><strong>KVLearn</strong></td>
+            <td>Typed Retention</td>
+            <td>分解式服务</td>
+            <td>PRP 复用预测 + CARS 成本感知保留分</td>
+            <td>学习型保留策略</td>
+            <td>可参考其成本建模思路</td>
+          </tr>
+          <tr>
+            <td><strong>Not All Thoughts</strong></td>
+            <td>Typed Retention</td>
+            <td>语义分层</td>
+            <td>累积注意力 4 级分层 + 零误差 DDR 预取</td>
+            <td>精度无损的 HBM 释放</td>
+            <td>可结合到 typed retention 的分层策略</td>
+          </tr>
+          <tr>
+            <td><strong>Prediction-based KV</strong></td>
+            <td>主动预取</td>
+            <td>SGLang HiCache</td>
+            <td>复用预测 + 保守预取，隐藏在 decode 后</td>
+            <td>减少 cache miss 延迟</td>
+            <td>预取策略参考，SGLang 而非 vLLM</td>
+          </tr>
+          <tr>
+            <td><strong>Predictive Multi-Tier</strong></td>
+            <td>主动预取</td>
+            <td>多层通用</td>
+            <td>位置感知自适应窗口 + 贝叶斯预测</td>
+            <td>miss 率 -25%</td>
+            <td>预取窗口设计可参考</td>
+          </tr>
+          <tr>
+            <td><strong>Agent Memory</strong></td>
+            <td>会话持久化</td>
+            <td>Edge</td>
+            <td>Q4 KV 写磁盘 + 直接注入恢复</td>
+            <td>消除重 prefill，跨重启持久</td>
+            <td>直接相关，持久化格式参考</td>
+          </tr>
+          <tr>
+            <td><strong>MorphCloud</strong></td>
+            <td>会话持久化</td>
+            <td>云原生</td>
+            <td>异步增量 checkpoint 到 S3 + 亚秒恢复</td>
+            <td>开销 <3%, 恢复 1390ms</td>
+            <td>增量 checkpoint 机制可参考</td>
+          </tr>
+          <tr>
+            <td><strong>CacheFlow</strong></td>
+            <td>会话持久化</td>
+            <td>多 GPU</td>
+            <td>token/layer/GPU 3D 并行恢复 + 双指针调度</td>
+            <td>I/O 计算最大重叠</td>
+            <td>恢复加速可参考</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rec-box" style="background:linear-gradient(135deg,rgba(199,0,11,0.04),rgba(0,102,204,0.04));border:1px solid rgba(199,0,11,0.15);border-radius:12px;padding:28px;margin:24px 0;">
+      <h3 style="color:var(--accent);margin-top:0;">对你方案的启示</h3>
+      <ol style="margin-left:20px;">
+        <li><strong>CacheScout 是最接近的现有工作</strong>——已在 vLLM 上实现了 agent 感知的 eviction + prefetch，但它只做了 agent 级别的马尔可夫预测，没有做 block 级别的 typed retention，也没有会话持久化。你的方案可以在其基础上增加 typed retention（参考 MemDecay）和会话持久化（参考 Agent Memory + MorphCloud）。</li>
+        <li><strong>Typed retention 已有 MemDecay 的 training-free 方案</strong>——区域划分 + 区域特定 decay + pin，实现简单且效果明确。可以直接借鉴其区域参数化设计。</li>
+        <li><strong>会话持久化有两条路径</strong>——Agent Memory 的 Q4 直接注入（适合边缘/单节点）和 MorphCloud 的增量 checkpoint（适合云原生/分布式）。你的方案可以根据部署场景选择或组合。</li>
+        <li><strong>预取策略需要保守</strong>——Prediction-based KV 的「高置信度 + 空闲空间」双条件原则值得遵循，避免错误预取浪费资源。</li>
+        <li><strong>所有现有方案都是单点优化</strong>——没有一个方案同时整合会话级管理 + typed retention + 持久化 + 预取。你的差异化在于做一个统一的会话级 KB 管理层，整合这些机制。</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ========== 附录：数据集 ========== -->
+  <section id="datasets">
+    <div class="dir-header">
+      <div class="icon" style="background:rgba(199,0,11,0.06);">📦</div>
+      <h2>附录：Coding Agent Trace 开源数据集</h2>
+      <span class="desc">5 个数据集</span>
+    </div>
+
+    <p style="margin-bottom:20px;color:var(--text2);font-size:14px;">
+      评估会话级 KV Cache 管理策略需要真实的 agent 执行 trace。以下是 2026 年可用的开源数据集，按对 KV cache 研究的相关性排序。
+    </p>
+
+    <!-- TraceLab -->
+    <div class="paper">
+      <div class="paper-head">
+        <h3>数据集 1：TraceLab（首推）</h3>
+        <div class="links">
+          <span class="badge vllm">专为 Serving 设计</span>
+          <a href="https://github.com/uw-syfi/TraceLab.git" target="_blank">GitHub</a>
+          <a href="https://arxiv.org/abs/2606.30560" target="_blank">arXiv:2606.30560</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发布：</strong>2026.06</span>
+        <span><strong>机构：</strong>华盛顿大学 SyFI Lab</span>
+        <span><strong>规模：</strong>~4,300 会话 / 35 万 LLM steps / 43 万 tool calls</span>
+      </div>
+      <h4>数据来源</h4>
+      <p>43 名开发者在 8 个月内日常使用 Claude Code 和 Codex 的真实日志，覆盖 20+ 模型版本。采集流水线自动提取、标准化格式、匿名化处理。</p>
+      <h4>数据格式</h4>
+      <ul>
+        <li><strong>统一 step-level schema：</strong>每行 = 一次 LLM 调用 + 其产生的 tool calls</li>
+        <li><strong>事件类型：</strong>metadata / user message / reasoning / output / tool call / tool result，每个事件带时间戳</li>
+        <li><strong>Token 统计：</strong>每次 LLM 调用报告 input/output token usage</li>
+        <li><strong>会话级统计：</strong>平均 9.2 requests/session，平均 73.6 tool-initiated steps，p99 达 1,107 steps</li>
+      </ul>
+      <h4>对 KV Cache 研究的价值</h4>
+      <ul>
+        <li>论文直接分析了 prefix cache 行为：<strong>总体命中率 95.7%</strong>，但 user-initiated step 仅 84.4%（人思考时间长导致 eviction）</li>
+        <li>idle >5 分钟开始出现 cache miss，>1 小时几乎全 miss——<strong>可直接用于模拟不同 eviction 策略的效果</strong></li>
+        <li>prefill amplification factor 5.3×（实际 prefill 是理想缓存的 5.3 倍），量化了优化空间</li>
+        <li>可重放 trace 对比不同 KV 管理策略（LRU / predictive / typed retention）</li>
+      </ul>
+      <div class="result-box"><strong>推荐用途：</strong>会话级 KV 管理策略的主要评估数据集，格式最对口，有真实时间间隔可模拟 eviction 和 prefetch。</div>
+    </div>
+
+    <!-- SWE-chat -->
+    <div class="paper">
+      <div class="paper-head">
+        <h3>数据集 2：SWE-chat</h3>
+        <div class="links">
+          <span class="badge vllm">真实在野数据</span>
+          <a href="https://arxiv.org/abs/2604.20779" target="_blank">arXiv:2604.20779</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发布：</strong>2026.04</span>
+        <span><strong>规模：</strong>6,000 会话 / 6.3 万 user prompts / 35.5 万 tool calls / 270 万事件</span>
+      </div>
+      <h4>数据来源</h4>
+      <p>通过 Entire.io 开源 CLI 从 200+ 公开 GitHub 仓库自动收集，开发者主动 opt-in。支持 Claude Code、OpenCode、Gemini CLI、Cursor、Factory AI Droid。</p>
+      <h4>数据特点</h4>
+      <ul>
+        <li><strong>"Living dataset"：</strong>采集流水线持续自动发现和处理新会话，数据不断增长</li>
+        <li><strong>代码作者归属：</strong>每行代码标注是人写还是 agent 写，可分析 agent 产出的实际留存率</li>
+        <li><strong>Tool 类型丰富：</strong>read(19.8%)、edit(19.6%)、git/gh(11.9%)、grep(10.1%)、bash:build(8.0%) 等 12 类</li>
+        <li><strong>用户行为真实：</strong>44% 的 turn 中用户会纠正/中断 agent，41% 会话是"vibe coding"（agent 写几乎所有代码）</li>
+      </ul>
+      <h4>对 KV Cache 研究的价值</h4>
+      <p>更偏代码质量分析，但 trace 完整（含 user prompts、agent responses、tool calls、token usage），可用于推理负载模拟。优势是用户多样性高（200+ 仓库），能补充 TraceLab 仅 43 名开发者的样本偏差。</p>
+      <div class="limit-box"><strong>局限：</strong>不是专门为推理系统设计，缺少标准化的 step-level 时间戳格式；更适合做负载特征分析而非精确的 KV 策略对比。</div>
+    </div>
+
+    <!-- GAIATrace -->
+    <div class="paper">
+      <div class="paper-head">
+        <h3>数据集 3：GAIATrace + Vidur-Agent</h3>
+        <div class="links">
+          <span class="badge sglang">Token-Level + 模拟器</span>
+          <a href="https://arxiv.org/abs/2606.01725" target="_blank">arXiv:2606.01725</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发布：</strong>2026.06</span>
+        <span><strong>场景：</strong>通用任务 Agent（非 Coding）</span>
+        <span><strong>规模：</strong>268 任务 / 7,488 LLM queries</span>
+      </div>
+      <h4>数据来源</h4>
+      <p>两个 SOTA agent 系统——MiroThinker（103 任务）和 OWL（165 任务）——运行 GAIA benchmark 的完整 trace。使用开源 LLM（gpt-oss-120b / MiroThinker-1.7-mini）作为主模型以捕获完整 reasoning tokens。</p>
+      <h4>数据特点</h4>
+      <ul>
+        <li><strong>第一个 token-level trace：</strong>捕获完整 reasoning tokens（MiroThinker reasoning token ratio 70.3%），而非仅 input/output 统计</li>
+        <li><strong>Task-level 结构：</strong>每个高层 task 包含有序的多轮 LLM queries 和 tool calls</li>
+        <li><strong>多模型 trace：</strong>同时记录 Main-LLM 和 Sub-LLM（gpt-4o / gpt-4o-mini）的调用</li>
+        <li><strong>配套 Vidur-Agent 模拟器：</strong>支持 KV cache、prefix cache、PD 分解、异构模型、调度策略的 trace-driven 仿真</li>
+      </ul>
+      <h4>对 KV Cache 研究的价值</h4>
+      <ul>
+        <li>报告了 KV hit rate：intra-task 58–79%，inter-task 59–80%——比 coding agent 低很多，因为通用任务的上下文复用模式不同</li>
+        <li>Vidur-Agent 可快速仿真不同 KV 策略，无需真实 GPU 集群</li>
+        <li>trace 可直接在 vLLM 上重放（vLLM 支持 custom trace benchmark）</li>
+      </ul>
+      <div class="limit-box"><strong>局限：</strong>是通用任务 agent 不是 coding agent，工具调用模式和上下文增长规律不同；任务量较小（268 个）。</div>
+    </div>
+
+    <!-- LMCache traces -->
+    <div class="paper">
+      <div class="paper-head">
+        <h3>数据集 4：LMCache Claude Code Traces</h3>
+        <div class="links">
+          <span class="badge sglang">KV Cache 专用</span>
+          <a href="https://blog.lmcache.ai/en/benchmarking-lmcache-for-multi-turn-agentic-workloads-on-amd-mi300x/" target="_blank">LMCache Blog</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发布：</strong>2026.05</span>
+        <span><strong>规模：</strong>739 个匿名化 Claude Code 对话 trace</span>
+      </div>
+      <h4>数据特点</h4>
+      <p>LMCache 团队用于多轮 agentic workload 的 KV cache benchmark，直接对比了三种策略：no cache、vLLM HBM prefix cache、LMCache。在 MiniMax-M2.5（230GB FP8 MoE）+ 2× AMD MI300X + vLLM 0.19.0 上测试。</p>
+      <h4>对 KV Cache 研究的价值</h4>
+      <p>量小但专门为 KV cache 评估设计，trace 格式可直接用于 vLLM + LMCache 的 benchmark pipeline。适合做快速的概念验证（PoC）评估。</p>
+      <div class="limit-box"><strong>局限：</strong>仅 739 个会话，规模有限；未完全公开为独立数据集（嵌入在 LMCache benchmark 中）。</div>
+    </div>
+
+    <!-- Open-SWE-Traces -->
+    <div class="paper">
+      <div class="paper-head">
+        <h3>数据集 5：Open-SWE-Traces</h3>
+        <div class="links">
+          <span class="badge vllm">大规模训练轨迹</span>
+          <a href="https://arxiv.org/abs/2606.16038" target="_blank">arXiv:2606.16038</a>
+        </div>
+      </div>
+      <div class="paper-meta">
+        <span><strong>发布：</strong>2026.06</span>
+        <span><strong>规模：</strong>207,489 trajectories / 9 种语言 / 20,000 PR</span>
+      </div>
+      <h4>数据来源</h4>
+      <p>从 20,000 个真实世界 PR 中，通过 OpenHands 和 SWE-agent harness 生成的 agent trajectories。使用 Minimax-M2.5 生成带显式 thinking 过程的轨迹。覆盖 Python、Go、TS、JS、Rust、Java、PHP、C、C++ 九种语言。</p>
+      <h4>对 KV Cache 研究的价值</h4>
+      <p>规模最大（20 万+），语言多样性好。但主要用于模型蒸馏/训练，<strong>缺少时间戳和 token 级细节</strong>，不适合精确的推理系统评估。可用于分析 agent 行为模式（工具调用序列、上下文长度分布）。</p>
+      <div class="limit-box"><strong>局限：</strong>是合成轨迹（用 agent harness 跑 PR 生成），不是真实用户日常使用；缺少推理时间间隔，无法模拟 eviction 行为。</div>
+    </div>
+
+    <!-- 对比表格 -->
+    <h3 style="margin:32px 0 16px;color:var(--accent);">数据集横向对比</h3>
+    <div class="table-wrap" style="overflow-x:auto;">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>数据集</th>
+            <th>规模</th>
+            <th>来源</th>
+            <th>时间戳</th>
+            <th>Token 级</th>
+            <th>KV 评估适配度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>TraceLab</strong></td>
+            <td>4.3K 会话 / 350K steps</td>
+            <td>Claude Code + Codex 日常使用</td>
+            <td>✅ 精确</td>
+            <td>✅ 每次调用</td>
+            <td><strong style="color:var(--green);">★★★★★ 首推</strong></td>
+          </tr>
+          <tr>
+            <td><strong>SWE-chat</strong></td>
+            <td>6K 会话 / 355K tool calls</td>
+            <td>200+ 公开仓库自动采集</td>
+            <td>✅ 有</td>
+            <td>⚠️ 部分</td>
+            <td style="color:var(--yellow);">★★★★ 补充</td>
+          </tr>
+          <tr>
+            <td><strong>GAIATrace</strong></td>
+            <td>268 任务 / 7.5K queries</td>
+            <td>MiroThinker + OWL 跑 GAIA</td>
+            <td>✅ 有</td>
+            <td>✅ 完整 reasoning</td>
+            <td style="color:var(--yellow);">★★★★ 仿真</td>
+          </tr>
+          <tr>
+            <td><strong>LMCache Traces</strong></td>
+            <td>739 会话</td>
+            <td>匿名化 Claude Code</td>
+            <td>✅ 有</td>
+            <td>✅ 有</td>
+            <td style="color:var(--yellow);">★★★ PoC</td>
+          </tr>
+          <tr>
+            <td><strong>Open-SWE-Traces</strong></td>
+            <td>207K trajectories</td>
+            <td>OpenHands + SWE-agent 合成</td>
+            <td>❌ 无</td>
+            <td>❌ 无</td>
+            <td style="color:var(--red);">★★ 行为分析</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rec-box" style="background:linear-gradient(135deg,rgba(199,0,11,0.04),rgba(0,102,204,0.04));border:1px solid rgba(199,0,11,0.15);border-radius:12px;padding:24px;margin:24px 0;">
+      <h3 style="color:var(--accent);margin-top:0;">选型建议</h3>
+      <ol style="margin-left:20px;">
+        <li><strong>主评估集：TraceLab</strong>——格式专为 serving 设计，有精确时间戳和 token 统计，可直接重放对比不同 KV 策略。</li>
+        <li><strong>快速仿真：GAIATrace + Vidur-Agent</strong>——无需 GPU 集群即可在模拟器中验证策略趋势，适合早期原型迭代。</li>
+        <li><strong>补充多样性：SWE-chat</strong>——用户和仓库多样性高，可验证策略在更广泛分布上的鲁棒性。</li>
+        <li><strong>注意缺口：</strong>目前没有任何数据集包含 <strong>KV cache block 级别的访问 trace</strong>（即每个 block 何时被命中/淘汰），所有数据集都需要在推理引擎中重放后才能采集这类信号。这是你做研究时需要自己搭建的 measurement pipeline。</li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    <p>本报告覆盖 2026 年发表的 11 个代表性技术方案 + 5 个开源 Coding Agent Trace 数据集，所有链接均为公开可访问的 arXiv / ACM / GitHub 地址。</p>
+    <p style="margin-top:8px;">调研时间：2026-09-15 ｜ 方案筛选标准：2026 年发表、与 Agent 场景 KV cache 管理直接相关、有明确实现或实验结果。</p>
+  </footer>
+
+</div>
+</body>
+</html>
