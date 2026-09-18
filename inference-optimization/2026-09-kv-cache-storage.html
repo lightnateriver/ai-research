@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主流云厂商 KV Cache 存储商业模式调研报告</title>
+<style>
+  :root {
+    --huawei-red: #C7000B;
+    --huawei-red-light: #E8384F;
+    --huawei-red-bg: #FFF0F1;
+    --text-primary: #1A1A1A;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+    --bg-page: #F7F8FA;
+    --bg-card: #FFFFFF;
+    --border-light: #E8E8E8;
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.7;
+    padding: 20px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .header {
+    background: linear-gradient(135deg, #C7000B 0%, #8B0000 100%);
+    color: #fff;
+    padding: 36px 32px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .header .subtitle { font-size: 15px; opacity: 0.9; margin-bottom: 16px; }
+  .header .meta { font-size: 13px; opacity: 0.85; display: flex; flex-wrap: wrap; gap: 16px; }
+  .header .badges { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .header .badge {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 32px 0 16px;
+    padding-left: 14px;
+    border-left: 4px solid var(--huawei-red);
+  }
+  .card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .conclusion-box {
+    background: linear-gradient(135deg, #FFF0F1 0%, #FFFFFF 100%);
+    border: 1px solid #FFCDD2;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  .conclusion-box h2 { font-size: 17px; color: var(--huawei-red); margin-bottom: 12px; font-weight: 700; }
+  .conclusion-box p { font-size: 14px; color: #333; margin-bottom: 10px; }
+  .conclusion-box strong { color: var(--text-primary); }
+  .table-wrapper {
+    background: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 760px;
+  }
+  th {
+    background: var(--huawei-red);
+    color: #fff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: top;
+    color: #333;
+  }
+  tr:nth-child(even) { background: #FAFAFA; }
+  tr:hover { background: var(--huawei-red-bg); }
+  tr:last-child td { border-bottom: none; }
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-green { background: #E8F5E9; color: #2E7D32; }
+  .tag-red { background: #FFEBEE; color: #C62828; }
+  .tag-orange { background: #FFF3E0; color: #E65100; }
+  .tag-blue { background: #E3F2FD; color: #1565C0; }
+  .tag-huawei { background: #FFF0F1; color: #C7000B; }
+  .vendor-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .vendor-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .vendor-card .vendor-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+  .vendor-card .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    margin-bottom: 14px;
+  }
+  .vendor-card .detail-item {
+    font-size: 13px;
+    color: #333;
+  }
+  .vendor-card .detail-item .label {
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .vendor-card .highlight {
+    background: var(--huawei-red-bg);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #8B0000;
+    margin-top: 10px;
+    border-left: 3px solid var(--huawei-red);
+  }
+  .vendor-card .highlight strong { color: var(--huawei-red); }
+  .recommend-box {
+    background: linear-gradient(135deg, #FFF0F1 0%, #FFFFFF 100%);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border: 1px solid #FFCDD2;
+  }
+  .recommend-box h3 { font-size: 16px; color: var(--huawei-red); margin-bottom: 14px; }
+  .recommend-item {
+    background: #fff;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--huawei-red);
+  }
+  .recommend-item:last-child { margin-bottom: 0; }
+  .recommend-item .rec-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .recommend-item .rec-desc { font-size: 13px; color: #555; }
+  .sources {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .sources h3 { font-size: 15px; color: var(--text-primary); margin-bottom: 10px; }
+  .sources ul { list-style: none; }
+  .sources li {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 4px 0;
+    border-bottom: 1px dashed #eee;
+    word-break: break-all;
+  }
+  .sources li:last-child { border-bottom: none; }
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 16px 0;
+  }
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .header { padding: 24px 20px; }
+    .header h1 { font-size: 20px; }
+    .card, .vendor-card, .conclusion-box, .recommend-box { padding: 18px 18px; }
+    .vendor-card .detail-grid { grid-template-columns: 1fr; }
+    table { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>主流云厂商 KV Cache 存储商业模式调研报告</h1>
+    <div class="subtitle">个人专属 KV 缓存存储是否存在？—— OpenAI / Anthropic / 火山引擎 / 阿里云 / 腾讯云 / 华为云 / AWS / Google Cloud 全景调研</div>
+    <div class="meta">
+      <span>调研时间：2026-09-18</span>
+      <span>调研范围：8 家主流厂商</span>
+      <span>方向：推理优化 / 行业分析</span>
+    </div>
+    <div class="badges">
+      <span class="badge">#KV-Cache</span>
+      <span class="badge">#商业模式</span>
+      <span class="badge">#推理优化</span>
+      <span class="badge">#云厂商</span>
+      <span class="badge">#专属存储</span>
+    </div>
+  </div>
+
+  <div class="section-title">调研概述</div>
+  <div class="card">
+    <p style="font-size:14px;color:#333;margin-bottom:10px;"><strong>调研背景：</strong>当前 LLM API 服务的会话级 KV Cache 多为多租户共享存储，高并发时用户的缓存可能被其他用户的会话挤掉，导致缓存命中率下降。用户构想的商业模式是：在购买 API / Token Plan 时，能否额外购买一块专属存储来存放自己的 KV Cache，从而避免被其他用户挤掉。</p>
+    <p style="font-size:14px;color:#333;"><strong>调研目标：</strong>系统调研 8 家主流云厂商（OpenAI、Anthropic、火山引擎、阿里云、腾讯云、华为云、AWS、Google Cloud）是否存在"专属 KV Cache 存储"的商业模式或接近的产品方案。</p>
+  </div>
+
+  <div class="section-title">核心结论</div>
+  <div class="conclusion-box">
+    <h2>结论摘要</h2>
+    <p><strong>用户构想的"在 Token Plan 里额外购买一块物理隔离的专属 KV Cache 存储"，目前所有主流云厂商都没有提供。</strong></p>
+    <p>行业现状分为两个层面：<strong>API 层</strong>（共享基础设施上的逻辑缓存，个人可用，按 token 或时长计费）和 <strong>自建推理层</strong>（独立的分布式 KV 存储产品，需自建推理引擎，门槛高，多为企业级）。</p>
+    <p>最接近用户构想的产品是 <strong>Google Vertex AI 显式缓存</strong>（API 层 + 按小时收存储费 + 个人可用）和 <strong>腾讯云 HAI 共享 KVCache</strong>（半托管 + 一键开启 + 个人低门槛）。</p>
+  </div>
+
+  <div class="section-title">八家厂商产品总览对比</div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>厂商</th>
+          <th>产品名称</th>
+          <th>层面</th>
+          <th>个人可用性</th>
+          <th>起步门槛</th>
+          <th>计费方式</th>
+          <th>需自建推理</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Google Cloud</strong></td>
+          <td>Vertex AI Context Caching（显式）</td>
+          <td><span class="tag tag-blue">API层</span></td>
+          <td><span class="tag tag-green">个人可用</span></td>
+          <td>4096 token 起</td>
+          <td>存储费 $4.5/百万token/小时 + 命中90%折扣</td>
+          <td>否</td>
+        </tr>
+        <tr>
+          <td><strong>AWS</strong></td>
+          <td>Bedrock Prompt Caching</td>
+          <td><span class="tag tag-blue">API层</span></td>
+          <td><span class="tag tag-green">个人可用</span></td>
+          <td>1024-4096 token 视模型</td>
+          <td>无存储费；write 1.25x / hit 90%折扣</td>
+          <td>否</td>
+        </tr>
+        <tr>
+          <td><strong>阿里云</strong></td>
+          <td>百炼显式缓存</td>
+          <td><span class="tag tag-blue">API层</span></td>
+          <td><span class="tag tag-green">个人可用</span></td>
+          <td>1024 token 起</td>
+          <td>write 125% / hit 10%；无存储费</td>
+          <td>否</td>
+        </tr>
+        <tr>
+          <td><strong>火山引擎</strong></td>
+          <td>方舟上下文缓存</td>
+          <td><span class="tag tag-blue">API层</span></td>
+          <td><span class="tag tag-green">个人可用</span></td>
+          <td>1024 token 起</td>
+          <td>按 token×小时 收存储费（如 0.017元/百万token/小时）</td>
+          <td>否</td>
+        </tr>
+        <tr>
+          <td><strong>Anthropic</strong></td>
+          <td>Prompt Caching</td>
+          <td><span class="tag tag-blue">API层</span></td>
+          <td><span class="tag tag-green">个人可用</span></td>
+          <td>1024 token 起</td>
+          <td>write 1.25x(5m)/2x(1h) / hit 10%；无存储费</td>
+          <td>否</td>
+        </tr>
+        <tr>
+          <td><strong>OpenAI</strong></td>
+          <td>Prompt Caching（自动）</td>
+          <td><span class="tag tag-blue">API层</span></td>
+          <td><span class="tag tag-green">个人可用</span></td>
+          <td>1024 token 起</td>
+          <td>hit 10%-50%；无存储费，无 write 溢价（旧模型）</td>
+          <td>否</td>
+        </tr>
+        <tr>
+          <td><strong>腾讯云</strong></td>
+          <td>HAI 共享 KVCache</td>
+          <td><span class="tag tag-orange">半托管</span></td>
+          <td><span class="tag tag-green">个人可用</span></td>
+          <td>HAI GPU 实例 1.2元/小时起，有1元体验券</td>
+          <td>含在 HAI 实例费用中，KVCache 无单独费用</td>
+          <td>半托管（一键部署）</td>
+        </tr>
+        <tr>
+          <td><strong>火山引擎</strong></td>
+          <td>EIC 弹性极速缓存</td>
+          <td><span class="tag tag-orange">自建推理层</span></td>
+          <td><span class="tag tag-orange">有门槛</span></td>
+          <td>需 VKE GPU 集群 + EIC 实例；部分功能邀测</td>
+          <td>公测期间免费，后续规则待定</td>
+          <td>是</td>
+        </tr>
+        <tr>
+          <td><strong>华为云</strong></td>
+          <td>EMS 弹性内存存储</td>
+          <td><span class="tag tag-orange">自建推理层</span></td>
+          <td><span class="tag tag-red">企业级</span></td>
+          <td>公测审核制，需填写企业规模等信息；需 ModelArts/CCE</td>
+          <td>按需付费（后付费），费率需提工单咨询</td>
+          <td>是（半托管）</td>
+        </tr>
+        <tr>
+          <td><strong>阿里云</strong></td>
+          <td>KVCacheStore</td>
+          <td><span class="tag tag-red">自建推理层</span></td>
+          <td><span class="tag tag-red">企业级</span></td>
+          <td><strong>起步 300 TiB</strong>，300TiB 步长；需灵骏裸金属节点</td>
+          <td>按配置容量按量付费（小时结算）</td>
+          <td>是</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">各厂商产品详细说明</div>
+
+  <div class="vendor-card">
+    <h3>Google Cloud — Vertex AI Context Caching <span class="tag tag-huawei">最接近"买存储"</span></h3>
+    <div class="vendor-desc">六家中唯一在 API 层面明确按"存储时长"收费的产品，个人开发者可直接使用。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">两种模式：</span>① 隐式缓存（所有 project 默认开启，自动，无存储费，90%折扣）；② 显式缓存（通过 caches.create API 创建 CachedContent 对象）</div>
+      <div class="detail-item"><span class="label">存储费：</span>显式缓存 $4.5 / 百万 token / 小时</div>
+      <div class="detail-item"><span class="label">TTL：</span>默认 60 分钟，可更新，无最大时长限制</div>
+      <div class="detail-item"><span class="label">最低缓存：</span>Gemini 3.x 为 4096 token；Gemini 2.x 为 2048 token</div>
+      <div class="detail-item"><span class="label">命中折扣：</span>Gemini 2.5+ 为 90%；Gemini 2.0 为 75%</div>
+      <div class="detail-item"><span class="label">隔离性：</span>按 Google Cloud project 逻辑隔离，共享底层基础设施</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>最接近用户构想的"买存储"概念——你手动创建缓存对象，按存储时长付费，个人账号即可用。但仍是共享基础设施上的逻辑缓存，非物理隔离专属存储。</div>
+  </div>
+
+  <div class="vendor-card">
+    <h3>腾讯云 — HAI 共享 KVCache + FlexKV <span class="tag tag-huawei">个人门槛最低</span></h3>
+    <div class="vendor-desc">HAI 是一键部署 GPU 模型服务的平台，KVCache 是其可信集群的一个功能开关。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">HAI 共享 KVCache：</span>创建 HAI 可信集群时可开启"全局共享 KVCache 缓存池"，将缓存从显存下沉至分布式缓存/存储</div>
+      <div class="detail-item"><span class="label">FlexKV：</span>腾讯自研 KV Cache 卸载技术，已合入 vLLM / NVIDIA Dynamo / TensorRT-LLM 官方主线</div>
+      <div class="detail-item"><span class="label">起步成本：</span>GPU 基础型 1.2 元/小时起；有 1 元 = 8 小时体验券</div>
+      <div class="detail-item"><span class="label">计费：</span>含在 HAI 实例费用中，KVCache 无单独费用</div>
+      <div class="detail-item"><span class="label">开放状态：</span>KVCache 能力逐步开放中，具体以控制台为准</div>
+      <div class="detail-item"><span class="label">隔离性：</span>"全局共享 KVCache 缓存池"为平台级共享，非独占</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>个人开发者拥有 KV 缓存存储能力的最低门槛方案——不需要自己搭建推理引擎，HAI 一键部署后打开开关即可，1 元体验券即可上手。但缓存池是共享的。</div>
+  </div>
+
+  <div class="vendor-card">
+    <h3>AWS — Bedrock Prompt Caching <span class="tag tag-blue">标准 API 层</span></h3>
+    <div class="vendor-desc">Amazon Bedrock 的标准 prompt caching 功能，支持多家模型提供商。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">机制：</span>显式 cache checkpoint，支持 Converse / InvokeModel API</div>
+      <div class="detail-item"><span class="label">TTL：</span>5 分钟（默认）/ 1 小时（部分 Claude 模型，需指定 ttl=1h）/ 30 分钟（GPT-5.6 系列）</div>
+      <div class="detail-item"><span class="label">计费：</span>无单独存储费；cache write 按 1.25x 输入价（GPT-5.6），cache read 90% 折扣</div>
+      <div class="detail-item"><span class="label">特殊：</span>cached tokens 不计入速率限制</div>
+      <div class="detail-item"><span class="label">最低缓存：</span>1024-4096 token 视模型而定</div>
+      <div class="detail-item"><span class="label">另：</span>SageMaker HyperPod 有 Managed Tiered KV Cache（自建推理层面，企业级）</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>标准的 API 层缓存方案，个人可用，但没有"买存储"的概念——缓存是自动管理的易失性缓存，TTL 到期即清除。</div>
+  </div>
+
+  <div class="vendor-card">
+    <h3>阿里云 — 百炼显式缓存 + KVCacheStore + PAI FlashKV <span class="tag tag-huawei">产品最全</span></h3>
+    <div class="vendor-desc">阿里云是产品矩阵最全的一家，同时覆盖 API 层和自建推理层。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">① 百炼显式缓存（API层）：</span>通过 cache_control 标记，<strong>100% 确定性命中，不受后端资源调度影响</strong>，5 分钟 TTL 命中自动续期</div>
+      <div class="detail-item"><span class="label">百炼计费：</span>cache write 125% / hit 10%；无存储费；个人可用</div>
+      <div class="detail-item"><span class="label">② KVCacheStore（独立产品）：</span>百 PiB 级分布式 KV 存储，按配置容量计费</div>
+      <div class="detail-item"><span class="label">KVCacheStore 门槛：</span><strong>起步 300 TiB</strong>，300 TiB 步长扩容；需挂载智能计算灵骏裸金属节点</div>
+      <div class="detail-item"><span class="label">③ PAI FlashKV：</span>分布式 KV-Cache 服务，集群级跨实例共享，面向自建推理</div>
+      <div class="detail-item"><span class="label">④ Tair KVCache：</span>显存-内存-SSD 三级缓存系统，面向自建推理</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>百炼显式缓存的"100% 确定性命中"直接解决了用户担心的"被挤掉"问题（通过 API 层面的保证，而非物理隔离）。但真正的独立 KV 存储产品 KVCacheStore 是 300TiB 起步的企业级产品，个人基本不可用。</div>
+  </div>
+
+  <div class="vendor-card">
+    <h3>火山引擎 — EIC 弹性极速缓存 + 方舟上下文缓存 <span class="tag tag-orange">EIC 公测免费</span></h3>
+    <div class="vendor-desc">火山引擎同时提供 API 层的方舟上下文缓存和自建推理层的 EIC 分布式 KV 存储。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">① 方舟上下文缓存（API层）：</span>前缀缓存 + Session 缓存，通过 previous_response_id 引用，最长 72 小时</div>
+      <div class="detail-item"><span class="label">方舟计费：</span>按 token×小时 收存储费（如 DeepSeek-R1: 0.017元/百万token/小时）；命中输入享折扣</div>
+      <div class="detail-item"><span class="label">② EIC 弹性极速缓存（自建层）：</span>分布式 KVCache 存储服务，GDR 零拷贝（时延降至 1/50），Namespace 级隔离与治理</div>
+      <div class="detail-item"><span class="label">EIC 兼容性：</span>兼容 vLLM / SGLang / LMCache，提供 C++/Python SDK</div>
+      <div class="detail-item"><span class="label">EIC 使用方式：</span>创建 VKE GPU 集群 → 创建 EIC 实例 → 在推理引擎配置中填入 EIC instanceID 和 endpoint</div>
+      <div class="detail-item"><span class="label">EIC 计费：</span><strong>公测期间暂不收费</strong>，后续规则待定；部分模板需申请邀测</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>EIC 是真正的"买一块 KV 缓存存储"产品形态，且公测免费。但需要你自己在 VKE 上部署推理引擎，个人开发者如果有 GPU 集群可以尝试。方舟 API 层的上下文缓存则个人可直接用。</div>
+  </div>
+
+  <div class="vendor-card">
+    <h3>华为云 — EMS 弹性内存存储 + Mooncake <span class="tag tag-red">公测审核制</span></h3>
+    <div class="vendor-desc">EMS 明确做 KV Cache 缓存，但目前处于公测阶段，审核制偏向企业客户。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">EMS 定位：</span>通过缓存历史 KV Cache，以存代算，提升推理吞吐、节省算力、降低时延</div>
+      <div class="detail-item"><span class="label">部署模式：</span>半托管融合部署，数据面部署在用户 AI 节点本地，纳管空闲内存资源</div>
+      <div class="detail-item"><span class="label">搭配使用：</span>AI 开发平台 ModelArts / CCE 容器集群</div>
+      <div class="detail-item"><span class="label">开通方式：</span><strong>公测阶段，需申请公测并通过审核</strong>，需填写企业规模、研发人员比例、应用场景等</div>
+      <div class="detail-item"><span class="label">计费：</span>按需付费（后付费），每小时结算，具体费率需提工单咨询</div>
+      <div class="detail-item"><span class="label">Mooncake：</span>开源 KVCache 复用系统，可安装在 ModelArts 专属资源池</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>EMS 产品定位清晰，但公测审核制明显偏向企业客户，个人开发者申请通过的可能性较低。需要搭配 ModelArts 或 CCE 使用，属于半托管自建推理方案。</div>
+  </div>
+
+  <div class="vendor-card">
+    <h3>OpenAI — Prompt Caching（自动） <span class="tag tag-blue">标准 API 层</span></h3>
+    <div class="vendor-desc">OpenAI 的 prompt caching 是自动的，无需手动标记，没有"买存储"选项。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">机制：</span>自动前缀缓存，≥1024 token 自动缓存，按 128 token 递增</div>
+      <div class="detail-item"><span class="label">TTL：</span>GPT-5.6+ 支持 prompt_cache_options.ttl=30m（默认，唯一值）；旧模型 5-10 分钟不活动后清除，1 小时内一定移除</div>
+      <div class="detail-item"><span class="label">计费：</span>cached read 为输入价的 10%（GPT-5 系列）/ 50%（GPT-4o/o-series）；旧模型无 write 溢价</div>
+      <div class="detail-item"><span class="label">隔离性：</span>按 API Key / 组织逻辑隔离</div>
+      <div class="detail-item"><span class="label">专属存储：</span><strong>无</strong>。没有任何"额外购买专属 KV 缓存存储"的选项</div>
+      <div class="detail-item"><span class="label">另：</span>File Search 有 vector store 存储（$0.10/GB/天），但那是 RAG 向量检索，非 KV cache</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>OpenAI 在 KV 缓存商业化上最为保守——纯自动缓存，无显式控制，无存储费，无专属存储选项。缓存完全由平台管理，高并发时可能被驱逐。</div>
+  </div>
+
+  <div class="vendor-card">
+    <h3>Anthropic — Prompt Caching <span class="tag tag-blue">显式控制 API 层</span></h3>
+    <div class="vendor-desc">Anthropic 是最早将 prompt caching 做成 API 一等公民的厂商，支持显式 cache_control 标记。</div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="label">机制：</span>显式 cache_control 标记，最多 4 个断点，精确控制缓存边界</div>
+      <div class="detail-item"><span class="label">TTL：</span>5 分钟（默认 ephemeral）/ 1 小时（付费，2x write price）</div>
+      <div class="detail-item"><span class="label">计费：</span>cache write 1.25x（5m）/ 2x（1h）；cache hit 0.1x；无单独存储费</div>
+      <div class="detail-item"><span class="label">隔离性：</span>按 Workspace 隔离（Claude API/AWS/Microsoft Foundry），按 Organization 隔离（Bedrock/Google Cloud）；缓存不跨组织共享</div>
+      <div class="detail-item"><span class="label">专属存储：</span><strong>无</strong>。虽然有逻辑隔离，但缓存仍是易失性的，存在共享基础设施上</div>
+      <div class="detail-item"><span class="label">最低缓存：</span>1024 token 起</div>
+    </div>
+    <div class="highlight"><strong>评价：</strong>Anthropic 的缓存控制粒度最细（4 个断点 + 两档 TTL），按 Workspace 隔离也相对严格。但仍然没有"买一块专属持久化存储"的选项，缓存 TTL 最长仅 1 小时。</div>
+  </div>
+
+  <div class="section-title">个人开发者推荐路径</div>
+  <div class="recommend-box">
+    <h3>如果你是个人开发者，想立刻体验"拥有自己的 KV 缓存存储"</h3>
+    <div class="recommend-item">
+      <div class="rec-title">路径一（最轻量）：API 层显式缓存</div>
+      <div class="rec-desc">使用 <strong>Google Vertex AI 显式缓存</strong> 或 <strong>阿里云百炼显式缓存</strong>——纯 API 调用，按存储量/时长付费，不需要管基础设施。Google 的按小时存储费最接近"买存储"概念；阿里云的 100% 命中保证最直接解决"被挤掉"问题。</div>
+    </div>
+    <div class="recommend-item">
+      <div class="rec-title">路径二（想拥有实际存储层）：半托管一键部署</div>
+      <div class="rec-desc">使用 <strong>腾讯云 HAI</strong>——一键部署 GPU 实例，打开 KVCache 开关即可，1 元体验券即可上手。不需要自己搭建推理引擎，但拥有自己的 GPU 实例和缓存池。或尝试 <strong>火山 EIC</strong>（公测免费，需 VKE GPU 集群）。</div>
+    </div>
+    <div class="recommend-item">
+      <div class="rec-title">路径三（企业级/大规模）：自建推理 + 独立 KV 存储</div>
+      <div class="rec-desc">使用 <strong>阿里云 KVCacheStore</strong>（300TiB 起步）、<strong>华为云 EMS</strong>（公测审核制）、<strong>AWS SageMaker HyperPod</strong> 等——真正的物理隔离专属 KV 存储，但门槛和成本都很高，适合企业级大规模推理部署。</div>
+    </div>
+  </div>
+
+  <div class="section-title">行业趋势与未来方向</div>
+  <div class="conclusion-box">
+    <h2>观察与判断</h2>
+    <p><strong>1. 两层分化明显：</strong>API 层（共享缓存，个人可用，按 token 计费）和自建推理层（独立 KV 存储产品，企业级，按容量计费）之间存在明显的断层。用户构想的"API 层 + 专属存储"恰好处于这个断层中。</p>
+    <p><strong>2. "以存代算"成为共识：</strong>六家厂商都推出了 KV Cache 卸载/分层存储产品（EIC、KVCacheStore、EMS、FlexKV、SageMaker HyperPod、Tair KVCache），说明将 KV 从 GPU 显存卸载到独立存储是行业明确趋势。</p>
+    <p><strong>3. API 层开始收存储费：</strong>Google Vertex AI 显式缓存按小时收存储费、火山方舟按 token×小时收存储费，说明"为缓存存储付费"的商业模式正在 API 层萌芽。</p>
+    <p><strong>4. 学术前沿：</strong>arXiv 论文 "Can I Buy Your KV Cache?"（2026.06）提出了 "prefill CDN" 概念——发布者预计算 KV、其他 agent 付费加载，论证了经济学可行性，但尚未商业化。</p>
+    <p><strong>5. 机会判断：</strong>"在 Token Plan 中附加购买专属 KV 缓存存储"目前是空白市场。随着长上下文和 Agent 工作负载增长，缓存命中率的稳定性将成为刚需，这个方向可能成为下一个商业化机会。</p>
+  </div>
+
+  <div class="section-title">数据来源</div>
+  <div class="sources">
+    <h3>官方文档与产品页</h3>
+    <ul>
+      <li>Google Cloud: Vertex AI Context Caching — https://docs.cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview</li>
+      <li>Google Cloud: Vertex AI Pricing — https://cloud.google.com/vertex-ai/generative-ai/pricing</li>
+      <li>AWS: Amazon Bedrock Prompt Caching — https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html</li>
+      <li>阿里云: KVCacheStore 产品概述 — https://help.aliyun.com/zh/kvcachestore/product-overview/</li>
+      <li>阿里云: KVCacheStore 计费概述 — https://help.aliyun.com/zh/kvcachestore/billing-overview</li>
+      <li>阿里云: 百炼显式缓存最佳实践 — https://help.aliyun.com/zh/model-studio/explicit-cache-guide</li>
+      <li>火山引擎: EIC 弹性极速缓存产品页 — https://www.volcengine.com/product/eic</li>
+      <li>火山引擎: EIC 计费概述 — https://www.volcengine.com/docs/85848/1749167</li>
+      <li>火山引擎: 方舟上下文缓存 — https://www.volcengine.com/docs/82379/1602228</li>
+      <li>腾讯云: HAI 产品优势 — https://cloud.tencent.com/document/product/1721/101025</li>
+      <li>腾讯云: HAI 创建可信集群 — https://cloud.tencent.com/document/product/1721/124634</li>
+      <li>腾讯云: HAI 特惠活动 — https://cloud.tencent.com/act/pro/hai</li>
+      <li>华为云: EMS 弹性内存存储产品页 — https://www.huaweicloud.com/product/ems</li>
+      <li>华为云: EMS 申请公测 — https://support.huaweicloud.com/usermanual-ems/ems_03_0000.html</li>
+      <li>OpenAI: Prompt Caching — https://openai.com/index/api-prompt-caching/</li>
+      <li>Anthropic: Prompt Caching — https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching</li>
+      <li>学术参考: Can I Buy Your KV Cache? (arXiv 2606.13361) — https://arxiv.org/html/2606.13361</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    本报告由 AI 辅助生成，数据来源于各厂商官方公开文档，调研截止时间 2026-09-18。产品功能与价格可能随时变化，请以官方最新信息为准。
+  </div>
+
+</div>
+</body>
+</html>
