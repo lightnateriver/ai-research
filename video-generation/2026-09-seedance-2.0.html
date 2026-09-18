@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance 2.0 深度技术调研报告</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; padding: 30px 20px; background: #FAFAFA; color: #333333; line-height: 1.75; }
+  h1 { color: #333333; border-bottom: 3px solid #C7000B; padding-bottom: 12px; font-size: 1.8em; }
+  h2 { color: #C7000B; margin-top: 40px; border-left: 5px solid #C7000B; padding-left: 14px; background: linear-gradient(90deg, #FDE8EA 0%, transparent 100%); padding-top: 8px; padding-bottom: 8px; font-size: 1.4em; }
+  h3 { color: #333333; margin-top: 26px; font-size: 1.15em; border-bottom: 1px dashed #F5C6CB; padding-bottom: 4px; }
+  h4 { color: #0066B3; margin-top: 18px; font-size: 1.05em; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-radius: 6px; overflow: hidden; }
+  th { background: #C7000B; color: white; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 0.92em; }
+  td { padding: 10px 14px; border-bottom: 1px solid #EEEEEE; vertical-align: top; font-size: 0.93em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover { background: #FFF0F0; }
+  .meta-box { background: #FDE8EA; border-radius: 10px; padding: 20px 26px; margin: 20px 0; border-left: 4px solid #C7000B; }
+  .meta-box p { margin: 6px 0; }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 0.82em; font-weight: 700; margin-right: 5px; white-space: nowrap; }
+  .tag-l1 { background: #E6F7F0; color: #00875A; }
+  .tag-l2 { background: #FFF8E6; color: #B8860B; }
+  .tag-l3 { background: #FFF8F0; color: #CC5500; }
+  .tag-l4 { background: #FDE8EA; color: #C7000B; }
+  .tag-gen { background: #E8F0FE; color: #1A73E8; }
+  .tag-spec { background: #FFF3E6; color: #E65100; }
+  .highlight { background: #FFF0F0; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .conclusion { background: #E6F7F0; border-left: 5px solid #00B578; padding: 18px 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+  .conclusion h3 { margin-top: 0; color: #00875A; border: none; }
+  .svg-container { background: white; border-radius: 8px; padding: 20px; margin: 18px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; overflow-x: auto; }
+  .svg-container svg { max-width: 100%; height: auto; }
+  .detail-card { background: white; border-radius: 8px; padding: 16px 20px; margin: 12px 0; border-left: 3px solid #0066B3; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .detail-card h4 { margin-top: 0; color: #C7000B; }
+  .purpose-box { background: #FFF8F0; border-left: 3px solid #FF6B00; padding: 10px 16px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.93em; }
+  .purpose-box strong { color: #CC5500; }
+  .overview-box { background: linear-gradient(135deg, #FDE8EA 0%, #FFF5F5 100%); border-radius: 12px; padding: 24px 28px; margin: 20px 0; border: 2px solid #C7000B; }
+  .overview-box h3 { margin-top: 0; color: #333333; border: none; }
+  .innovation-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .innovation-quick .item { background: white; border-radius: 8px; padding: 14px 16px; border-left: 3px solid #FF6B00; }
+  .innovation-quick .item strong { color: #CC5500; display: block; margin-bottom: 4px; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; color: #999999; font-size: 0.88em; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .warn-box { background: #FFF8E6; border-left: 3px solid #B8860B; padding: 10px 16px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.93em; }
+  .warn-box strong { color: #8B6914; }
+  .elo-badge { display: inline-block; background: #C7000B; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 1.1em; }
+  @media (max-width: 768px) { .two-col, .three-col, .innovation-quick { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Seedance 2.0 深度技术调研报告</h1>
+
+<div class="meta-box">
+  <p><strong>论文标题：</strong>Seedance 2.0: A Unified Multimodal Audio-Visual Generation Model with Reference-to-Video Capability</p>
+  <p><strong>厂商：</strong>字节跳动 Seed 团队 ｜ <strong>模型 ID：</strong>Doubao-Seedance-2.0（标准版 / Fast版）</p>
+  <p><strong>发布时间：</strong>2026年4月（arXiv v1） ｜ <strong>arXiv：</strong><a href="https://arxiv.org/abs/2604.14148" target="_blank">2604.14148</a></p>
+  <p><strong>部署平台：</strong>豆包、即梦、火山引擎 ｜ <strong>论文形态：</strong>Model Card / Evaluation Report（26页，以评测数据为主）</p>
+  <p><strong>核心定位：</strong>字节第三代视频生成模型，<strong>统一多模态音视频联合生成架构</strong>，支持文本/图像/音频/视频四模态参考输入，原生支持 R2V（参考生视频）和五大编辑能力，双模型（标准版+Fast版）覆盖质量与速度需求</p>
+  <p><strong>核心性能：</strong>Arena.AI 双榜 <span class="elo-badge">#1</span>（T2V Elo 1450±15, I2V Elo 1449±11）；SeedVideoBench 2.0 T2V 六维全部第一；motion 3.75（较1.5提升1.36）；双声道音频</p>
+  <p><strong>报告结构：</strong>① 总览 → ② 数据管线 → ③ 模型结构 → ④ 训练整体 → ⑤ 后训练 → ⑥ 推理加速 → ⑦ 长视频/可控性/音频 → ⑧ 安全合规 → ⑨ 评测体系 → ⑩ 创新点核查 → ⑪ V0.1修订建议</p>
+</div>
+
+<div class="warn-box">
+  <strong>⚠️ 披露等级总评：</strong>本论文为 Model Card / Evaluation Report 形态（26页），<strong>技术架构细节披露极少</strong>——未披露架构参数、数据量级、训练超参、VAE规格、消融实验。论文约70%篇幅为评测数据表格和定性案例。可核查信息集中在：四模态参考输入规格、R2V任务矩阵、五大编辑能力、Arena.AI排名、SeedVideoBench 2.0详细评分、双声道音频。架构继承自 Seedance 1.0/1.5（已精读），本报告在相关处标注"继承自1.0/1.5"。
+</div>
+
+<h2>① 文章大体工作与创新点总览</h2>
+
+<div class="overview-box">
+  <h3>一句话定位</h3>
+  <p>Seedance 2.0 是字节跳动 Seed 团队推出的<strong>统一多模态音视频联合生成模型</strong>，在 1.5 pro 的双分支音视频联合架构基础上，将参考输入从"文本+单图"扩展为<strong>文本+图像+音频+视频四模态</strong>，原生支持 R2V（Reference-to-Video，参考生视频）能力——可同时接受最多3个视频、9张图像、3段音频作为参考，生成与之风格/内容/声音一致的新视频。同时提供<strong>标准版（质量优先）和 Fast版（速度优先）</strong>双模型，2026年4月上线豆包和即梦。</p>
+</div>
+
+<h3>整体技术路线一图流</h3>
+
+<div class="svg-container">
+<svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr20" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#555555"/>
+    </marker>
+  </defs>
+  <text x="500" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">Seedance 2.0 整体技术路线总览（统一多模态音视频联合生成）</text>
+  <rect x="20" y="50" width="200" height="130" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="120" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">① 四模态参考输入</text>
+  <text x="120" y="95" text-anchor="middle" font-size="10" fill="#555555">文本 Prompt（必填）</text>
+  <text x="120" y="110" text-anchor="middle" font-size="10" fill="#555555">图像参考 ≤9张</text>
+  <text x="120" y="125" text-anchor="middle" font-size="10" fill="#555555">音频参考 ≤3段</text>
+  <text x="120" y="140" text-anchor="middle" font-size="10" fill="#555555">视频参考 ≤3段</text>
+  <text x="120" y="160" text-anchor="middle" font-size="9" fill="#999999">[2.0核心新增: 视频+音频参考]</text>
+  <line x1="222" y1="115" x2="248" y2="115" stroke="#C7000B" stroke-width="2" marker-end="url(#arr20)"/>
+  <rect x="250" y="50" width="220" height="130" rx="10" fill="#F0FAF6" stroke="#00B578" stroke-width="2"/>
+  <text x="360" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#00875A">② 统一多模态编码</text>
+  <text x="360" y="95" text-anchor="middle" font-size="10" fill="#555555">文本: 微调LLM [继承]</text>
+  <text x="360" y="110" text-anchor="middle" font-size="10" fill="#555555">图像: VAE+CLIP [继承]</text>
+  <text x="360" y="125" text-anchor="middle" font-size="10" fill="#555555">音频: Audio VAE [继承1.5]</text>
+  <text x="360" y="140" text-anchor="middle" font-size="10" fill="#555555">视频: 3D VAE [继承]</text>
+  <text x="360" y="160" text-anchor="middle" font-size="9" fill="#999999">多模态token统一表示 [L4]</text>
+  <line x1="472" y1="115" x2="498" y2="115" stroke="#00B578" stroke-width="2" marker-end="url(#arr20)"/>
+  <rect x="500" y="50" width="220" height="130" rx="10" fill="#FFF3E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="610" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B6914">③ 双分支DiT联合生成</text>
+  <text x="610" y="95" text-anchor="middle" font-size="10" fill="#555555">视觉分支 [继承1.5]</text>
+  <text x="610" y="110" text-anchor="middle" font-size="10" fill="#555555">音频分支 [继承1.5]</text>
+  <text x="610" y="125" text-anchor="middle" font-size="10" fill="#555555">跨模态联合模块 [继承]</text>
+  <text x="610" y="140" text-anchor="middle" font-size="10" fill="#555555">R2V条件注入 [2.0新增]</text>
+  <text x="610" y="160" text-anchor="middle" font-size="9" fill="#999999">同时去噪视觉+音频latent</text>
+  <line x1="722" y1="115" x2="748" y2="115" stroke="#FF6B00" stroke-width="2" marker-end="url(#arr20)"/>
+  <rect x="750" y="50" width="230" height="130" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="865" y="75" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B0000">④ 双模型输出</text>
+  <text x="865" y="95" text-anchor="middle" font-size="10" fill="#555555">标准版: 质量优先</text>
+  <text x="865" y="110" text-anchor="middle" font-size="10" fill="#555555">Fast版: 速度优先</text>
+  <text x="865" y="125" text-anchor="middle" font-size="10" fill="#555555">4-15秒, 480p/720p</text>
+  <text x="865" y="140" text-anchor="middle" font-size="10" fill="#555555">双声道音频输出</text>
+  <text x="865" y="160" text-anchor="middle" font-size="9" fill="#999999">[蒸馏加速, 具体L4]</text>
+  <rect x="20" y="205" width="960" height="170" rx="10" fill="#FAFAFA" stroke="#CCCCCC" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="500" y="228" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">核心能力矩阵</text>
+  <rect x="35" y="242" width="175" height="120" rx="6" fill="white" stroke="#C7000B" stroke-width="1.5"/>
+  <text x="122" y="262" text-anchor="middle" font-size="11" font-weight="bold" fill="#C7000B">R2V 参考生视频</text>
+  <text x="122" y="280" text-anchor="middle" font-size="9.5" fill="#555555">20/22任务支持</text>
+  <text x="122" y="295" text-anchor="middle" font-size="9.5" fill="#555555">7个独有任务</text>
+  <text x="122" y="310" text-anchor="middle" font-size="9.5" fill="#555555">多参考组合生成</text>
+  <text x="122" y="325" text-anchor="middle" font-size="9.5" fill="#555555">风格/内容/声音迁移</text>
+  <text x="122" y="345" text-anchor="middle" font-size="9" fill="#999999">[2.0核心创新]</text>
+  <rect x="225" y="242" width="175" height="120" rx="6" fill="white" stroke="#0066B3" stroke-width="1.5"/>
+  <text x="312" y="262" text-anchor="middle" font-size="11" font-weight="bold" fill="#0066B3">五大编辑能力</text>
+  <text x="312" y="280" text-anchor="middle" font-size="9.5" fill="#555555">① 主体编辑</text>
+  <text x="312" y="295" text-anchor="middle" font-size="9.5" fill="#555555">② 风格编辑</text>
+  <text x="312" y="310" text-anchor="middle" font-size="9.5" fill="#555555">③ 场景编辑</text>
+  <text x="312" y="325" text-anchor="middle" font-size="9.5" fill="#555555">④ 音频内容编辑</text>
+  <text x="312" y="340" text-anchor="middle" font-size="9.5" fill="#555555">⑤ 视频延续/扩展</text>
+  <rect x="415" y="242" width="175" height="120" rx="6" fill="white" stroke="#00B578" stroke-width="1.5"/>
+  <text x="502" y="262" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">Arena.AI 双榜#1</text>
+  <text x="502" y="282" text-anchor="middle" font-size="14" font-weight="bold" fill="#C7000B">T2V 1450±15</text>
+  <text x="502" y="302" text-anchor="middle" font-size="14" font-weight="bold" fill="#C7000B">I2V 1449±11</text>
+  <text x="502" y="322" text-anchor="middle" font-size="9.5" fill="#555555">超越Veo3.5/Kling3.0</text>
+  <text x="502" y="340" text-anchor="middle" font-size="9" fill="#999999">[公开盲测排名]</text>
+  <rect x="605" y="242" width="175" height="120" rx="6" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="692" y="262" text-anchor="middle" font-size="11" font-weight="bold" fill="#8B6914">SeedVideoBench 2.0</text>
+  <text x="692" y="280" text-anchor="middle" font-size="9.5" fill="#555555">T2V六维全部第一</text>
+  <text x="692" y="295" text-anchor="middle" font-size="9.5" fill="#555555">motion 3.75 (↑1.36)</text>
+  <text x="692" y="310" text-anchor="middle" font-size="9.5" fill="#555555">I2V五维全部第一</text>
+  <text x="692" y="325" text-anchor="middle" font-size="9.5" fill="#555555">音频四维度领先</text>
+  <text x="692" y="345" text-anchor="middle" font-size="9" fill="#999999">[内部专家评测]</text>
+  <rect x="795" y="242" width="175" height="120" rx="6" fill="#E6F7F0" stroke="#00B578" stroke-width="2"/>
+  <text x="882" y="262" text-anchor="middle" font-size="11" font-weight="bold" fill="#00875A">双声道音频</text>
+  <text x="882" y="280" text-anchor="middle" font-size="9.5" fill="#555555">Stereo Audio Output</text>
+  <text x="882" y="295" text-anchor="middle" font-size="9.5" fill="#555555">空间声场渲染</text>
+  <text x="882" y="310" text-anchor="middle" font-size="9.5" fill="#555555">语音+音效+BGM</text>
+  <text x="882" y="325" text-anchor="middle" font-size="9.5" fill="#555555">音画同步增强</text>
+  <text x="882" y="345" text-anchor="middle" font-size="9" fill="#999999">[继承1.5+升级]</text>
+</svg>
+</div>
+
+<h3>核心创新点速览</h3>
+
+<div class="innovation-quick">
+  <div class="item">
+    <strong>创新1：四模态统一参考输入 + R2V <span class="tag tag-spec">模型特有</span></strong>
+    将参考输入从文本+单图扩展为文本+图像(≤9)+音频(≤3)+视频(≤3)四模态，原生支持20/22种R2V任务，其中7个为独有任务。多参考组合生成是2.0的核心差异化能力。
+  </div>
+  <div class="item">
+    <strong>创新2：五大编辑能力 <span class="tag tag-spec">模型特有</span></strong>
+    主体编辑、风格编辑、场景编辑、音频内容编辑、视频延续/扩展——五大编辑能力原生集成，无需外挂编辑模型，通过统一架构的条件注入实现。
+  </div>
+  <div class="item">
+    <strong>创新3：标准版+Fast版双模型 <span class="tag tag-gen">业界趋势</span></strong>
+    同时提供质量优先的标准版和速度优先的Fast版，覆盖不同场景需求。Fast版通过蒸馏加速实现，具体方法继承自1.5的多阶段蒸馏框架。
+  </div>
+  <div class="item">
+    <strong>创新4：双声道音频 + 音频内容编辑 <span class="tag tag-spec">模型特有</span></strong>
+    在1.5单声道基础上升级为双声道（Stereo）输出，新增音频内容编辑能力（可修改已有视频的音频轨道），空间声场渲染增强沉浸感。
+  </div>
+</div>
+
+<h3>关键性能数据（可核查）</h3>
+
+<table>
+  <tr><th>指标</th><th>数值</th><th>说明 / 来源</th></tr>
+  <tr><td>Arena.AI T2V Elo</td><td><strong>1450 ± 15</strong></td><td>排名#1，超越Veo3.5(1422)、Kling3.0(1373) <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>Arena.AI I2V Elo</td><td><strong>1449 ± 11</strong></td><td>排名#1，超越Veo3.5(1405)、Kling3.0(1354) <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>生成时长</td><td>4-15秒</td><td>支持4s/5s/10s/15s多档 <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>分辨率</td><td>480p / 720p</td><td>标准版和Fast版均支持 <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>参考输入上限</td><td>视频≤3, 图像≤9, 音频≤3</td><td>四模态参考输入规格 <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>R2V任务覆盖</td><td>20/22（7个独有）</td><td>参考生视频任务矩阵 <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>SeedVideoBench motion</td><td><strong>3.75</strong></td><td>T2V，较1.5 pro(2.39)提升1.36 <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>音频输出</td><td>双声道 Stereo</td><td>空间声场渲染 <span class="tag tag-l1">L1</span></td></tr>
+  <tr><td>对比基线</td><td>Veo 3.5, Kling 3.0, Sora 2, Hailuo, Pika 2.6, LTX-2, Seedance 1.5</td><td>Arena.AI公开盲测 + SeedVideoBench内部评测 <span class="tag tag-l1">L1</span></td></tr>
+</table>
+
+<h2>② 数据管线深度拆解</h2>
+
+<div class="warn-box">
+  <strong>⚠️ 披露说明：</strong>2.0 论文<strong>完全未披露</strong>数据管线的具体方法、数据量级、过滤阈值、Caption系统等细节。仅在相关工作中引用了 Seedance 1.0/1.5 的数据框架，以及 Seedream 系列、Seed-VL、Mogao 等字节内部模型。以下内容基于继承关系和论文中的零星描述整理，具体参数均标注为未披露。
+</div>
+
+<h3>2.1 数据管线继承关系</h3>
+
+<div class="detail-card">
+  <p>2.0 论文未单独描述数据管线，但从相关工作引用和能力演进可推断：</p>
+  <ul>
+    <li><strong>基础数据框架：</strong>继承自 1.5 pro 的"音视频联合数据框架"（多阶段策展+双模态Caption+课程调度）<span class="tag tag-l3">L3 推断</span></li>
+    <li><strong>R2V 训练数据：</strong>为支持四模态参考输入和20/22种R2V任务，需要专门构建"参考-目标"配对数据集，具体构建方法<strong>未披露</strong> <span class="tag tag-l4">L4</span></li>
+    <li><strong>编辑能力数据：</strong>五大编辑能力需要"编辑前-编辑后"配对数据，具体来源和构建方法<strong>未披露</strong> <span class="tag tag-l4">L4</span></li>
+    <li><strong>双声道音频数据：</strong>需要双声道音视频数据，具体采集和处理方法<strong>未披露</strong> <span class="tag tag-l4">L4</span></li>
+    <li><strong>引用的内部模型：</strong>Seedream 4.5/4.7（图像生成）、Seedream 5.0（图像编辑）、Seed-VL（多模态理解）、Mogao（音频理解）——这些可能用于数据标注或Caption <span class="tag tag-l3">L3 推断</span></li>
+  </ul>
+  <div class="purpose-box"><strong>设计目的（推断）：</strong>① R2V数据需要"多参考→目标"的配对，这比普通T2V/I2V数据更难获取，可能通过从长视频中截取片段作为参考、另一片段作为目标来构建；② 编辑能力数据需要"原始视频+编辑指令+编辑后视频"三元组，可能通过图像编辑模型（Seedream 5.0）对视频帧批量编辑来合成；③ 双声道数据需要立体声采集，可能来自电影、剧集等专业内容。</div>
+</div>
+
+<h2>③ 模型结构深度拆解</h2>
+
+<div class="warn-box">
+  <strong>⚠️ 披露说明：</strong>2.0 论文<strong>完全未披露</strong>架构参数（层数、hidden dim、head数、参数量）、VAE规格、位置编码方案等细节。仅在摘要和相关工作中提到"unified multimodal audio-visual generation model"和"built upon Seedance 1.5"。以下基于继承关系和能力反推整理。
+</div>
+
+<h3>3.1 统一多模态架构推断</h3>
+
+<div class="detail-card">
+  <p>2.0 的架构基于 1.5 pro 的双分支 MMDiT 联合架构扩展，核心变化是<strong>参考输入模态的扩展</strong>和<strong>R2V/编辑条件注入</strong>：</p>
+  <ul>
+    <li><strong>基础架构：</strong>双分支 DiT（视觉分支+音频分支）+ 跨模态联合模块，继承自 1.5 pro <span class="tag tag-l3">L3 推断</span></li>
+    <li><strong>文本编码器：</strong>微调 decoder-only LLM，继承自 1.0/1.5 <span class="tag tag-l3">L3 推断</span></li>
+    <li><strong>图像编码器：</strong>VAE + CLIP 图像编码器，继承自 1.0/1.5 <span class="tag tag-l3">L3 推断</span></li>
+    <li><strong>音频编码器：</strong>Audio VAE，继承自 1.5 pro <span class="tag tag-l3">L3 推断</span></li>
+    <li><strong>视频编码器（新增）：</strong>3D VAE 编码参考视频片段，作为条件注入生成过程 <span class="tag tag-l4">L4</span></li>
+    <li><strong>R2V 条件注入：</strong>多参考token与噪声latent拼接或交叉注意力，具体方式<strong>未披露</strong> <span class="tag tag-l4">L4</span></li>
+    <li><strong>编辑条件注入：</strong>编辑指令文本+原始视频latent作为条件，具体方式<strong>未披露</strong> <span class="tag tag-l4">L4</span></li>
+    <li><strong>双声道输出：</strong>音频分支输出双声道latent，Audio VAE支持立体声解码 <span class="tag tag-l4">L4</span></li>
+  </ul>
+  <div class="purpose-box"><strong>设计目的（推断）：</strong>① 为什么用统一架构而非多个专用模型——R2V和编辑能力本质上都是"条件生成"，统一架构可以共享基础生成能力，避免为每个任务训练独立模型；② 为什么支持多参考（≤3视频+≤9图像+≤3音频）——单参考信息量有限，多参考可以组合出更丰富的条件（如"参考A的人物+参考B的场景+参考C的音乐"）；③ 为什么双声道——单声道音频缺乏空间感，双声道可以模拟左右声源位置，增强沉浸感，适合电影级内容。</div>
+</div>
+
+<h3>3.2 标准版 vs Fast版</h3>
+
+<div class="detail-card">
+  <table>
+    <tr><th>维度</th><th>标准版 (Standard)</th><th>Fast版</th><th>说明</th></tr>
+    <tr><td>定位</td><td>质量优先</td><td>速度优先</td><td>双模型覆盖不同场景 <span class="tag tag-l1">L1</span></td></tr>
+    <tr><td>分辨率</td><td>480p / 720p</td><td>480p / 720p</td><td>相同 <span class="tag tag-l1">L1</span></td></tr>
+    <tr><td>时长</td><td>4-15秒</td><td>4-15秒</td><td>相同 <span class="tag tag-l1">L1</span></td></tr>
+    <tr><td>架构差异</td><td>未披露</td><td>未披露</td><td>可能是同架构不同蒸馏步数，或不同参数量 <span class="tag tag-l4">L4</span></td></tr>
+    <tr><td>推理加速</td><td>标准步数</td><td>蒸馏加速（继承1.5多阶段蒸馏）</td><td>具体NFE未披露 <span class="tag tag-l4">L4</span></td></tr>
+    <tr><td>质量差异</td><td>Arena.AI评测使用标准版</td><td>未单独评测</td><td>Fast版质量损失程度未披露 <span class="tag tag-l4">L4</span></td></tr>
+  </table>
+  <div class="purpose-box"><strong>设计目的：</strong>双模型策略是业界趋势（如Sora的Turbo版、Kling的标准版/快速版）——标准版用于对质量要求高的专业创作场景，Fast版用于实时交互、快速预览等对速度敏感的场景。通过蒸馏可以在质量损失可控的前提下大幅降低推理成本。</div>
+</div>
+
+<h2>④ 训练整体情况深度拆解</h2>
+
+<div class="warn-box">
+  <strong>⚠️ 披露说明：</strong>2.0 论文<strong>完全未披露</strong>训练阶段划分、课程表、学习率、batch size、优化器、训练时长等任何超参数。仅在相关工作中引用了 RewardDance、DanceGRPO 等 RLHF 方法，以及 Seedance 1.0/1.5 的训练框架。
+</div>
+
+<h3>4.1 训练框架推断</h3>
+
+<div class="detail-card">
+  <p>基于继承关系和引用，2.0 的训练框架推断为：</p>
+  <ol>
+    <li><strong>预训练：</strong>大规模混合模态多任务预训练（T2V/I2V/T2VA/I2VA/R2V/编辑），继承自1.5的多任务框架，扩展R2V和编辑任务 <span class="tag tag-l3">L3 推断</span></li>
+    <li><strong>SFT：</strong>高质量音视频对 + R2V配对 + 编辑三元组 <span class="tag tag-l3">L3 推断</span></li>
+    <li><strong>RLHF：</strong>多维Reward（运动+美学+同步+音频质量+R2V一致性+编辑准确性），引用 RewardDance [arXiv:2509.08826] 和 DanceGRPO [arXiv:2505.07818] <span class="tag tag-l3">L3 推断</span></li>
+  </ol>
+  <p><span class="tag tag-l4">L4</span> 所有具体训练参数未披露，无训练曲线、无消融实验</p>
+</div>
+
+<h2>⑤ 后训练过程深度拆解（RLHF）</h2>
+
+<div class="detail-card">
+  <p>2.0 论文对 RLHF 的披露仅限于引用相关工作：</p>
+  <ul>
+    <li><strong>引用方法：</strong>RewardDance [arXiv:2509.08826]（视频生成reward scaling技术）、DanceGRPO [arXiv:2505.07818]（扩散模型GRPO优化）<span class="tag tag-l3">L3</span></li>
+    <li><strong>Reward维度推断：</strong>在1.5的运动+美学+音画同步+音频质量基础上，2.0可能新增R2V参考一致性reward和编辑准确性reward <span class="tag tag-l4">L4 推断</span></li>
+    <li><strong>优化算法：</strong>可能继承1.0的直接reward最大化框架，融合GRPO技巧 <span class="tag tag-l4">L4 推断</span></li>
+  </ul>
+  <p><span class="tag tag-l4">L4</span> RM架构、reward权重、优化算法选型、训练轮数、RLHF效果数据——全部未披露，无消融实验</p>
+</div>
+
+<h2>⑥ 推理加速与蒸馏</h2>
+
+<div class="detail-card">
+  <p>2.0 的 Fast版通过蒸馏加速实现，具体方法继承自 1.5 pro 的多阶段蒸馏框架：</p>
+  <ul>
+    <li><strong>蒸馏方法：</strong>可能继承 HyperSD TSCD + Mean Flows + RayFlow 组合 <span class="tag tag-l4">L4 推断</span></li>
+    <li><strong>系统优化：</strong>量化 + 并行 <span class="tag tag-l4">L4 推断</span></li>
+    <li><strong>加速比：</strong>未给出具体数字（1.5 pro为&gt;10×，2.0 Fast版可能类似或更高）<span class="tag tag-l4">L4</span></li>
+    <li><strong>质量损失：</strong>未给出标准版vs Fast版的质量对比数据 <span class="tag tag-l4">L4</span></li>
+  </ul>
+</div>
+
+<h2>⑦ 长视频 / 可控性 / 音频 / R2V / 编辑</h2>
+
+<h3>7.1 R2V（参考生视频）—— 2.0 核心能力</h3>
+
+<div class="detail-card">
+  <h4>7.1.1 R2V 任务矩阵（20/22支持，7个独有）</h4>
+  <p>论文定义了22种参考生视频任务，Seedance 2.0 支持其中20种，7个为独有任务（其他模型不支持）：</p>
+  <table>
+    <tr><th>任务类别</th><th>具体任务</th><th>支持状态</th><th>说明</th></tr>
+    <tr><td rowspan="4"><strong>图像参考</strong></td><td>图生视频 (I2V)</td><td>✅ 支持</td><td>基础能力，继承自1.0</td></tr>
+    <tr><td>多图生视频 (Multi-I2V)</td><td>✅ 支持</td><td>≤9张图像参考，2.0增强</td></tr>
+    <tr><td>风格迁移 (Style Transfer)</td><td>✅ 支持</td><td>参考图像风格生成新视频</td></tr>
+    <tr><td>角色一致性 (Character Consistency)</td><td>✅ 支持</td><td>参考图像角色保持一致</td></tr>
+    <tr><td rowspan="4"><strong>视频参考</strong></td><td>视频续写 (Video Continuation)</td><td>✅ 支持</td><td>参考视频结尾续写</td></tr>
+    <tr><td>视频风格迁移</td><td>✅ 支持</td><td>参考视频风格生成新视频</td></tr>
+    <tr><td>视频主体迁移</td><td>✅ 支持</td><td>参考视频主体迁移到新场景</td></tr>
+    <tr><td>运动迁移 (Motion Transfer)</td><td>✅ 独有</td><td>参考视频的运动模式迁移 <span class="tag tag-spec">特有</span></td></tr>
+    <tr><td rowspan="3"><strong>音频参考</strong></td><td>音频生视频 (A2V)</td><td>✅ 独有</td><td>纯音频驱动视频生成 <span class="tag tag-spec">特有</span></td></tr>
+    <tr><td>音频风格迁移</td><td>✅ 独有</td><td>参考音频风格生成新音视频 <span class="tag tag-spec">特有</span></td></tr>
+    <tr><td>语音驱动唇形</td><td>✅ 支持</td><td>继承自1.5，2.0增强</td></tr>
+    <tr><td rowspan="3"><strong>多模态组合</strong></td><td>图+音生视频</td><td>✅ 独有</td><td>图像+音频联合参考 <span class="tag tag-spec">特有</span></td></tr>
+    <tr><td>视频+图生视频</td><td>✅ 独有</td><td>视频+图像联合参考 <span class="tag tag-spec">特有</span></td></tr>
+    <tr><td>视频+音生视频</td><td>✅ 独有</td><td>视频+音频联合参考 <span class="tag tag-spec">特有</span></td></tr>
+  </table>
+  <p><span class="tag tag-l1">L1</span> 任务矩阵可核查，具体每个任务的实现方式未披露</p>
+  <div class="purpose-box"><strong>设计目的：</strong>① R2V的本质是"条件生成"的泛化——用户不再只能用文本描述想要什么，还可以直接给出参考样例，大幅降低表达门槛；② 多参考组合支持"混搭"创作——如"用A视频的人物+B图像的背景+C音频的音乐"生成新视频，这是单参考模型无法做到的；③ 7个独有任务（运动迁移、A2V、音频风格迁移、图+音、视频+图、视频+音等）体现了2.0在多模态联合参考上的深度，其他模型（Veo/Kling）主要支持单模态参考。</div>
+</div>
+
+<h3>7.2 五大编辑能力</h3>
+
+<div class="three-col">
+  <div class="detail-card">
+    <h4>① 主体编辑</h4>
+    <p>修改视频中的主体（人物/物体），保持背景和运动不变。通过文本指令指定替换主体。</p>
+    <p><span class="tag tag-l1">L1</span> 能力可核查</p>
+  </div>
+  <div class="detail-card">
+    <h4>② 风格编辑</h4>
+    <p>修改视频的艺术风格（如写实→动漫、白天→黑夜），保持内容结构不变。</p>
+    <p><span class="tag tag-l1">L1</span> 能力可核查</p>
+  </div>
+  <div class="detail-card">
+    <h4>③ 场景编辑</h4>
+    <p>修改视频的背景场景（如室内→室外、城市→自然），保持主体和运动不变。</p>
+    <p><span class="tag tag-l1">L1</span> 能力可核查</p>
+  </div>
+  <div class="detail-card">
+    <h4>④ 音频内容编辑</h4>
+    <p>修改视频的音频轨道（更换BGM、添加音效、修改语音内容），保持视频画面不变。<span class="tag tag-spec">2.0特有</span></p>
+    <p><span class="tag tag-l1">L1</span> 能力可核查</p>
+  </div>
+  <div class="detail-card">
+    <h4>⑤ 视频延续/扩展</h4>
+    <p>在已有视频基础上续写（前向/后向），或扩展视频时长。保持风格和内容一致性。</p>
+    <p><span class="tag tag-l1">L1</span> 能力可核查</p>
+  </div>
+  <div class="detail-card">
+    <h4>编辑实现方式</h4>
+    <p>通过统一架构的条件注入实现，无需外挂编辑模型。具体注入方式（inpainting/ControlNet/指令微调）<strong>未披露</strong> <span class="tag tag-l4">L4</span></p>
+  </div>
+</div>
+
+<h3>7.3 音频能力（双声道升级）</h3>
+
+<div class="detail-card">
+  <ul>
+    <li><strong>双声道输出：</strong>从1.5的单声道升级为双声道（Stereo），支持空间声场渲染 <span class="tag tag-l1">L1</span></li>
+    <li><strong>音频内容编辑：</strong>可修改已有视频的音频轨道，2.0新增 <span class="tag tag-l1">L1</span></li>
+    <li><strong>音频参考：</strong>支持≤3段音频作为参考，实现音频风格迁移和语音驱动 <span class="tag tag-l1">L1</span></li>
+    <li><strong>继承能力：</strong>多语言方言唇形同步、音画同步、音频表达力（继承自1.5）<span class="tag tag-l3">L3</span></li>
+  </ul>
+</div>
+
+<h3>7.4 长视频与可控性</h3>
+
+<div class="detail-card">
+  <ul>
+    <li><strong>生成时长：</strong>4-15秒，支持4s/5s/10s/15s多档 <span class="tag tag-l1">L1</span></li>
+    <li><strong>视频延续：</strong>通过编辑能力⑤实现长视频拼接，具体拼接机制未披露 <span class="tag tag-l4">L4</span></li>
+    <li><strong>相机控制：</strong>继承1.5的电影级相机控制（轨道/弧形/跟踪/Dolly Zoom）<span class="tag tag-l3">L3</span></li>
+    <li><strong>多镜头：</strong>继承1.0的MM-RoPE Multishot多镜头支持 <span class="tag tag-l3">L3</span></li>
+  </ul>
+</div>
+
+<h2>⑧ 安全对齐与合规</h2>
+
+<div class="detail-card">
+  <p>2.0 论文<strong>未单独设置安全章节</strong>，仅隐含通过字节内部安全评估后上线。</p>
+  <ul>
+    <li><strong>数据侧：</strong>继承1.0/1.5的安全过滤 <span class="tag tag-l4">L4</span></li>
+    <li><strong>模型侧：</strong>未披露安全对齐细节 <span class="tag tag-l4">L4</span></li>
+    <li><strong>输出侧：</strong>未披露水印方案 <span class="tag tag-l4">L4</span></li>
+    <li><strong>R2V/编辑安全：</strong>参考输入可能被用于生成侵权内容（如参考名人视频生成深伪），未披露防护措施 <span class="tag tag-l4">L4</span></li>
+  </ul>
+  <div class="warn-box"><strong>⚠️ R2V和编辑能力的特殊安全风险：</strong>① 视频参考输入可能被用于"换脸"或"动作迁移"生成深伪内容；② 音频参考输入可能被用于语音克隆；③ 编辑能力可能被用于篡改已有视频内容。论文未披露针对这些风险的具体防护措施。</div>
+</div>
+
+<h2>⑨ 评测体系</h2>
+
+<h3>9.1 Arena.AI 公开盲测（双榜#1）</h3>
+
+<div class="detail-card">
+  <p><strong>Arena.AI</strong> 是公开的视频生成模型盲测平台，用户对两个模型的输出进行偏好投票，最终计算 Elo 评分。</p>
+  <table>
+    <tr><th>榜单</th><th>Seedance 2.0</th><th>Veo 3.5</th><th>Kling 3.0</th><th>Sora 2</th><th>排名</th></tr>
+    <tr><td><strong>T2V Elo</strong></td><td><span class="highlight">1450 ± 15</span></td><td>1422</td><td>1373</td><td>~1350</td><td><strong>#1</strong> 🥇</td></tr>
+    <tr><td><strong>I2V Elo</strong></td><td><span class="highlight">1449 ± 11</span></td><td>1405</td><td>1354</td><td>~1340</td><td><strong>#1</strong> 🥇</td></tr>
+  </table>
+  <p><span class="tag tag-l1">L1</span> 公开可核查，数据来自Arena.AI官网</p>
+  <div class="purpose-box"><strong>设计目的：</strong>Arena.AI的价值在于"盲测"——用户不知道哪个模型生成的，纯粹凭质量偏好投票，避免了品牌偏见。Seedance 2.0在T2V和I2V双榜同时第一，且置信区间不与第二名重叠（T2V: 1450±15 vs 1422，差距28分&gt;误差15分），说明优势具有统计显著性。</div>
+</div>
+
+<h3>9.2 SeedVideoBench 2.0 内部专家评测</h3>
+
+<div class="detail-card">
+  <h4>T2V 六维评分（全部第一）</h4>
+  <table>
+    <tr><th>维度</th><th>Seedance 2.0</th><th>Seedance 1.5 pro</th><th>Veo 3.5</th><th>Kling 3.0</th><th>提升</th></tr>
+    <tr><td><strong>Motion（运动）</strong></td><td><span class="highlight">3.75</span></td><td>2.39</td><td>~3.2</td><td>~3.0</td><td><strong>+1.36</strong> vs 1.5</td></tr>
+    <tr><td>Prompt Following（指令遵循）</td><td><strong>第一</strong></td><td>领先</td><td>-</td><td>-</td><td>保持领先</td></tr>
+    <tr><td>Aesthetics（美学）</td><td><strong>第一</strong></td><td>强竞争力</td><td>-</td><td>-</td><td>提升</td></tr>
+    <tr><td>Subject Consistency（主体一致性）</td><td><strong>第一</strong></td><td>-</td><td>-</td><td>-</td><td>提升</td></tr>
+    <tr><td>Video Vividness（生动度）</td><td><strong>第一</strong></td><td>-</td><td>-</td><td>-</td><td>新增维度</td></tr>
+    <tr><td>Overall（总体）</td><td><strong>第一</strong></td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+  </table>
+  <p><span class="tag tag-l1">L1</span> motion具体数字可核查，其他维度论文表述为"全部第一"但未给具体分数</p>
+</div>
+
+<div class="detail-card">
+  <h4>I2V 五维评分（全部第一）</h4>
+  <p>Seedance 2.0 在 I2V 任务的五个维度上全部排名第一，具体分数论文未完全披露（仅给出motion等关键维度）。</p>
+  <p><span class="tag tag-l2">L2</span> 排名可核查，具体分数部分未披露</p>
+</div>
+
+<div class="detail-card">
+  <h4>音频评测（四维度领先）</h4>
+  <p>在音频指令遵循、音频质量、音画同步、音频表达力四个维度上，Seedance 2.0 均领先于对比基线（Veo 3.5、Kling 3.0、Sora 2）。双声道输出的空间声场效果获得好评。</p>
+  <p><span class="tag tag-l2">L2</span> 定性结论可核查，具体分数未披露</p>
+</div>
+
+<h3>9.3 R2V 和编辑能力评测</h3>
+
+<div class="detail-card">
+  <p>论文通过定性案例展示R2V和编辑能力的效果，包括：</p>
+  <ul>
+    <li>多参考组合生成（视频+图像+音频联合参考）</li>
+    <li>运动迁移效果</li>
+    <li>五大编辑能力的前后对比</li>
+    <li>视频延续的一致性</li>
+  </ul>
+  <p><span class="tag tag-l2">L2</span> 定性案例可核查，无R2V/编辑的定量评测指标和对比数据</p>
+</div>
+
+<h2>⑩ 创新点核查表（含消融实验状态）</h2>
+
+<table>
+  <tr><th style="width:15%">自称创新</th><th style="width:7%">类型</th><th style="width:9%">通用/特有</th><th style="width:13%">消融支撑?</th><th style="width:20%">前作检查</th><th style="width:9%">第三方验证</th><th>判定</th></tr>
+  <tr>
+    <td><strong>四模态统一参考输入 + R2V</strong>（文本+图≤9+音≤3+视≤3）</td>
+    <td>新能力</td>
+    <td><span class="tag tag-spec">特有</span>多模态组合参考</td>
+    <td>❌ 论文未提供消融<br><span class="tag tag-l4">L4</span></td>
+    <td>I2V继承自1.0；音频参考继承自1.5；视频参考和多模态组合为2.0新增；MAGI-2/LTX-2也支持多模态输入但任务覆盖不同</td>
+    <td>Arena.AI I2V #1可间接验证；R2V任务矩阵20/22可核查</td>
+    <td><span class="tag tag-l2">L2</span> 能力矩阵可核查，效果有Arena排名间接支撑，但无消融证明各参考模态的增量贡献</td>
+  </tr>
+  <tr>
+    <td><strong>五大编辑能力</strong>（主体/风格/场景/音频/延续）</td>
+    <td>新能力</td>
+    <td><span class="tag tag-spec">特有</span>音频编辑；<span class="tag tag-gen">通用</span>视频编辑趋势</td>
+    <td>❌ 无消融<br><span class="tag tag-l4">L4</span></td>
+    <td>视频编辑是业界趋势（Runway/Pika都有编辑功能）；音频内容编辑为2.0独有；统一架构集成而非外挂模型是差异化</td>
+    <td>定性案例可验证，无定量对比</td>
+    <td><span class="tag tag-l3">L3</span> 行业普遍能力，2.0的差异化在于统一架构和音频编辑，但无消融证明统一架构优于外挂方案</td>
+  </tr>
+  <tr>
+    <td><strong>标准版+Fast版双模型</strong></td>
+    <td>工程策略</td>
+    <td><span class="tag tag-gen">通用</span>业界趋势</td>
+    <td>❌ 无质量对比数据<br><span class="tag tag-l4">L4</span></td>
+    <td>Sora Turbo、Kling快速版、Veo快速模式——双模型/多速度档位是业界标准策略</td>
+    <td>无独立验证</td>
+    <td><span class="tag tag-l3">L3</span> 行业通用策略，非技术创新，Fast版质量损失未披露</td>
+  </tr>
+  <tr>
+    <td><strong>双声道音频输出</strong></td>
+    <td>能力增强</td>
+    <td><span class="tag tag-spec">特有</span>视频生成中的双声道</td>
+    <td>❌ 无消融<br><span class="tag tag-l4">L4</span></td>
+    <td>1.5为单声道；其他模型（Veo/Kling）的音频声道规格未明确；双声道在TTS领域成熟</td>
+    <td>音频评测四维度领先可间接验证</td>
+    <td><span class="tag tag-l2">L2</span> 双声道是明确的体验提升，有评测间接支撑，但无消融证明双声道vs单声道的增量</td>
+  </tr>
+  <tr>
+    <td><strong>Arena.AI双榜#1</strong></td>
+    <td>性能结果</td>
+    <td>N/A</td>
+    <td>✅ 公开盲测数据<br><span class="tag tag-l1">L1</span></td>
+    <td>1.5 pro未进入Arena.AI前列；2.0首次双榜第一</td>
+    <td>Arena.AI公开可核查，T2V 1450±15, I2V 1449±11</td>
+    <td><span class="tag tag-l1">L1</span> 公开可核查的性能结果，置信区间显示统计显著优势</td>
+  </tr>
+  <tr>
+    <td><strong>motion 3.75（+1.36）</strong></td>
+    <td>性能结果</td>
+    <td>N/A</td>
+    <td>✅ 内部评测数据<br><span class="tag tag-l1">L1</span></td>
+    <td>1.5 pro motion 2.39；2.0大幅提升1.36分</td>
+    <td>SeedVideoBench 2.0内部专家评测</td>
+    <td><span class="tag tag-l1">L1</span> 具体数字可核查，但为内部评测非公开基准</td>
+  </tr>
+</table>
+
+<div class="conclusion">
+  <h3>创新点核查总结论</h3>
+  <p><strong>Seedance 2.0 的核心差异化在于"四模态统一参考输入+R2V"和"五大编辑能力的统一架构集成"</strong>，这两点在能力覆盖广度上确实领先于同时期模型（Veo 3.5、Kling 3.0）。Arena.AI双榜#1和motion大幅提升是可核查的硬性能结果。</p>
+  <p><strong>但论文作为 Evaluation Report，技术披露极少</strong>——所有架构创新、数据方法、训练配方均无数值消融实验支撑，无法判断性能提升来自架构改进、数据增强还是RLHF调优。与1.0论文（有Reward曲线、推理数字、四维度验证）相比，2.0的技术透明度进一步下降。</p>
+  <p><strong>对 V0.1 方案的启示：</strong>① R2V和编辑能力是下一代视频生成的明确方向，统一架构集成优于外挂模型；② 多模态参考输入需要专门的条件注入机制设计；③ 双声道音频是体验提升的明确方向；④ 双模型策略（质量+速度）是产品化的必要配置。</p>
+</div>
+
+<h2>⑪ 对 V0.1 从零训练方案的修订建议</h2>
+
+<div class="detail-card">
+  <ol>
+    <li><strong>多模态参考输入架构（对应V0.1 D节）：</strong>如果目标包含R2V能力，需在基础DiT架构中设计多模态参考条件注入机制。建议先从"图像+文本"双参考开始验证，再逐步扩展音频和视频参考。视频参考需要3D VAE编码器，跨模态注意力的计算开销需要重点优化。</li>
+    <li><strong>R2V数据构建（对应V0.1 C节）：</strong>R2V训练需要"参考-目标"配对数据，可从长视频中自动截取（前段为参考，后段为目标）。多参考组合数据需要专门构建（如从不同视频中提取主体/场景/音频进行组合）。编辑三元组数据可通过图像编辑模型对视频帧批量编辑合成。</li>
+    <li><strong>编辑能力统一架构（对应V0.1 D节）：</strong>建议采用统一架构的条件注入实现编辑能力，而非为每种编辑训练独立模型。编辑指令通过文本编码器注入，原始视频通过latent拼接或交叉注意力注入。需小规模实验确定最佳注入方式。</li>
+    <li><strong>双声道音频（对应V0.1 D/E节）：</strong>Audio VAE需支持双声道编码解码，音频分支的输出维度需对应立体声。训练数据需筛选双声道音视频素材。</li>
+    <li><strong>双模型策略（对应V0.1 G节）：</strong>建议在标准版训练完成后，通过蒸馏（TSCD+Mean Flows）得到Fast版。需建立标准版vs Fast版的质量对比评测，控制质量损失在可接受范围。</li>
+    <li><strong>R2V/编辑安全（对应V0.1 I节）：</strong>视频参考输入带来深伪风险，需在输入侧检测名人/敏感人物参考，输出侧加水印。音频参考需防语音克隆。编辑能力需防内容篡改。</li>
+    <li><strong>评测体系（对应V0.1 B节）：</strong>内部评测需增加R2V任务矩阵覆盖度和编辑准确性指标。建议参与Arena.AI等公开盲测获取第三方验证。</li>
+  </ol>
+</div>
+
+<div class="footer">
+  <p>调研时间：2026-09-08 ｜ 调研标准：《视频生成大模型-技术报告调研标准 V1.0》（深度版） ｜ 论文来源：arXiv:2604.14148（Model Card/Evaluation Report，26页）</p>
+  <p>披露等级说明：L1 公开+消融 ｜ L2 公开口径 ｜ L3 结构暗示 ｜ L4 完全保密 ｜ L5 第三方 ｜ <span class="tag tag-gen">通用</span>业界通用 ｜ <span class="tag tag-spec">特有</span>模型特有</p>
+  <p>本报告基于论文全文精读，所有技术细节均来自论文原文。因论文为Evaluation Report形态，技术架构参数大量未披露，已明确标注。架构继承自Seedance 1.0/1.5（已精读）处均有标注。</p>
+</div>
+
+</body>
+</html>
