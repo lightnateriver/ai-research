@@ -15,10 +15,26 @@ ai-research/
 ├── industry-analysis/              # 行业/竞品分析方向
 ├── inference-optimization/         # 推理优化方向
 ├── agent-infra/                    # Agent 基础设施方向
+├── skills/                         # 自动化 Skill
+│   └── github-research/            # 调研报告归档工作流 Skill
 ├── templates/                      # 报告模板
 │   └── research-template.html
 └── assets/                         # 图片/图表资源
 ```
+
+## 🛠️ Skills
+
+### github-research
+
+调研报告归档与上传的标准化工作流 Skill。核心能力：
+
+- **四步闭环**：判断方向 → 生成华为配色浅色系 HTML → push 到 GitHub → 更新 README 索引
+- **报告更新**：支持删旧传新，刷新已有报告时自动删除旧文件、用新日期命名上传、更新索引链接
+- **Push 前 README 审视**：每次 push 前强制检查是否需要更新根目录 README（结构变化、索引更新、新增说明等）
+- **方向自动归档**：9 个预设方向，不匹配时自动创建新方向目录
+- **质量检查**：上传前自动检查配色规范、日期、结论章节、数据来源等
+
+详见 [`skills/github-research/SKILL.md`](skills/github-research/SKILL.md)。
 
 ## 📋 归档规则
 
