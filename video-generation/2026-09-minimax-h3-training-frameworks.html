@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniMax H3 开源训练框架调研报告</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  :root {
+    --huawei-red: #C7000B;
+    --huawei-red-light: #E8384F;
+    --huawei-red-bg: #FFF0F1;
+    --text-primary: #1A1A1A;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+    --bg-page: #F7F8FA;
+    --bg-card: #FFFFFF;
+    --border-light: #E8E8E8;
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-hover: 0 4px 20px rgba(199,0,11,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .header {
+    background: linear-gradient(135deg, #C7000B 0%, #8B0000 100%);
+    color: #fff;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
+  .header .subtitle { font-size: 15px; opacity: 0.9; margin-bottom: 20px; }
+  .header .meta { display: inline-flex; gap: 24px; font-size: 13px; opacity: 0.85; flex-wrap: wrap; justify-content: center; }
+  .header .meta span { display: flex; align-items: center; gap: 6px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 20px; font-weight: 700; color: var(--text-primary);
+    margin-bottom: 20px; padding-left: 14px; border-left: 4px solid var(--huawei-red); line-height: 1.3;
+  }
+  .card {
+    background: var(--bg-card); border-radius: 12px; padding: 28px;
+    box-shadow: var(--shadow-card); margin-bottom: 20px; transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: var(--shadow-hover); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+  .card-title { font-size: 19px; font-weight: 700; color: var(--huawei-red); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--huawei-red-bg); color: var(--huawei-red); }
+  .badge.green { background: #E8F5E9; color: #2E7D32; }
+  .badge.orange { background: #FFF3E0; color: #E65100; }
+  .badge.gray { background: #F0F0F0; color: #666; }
+  .badge.blue { background: #E3F2FD; color: #1565C0; }
+  .badge.purple { background: #F3E5F5; color: #6A1B9A; }
+  .github-link { font-size: 13px; color: var(--huawei-red); text-decoration: none; font-weight: 500; }
+  .github-link:hover { text-decoration: underline; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .info-item { background: #FAFAFA; border-radius: 8px; padding: 12px 16px; border-left: 3px solid var(--huawei-red); }
+  .info-item .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .info-item .value { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .info-item .value.star { color: var(--huawei-red); font-size: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0; }
+  th { background: var(--huawei-red); color: #fff; padding: 12px 14px; text-align: left; font-weight: 600; font-size: 13px; }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border-light); color: var(--text-secondary); }
+  tr:nth-child(even) td { background: #FAFAFA; }
+  tr:hover td { background: var(--huawei-red-bg); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .tag.yes { background: #E8F5E9; color: #2E7D32; }
+  .tag.no { background: #FFEBEE; color: #C62828; }
+  .tag.partial { background: #FFF3E0; color: #E65100; }
+  .chart-container { width: 100%; height: 420px; margin: 16px 0; }
+  .chart-container.radar { height: 500px; }
+  .conclusion-box {
+    background: linear-gradient(135deg, #FFF0F1 0%, #FFFFFF 100%);
+    border: 1px solid #FFCDD2; border-radius: 12px; padding: 24px 28px; margin-bottom: 16px;
+  }
+  .conclusion-box h4 { color: var(--huawei-red); font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .conclusion-box p, .conclusion-box li { color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+  .conclusion-box ul { padding-left: 20px; margin-top: 8px; }
+  .highlight { color: var(--huawei-red); font-weight: 600; }
+  .footer { text-align: center; padding: 32px 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border-light); margin-top: 40px; }
+  .detail-list { margin: 12px 0; padding-left: 0; list-style: none; }
+  .detail-list li { padding: 8px 0; border-bottom: 1px dashed #EEE; font-size: 14px; color: var(--text-secondary); display: flex; gap: 10px; }
+  .detail-list li:last-child { border-bottom: none; }
+  .detail-list li::before { content: "▸"; color: var(--huawei-red); font-weight: bold; flex-shrink: 0; }
+  .compare-table th { font-size: 12px; padding: 10px 12px; }
+  .compare-table td { font-size: 13px; padding: 10px 12px; }
+  .win { color: #2E7D32; font-weight: 600; }
+  .lose { color: #C62828; font-weight: 600; }
+  .tie { color: #E65100; font-weight: 600; }
+  .watch-card { border: 2px dashed #FFB74D; background: #FFF8E1; }
+  .watch-card .card-title { color: #E65100; }
+  @media (max-width: 768px) {
+    .header h1 { font-size: 22px; }
+    .card { padding: 20px; }
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    .chart-container { height: 360px; }
+    .chart-container.radar { height: 420px; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>MiniMax H3 开源训练框架调研报告</h1>
+  <div class="subtitle">支持 H3 音视频生成模型的 SFT / LoRA / RL / 蒸馏训练框架全景调研</div>
+  <div class="meta">
+    <span>📅 2026-09-18</span>
+    <span>🔧 7 个已验证框架 + 1 个待观察</span>
+    <span>✅ GitHub 仓库实时核实</span>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="section">
+  <div class="section-title">一、调研概述</div>
+  <div class="card">
+    <p><strong>MiniMax H3</strong> 是 MiniMax（稀宇科技）于 2026 年 7 月 31 日发布、8 月 3 日开源的通用全模态生成模型，核心为 <span class="highlight">33B 参数 H3-Omni Transformer</span>，支持文本/图像/视频/音频统一上下文理解，生成带原生立体声的 2K 视频。</p>
+    <br>
+    <p>关键背景：H3 官方<strong>仅开源了模型权重和推理代码</strong>（支持 SGLang、vLLM、diffusers、ComfyUI），<strong>未发布官方训练 recipe</strong>。训练能力由社区第三方框架填补。</p>
+    <br>
+    <p>本报告仅列入<strong>已验证支持 H3 视频生成模型训练</strong>的开源框架，所有数据均从 GitHub 仓库代码和文档中实际核实。经多轮 exhaustive 搜索，共确认 <span class="highlight">7 个支持 H3 训练的框架</span> + <span class="highlight">1 个待观察框架</span>（MindSpeed-MM，华为昇腾官方套件，尚未适配 H3）。</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">二、社区规模对比（GitHub 实时数据）</div>
+  <div class="card">
+    <div id="starsChart" class="chart-container"></div>
+    <table>
+      <tr><th>排名</th><th>框架</th><th>GitHub Stars</th><th>维护组织</th><th>开源时间</th></tr>
+      <tr><td>1</td><td><strong>DiffSynth-Studio</strong></td><td><span class="highlight">13,112</span></td><td>阿里达摩院 / ModelScope</td><td>2023-12</td></tr>
+      <tr><td>2</td><td><strong>AI-Toolkit</strong></td><td><span class="highlight">12,041</span></td><td>ostris（个人，LoRA 领域知名）</td><td>2023</td></tr>
+      <tr><td>3</td><td><strong>FastVideo</strong></td><td><span class="highlight">4,459</span></td><td>hao-ai-lab（UCSD 郝爱民团队）</td><td>2025</td></tr>
+      <tr><td>4</td><td><strong>SimpleTuner</strong></td><td><span class="highlight">2,922</span></td><td>bghira（个人）</td><td>2023</td></tr>
+      <tr><td>5</td><td><strong>VeOmni</strong></td><td><span class="highlight">2,210</span></td><td>字节 Seed + 火山引擎 + IaaS</td><td>2025-08</td></tr>
+      <tr><td>6</td><td><strong>VeRL-Omni</strong></td><td><span class="highlight">1,040</span></td><td>verl 社区 + vLLM 项目</td><td>2026-05</td></tr>
+      <tr><td>7</td><td><strong>Fizgig</strong></td><td><span class="highlight">385</span></td><td>个人开发者 shootthesound</td><td>2026-04</td></tr>
+      <tr><td>—</td><td><strong>MindSpeed-MM</strong>（待观察）</td><td>51</td><td>华为昇腾 Ascend</td><td>2026</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);">数据来源：GitHub 仓库页面 stargazerCount 字段实时提取（2026-09-18）</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">三、框架详细调研</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">3.1 DiffSynth-Studio <span class="badge green">SFT+LoRA</span> <span class="badge blue">蒸馏(框架)</span></div>
+      <a class="github-link" href="https://github.com/modelscope/DiffSynth-Studio" target="_blank">modelscope/DiffSynth-Studio ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">13,112</div></div>
+      <div class="info-item"><div class="label">维护组织</div><div class="value">阿里 ModelScope</div></div>
+      <div class="info-item"><div class="label">License</div><div class="value">Apache 2.0</div></div>
+      <div class="info-item"><div class="label">H3 专门文档</div><div class="value">✅ MiniMax-H3.md</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>专门文档</td><td><span class="tag yes">✅ 有</span></td><td>docs/zh/Model_Details/MiniMax-H3.md，含安装/推理/训练参数</td></tr>
+      <tr><td>全量训练 (SFT)</td><td><span class="tag yes">✅ 支持</span></td><td>7 种配置：FL2VA、Ref2VA、Pruned-FL2VA、Text-Embeddings、Fun-Controlnet-Union 等</td></tr>
+      <tr><td>LoRA 训练</td><td><span class="tag yes">✅ 支持</span></td><td><strong>15 种配置</strong>：FL2VA、Ref2VA、NF4、Pruned、Int8-ConvRot、FP8 等各种组合</td></tr>
+      <tr><td>RL 训练</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+      <tr><td>蒸馏训练</td><td><span class="tag partial">⚠️ 框架支持</span></td><td>框架层面支持蒸馏（Qwen-Image 有完整 Distill-Full/Distill-LoRA），H3 暂无蒸馏脚本</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag partial">⚠️ 通用支持</span></td><td>有 [npu]/[npu_aarch64] 安装依赖，但 H3 文档推理示例均为 CUDA，无 H3 特定 NPU 验证</td></tr>
+      <tr><td>MoE/EP</td><td><span class="tag partial">⚠️ MoE训练</span></td><td>支持 LingBot-Video MoE-30B 训练，但未找到明确 EP 实现</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li><strong>统一训练模块</strong>：MiniMaxH3TrainingModule，一个 train.py 覆盖全量+LoRA</li>
+      <li><strong>分布式训练</strong>：accelerate_config_zero3.yaml，DeepSpeed ZeRO-3</li>
+      <li><strong>低显存推理</strong>：VRAM 管理，最低 7G 显存可运行 NF4 量化模型</li>
+      <li><strong>ComfyUI 生态</strong>：训练的 LoRA 可直接被 ComfyUI 加载（2026年9月更新）</li>
+      <li><strong>中英文双语文档</strong>：docs/zh 和 docs/en</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">3.2 AI-Toolkit <span class="badge green">LoRA</span> <span class="badge blue">蒸馏</span></div>
+      <a class="github-link" href="https://github.com/ostris/ai-toolkit" target="_blank">ostris/ai-toolkit ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">12,041</div></div>
+      <div class="info-item"><div class="label">维护者</div><div class="value">ostris（个人）</div></div>
+      <div class="info-item"><div class="label">定位</div><div class="value">消费级 GPU 微调工具</div></div>
+      <div class="info-item"><div class="label">H3 支持版本</div><div class="value">commit 8502a84+</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>LoRA 训练</td><td><span class="tag yes">✅ 支持</span></td><td>commit 8502a84 添加 MiniMax H3 T2V + first-frame I2V 训练</td></tr>
+      <tr><td>全量训练 (SFT)</td><td><span class="tag partial">⚠️ 框架支持</span></td><td>框架有 full fine-tune 能力（flex/lumina 等），H3 目前主要是 LoRA</td></tr>
+      <tr><td>RL 训练</td><td><span class="tag no">❌ 不支持</span></td><td>AI-Toolkit 是微调工具，不支持 RL</td></tr>
+      <tr><td>蒸馏训练</td><td><span class="tag yes">✅ 支持</span></td><td>MiniMax 官网明确确认"AI-Toolkit supports H3 including a distillation training adapter"</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag no">❌ 不支持</span></td><td>仅 NVIDIA CUDA</td></tr>
+      <tr><td>MoE/EP</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li><strong>量化加载</strong>：pruned int8 ConvRot H3 transformer + NVFP4/AWQ Qwen3-VL text encoder</li>
+      <li><strong>训练方式</strong>：FlowMatch 训练，导出 ComfyUI 兼容 LoRA keys</li>
+      <li><strong>消费级友好</strong>：24GB 显存可训练，Low VRAM 模式 + 缓存启用</li>
+      <li><strong>社区生态</strong>：RunComfy 等平台集成，HuggingFace 上大量 H3 LoRA 基于此工具训练</li>
+      <li><strong>多模型支持</strong>：FLUX、Wan2.1/2.2、Qwen-Image、SD3.5、LTX-2.3、Hunyuan 等</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">3.3 FastVideo <span class="badge green">SFT</span> <span class="badge blue">蒸馏(FastH3)</span></div>
+      <a class="github-link" href="https://github.com/hao-ai-lab/FastVideo" target="_blank">hao-ai-lab/FastVideo ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">4,459</div></div>
+      <div class="info-item"><div class="label">维护组织</div><div class="value">hao-ai-lab (UCSD)</div></div>
+      <div class="info-item"><div class="label">合作伙伴</div><div class="value">NVIDIA FastGen、Nuva Lab</div></div>
+      <div class="info-item"><div class="label">定位</div><div class="value">推理+后训练一体化</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>全量训练 (SFT)</td><td><span class="tag yes">✅ 支持</span></td><td>overfit_minimax_h3_t2va.yaml，64 GPU（8×H200），FSDP2 + 序列并行(sp=8) + HSDP</td></tr>
+      <tr><td>LoRA 训练</td><td><span class="tag partial">⚠️ 框架支持</span></td><td>README 明确"Support full finetuning and LoRA finetuning"，H3 目前只有全量 overfit 配置</td></tr>
+      <tr><td>RL 训练</td><td><span class="tag no">❌ 不支持</span></td><td>configs/rl 目录只有 wan 模型，无 H3 RL 配置</td></tr>
+      <tr><td>蒸馏训练</td><td><span class="tag yes">✅ 支持</span></td><td>DMD2 stepwise distillation + Sparse distillation，FastH3 系列就是 H3 蒸馏产物</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag no">❌ 不支持</span></td><td>支持 NVIDIA GPU + Apple Silicon(MLX)，无昇腾 NPU</td></tr>
+      <tr><td>MoE/EP</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li><strong>FastH3 系列</strong>：从 MiniMax-H3 蒸馏的加速模型——4-Step Preview v1（2026-08-27）、8-Step V2（2026-09-15，80% VSA）</li>
+      <li><strong>训练技术栈</strong>：bf16、gradient checkpointing(full)、AdamW(lr=5e-5)、wandb 追踪、梯度裁剪</li>
+      <li><strong>数据预处理</strong>：fastvideo.pipelines.preprocess.preprocess_minimax_h3_overfit</li>
+      <li><strong>验证回调</strong>：MiniMaxH3Pipeline，每 20 步验证一次</li>
+      <li><strong>影响力</strong>：SGLang diffusion 推理基于 FastVideo fork；腾讯混元 SRPO/HY-WorldPlay、美团 LongCat 均基于 FastVideo</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">3.4 SimpleTuner <span class="badge green">LoRA+Adapter</span> <span class="badge blue">Drift蒸馏</span> <span class="badge purple">MoE</span></div>
+      <a class="github-link" href="https://github.com/bghira/SimpleTuner" target="_blank">bghira/SimpleTuner ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">2,922</div></div>
+      <div class="info-item"><div class="label">维护者</div><div class="value">bghira（个人）</div></div>
+      <div class="info-item"><div class="label">定位</div><div class="value">通用图像/视频/音频微调</div></div>
+      <div class="info-item"><div class="label">H3 文档</div><div class="value">✅ 专门 Quickstart</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>LoRA/Adapter 训练</td><td><span class="tag yes">✅ 支持</span></td><td>PEFT adapter，24g/32g/48g/80g 多档显存配置</td></tr>
+      <tr><td>全量训练 (SFT)</td><td><span class="tag partial">⚠️ 主要adapter</span></td><td>文档未明确 H3 全量 fine-tune，主要是 adapter training</td></tr>
+      <tr><td>RL 训练</td><td><span class="tag no">❌ 不支持</span></td><td>文档中无 reinforcement/grpo/ppo/reward</td></tr>
+      <tr><td>蒸馏训练</td><td><span class="tag yes">✅ 支持</span></td><td><strong>H3 Drift Distillation</strong>（漂移蒸馏器，默认启用），含 loss_weight/sft_loss_weight/video_weight/audio_weight</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag no">❌ 不支持</span></td><td>仅 NVIDIA CUDA</td></tr>
+      <tr><td>MoE/EP</td><td><span class="tag yes">✅ 支持</span></td><td>框架支持 Mixture of Experts，HiDream MoE 模型已验证</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li><strong>FL2VA 支持</strong>：first/last-frame conditioning</li>
+      <li><strong>ConvRot 量化</strong>：支持 int8 ConvRot quantized flavours</li>
+      <li><strong>漂移蒸馏</strong>：防止 adapter training 偏离 base model 的蒸馏行为，默认启用</li>
+      <li><strong>实验性稀疏注意力</strong>：MoBA-style 3D sparse attention（实验性，默认禁用）</li>
+      <li><strong>多模型支持</strong>：LTX Video、Hunyuan Video 1.5、Wan Video、HiDream MoE、Cosmos2、Qwen Image、SDXL、Flux 等</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">3.5 VeOmni <span class="badge green">SFT</span> <span class="badge orange">RL backend</span> <span class="badge blue">NPU官方验证</span> <span class="badge purple">EP</span></div>
+      <a class="github-link" href="https://github.com/ByteDance-Seed/VeOmni" target="_blank">ByteDance-Seed/VeOmni ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">2,210</div></div>
+      <div class="info-item"><div class="label">维护组织</div><div class="value">字节 Seed + 火山引擎</div></div>
+      <div class="info-item"><div class="label">License</div><div class="value">Apache 2.0</div></div>
+      <div class="info-item"><div class="label">论文</div><div class="value">arXiv:2508.02317</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>专门文档</td><td><span class="tag yes">✅ 有</span></td><td>docs/examples/minimax_h3.md —《MiniMax H3 FL2VA Quick Start》</td></tr>
+      <tr><td>全量训练 (SFT)</td><td><span class="tag yes">✅ 支持</span></td><td>两阶段训练：offline embedding → offline training（FSDP2 + gradient checkpointing + bf16）</td></tr>
+      <tr><td>LoRA 训练</td><td><span class="tag partial">⚠️ 框架支持</span></td><td>框架支持 LoRA，但 configs/dit 中暂无 H3 专用 LoRA 配置</td></tr>
+      <tr><td>RL 训练</td><td><span class="tag partial">⚠️ 有backend</span></td><td>有 train_vlm_rl.py 和 train_text_rl.py，README 明确"RL post training with VeRL"，但无 H3 专用 RL 配置</td></tr>
+      <tr><td>蒸馏训练</td><td><span class="tag no">❌ 不支持</span></td><td>仓库中无任何 distill 相关引用</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag yes">✅ 官方验证</span></td><td>H3 文档标题明确"on an Ascend NPU machine"，验证环境 4×Ascend NPU + torch_npu + torchrun</td></tr>
+      <tr><td>MoE/EP</td><td><span class="tag yes">✅ 支持</span></td><td>README 明确"Experts Parallelism support large MOE model training"，docs/key_features/ep_fsdp2.md，已验证 Qwen3-MoE</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li><strong>两阶段训练</strong>：Stage1 编码视频/音频/文本为 parquet；Stage2 FSDP2 训练 DiT</li>
+      <li><strong>数据约束</strong>：帧数 (N-5)%17==0，分辨率 480x832，帧率 24，音频 32kHz 立体声</li>
+      <li><strong>三个统一</strong>：统一多模态、统一并行策略、统一算力底座</li>
+      <li><strong>硬件支持</strong>：NVIDIA GPU、AMD ROCm、Ascend NPU</li>
+      <li><strong>生态整合</strong>：verl 已将 VeOmni 作为可选训练后端引擎（v0.7 alpha）；与 VeRL-Omni 同属字节生态</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">3.6 VeRL-Omni <span class="badge green">RL(唯一)</span> <span class="badge orange">NPU间接</span></div>
+      <a class="github-link" href="https://github.com/verl-project/verl-omni" target="_blank">verl-project/verl-omni ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">1,040</div></div>
+      <div class="info-item"><div class="label">维护组织</div><div class="value">verl 社区 + vLLM</div></div>
+      <div class="info-item"><div class="label">发起方</div><div class="value">字节跳动 Seed 团队</div></div>
+      <div class="info-item"><div class="label">最新版本</div><div class="value">v0.2.0 (2026-08-20)</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>H3 RL 训练</td><td><span class="tag yes">✅ 唯一支持</span></td><td>2026-09-08 发布 MiniMax H3 完整在线 RL 后训练管线</td></tr>
+      <tr><td>RL 算法</td><td><span class="tag yes">✅ DiffusionNFT</span></td><td>ICLR 2026 Oral，专为扩散模型 RL 设计</td></tr>
+      <tr><td>SFT 训练</td><td><span class="tag no">❌ 不支持</span></td><td>RL 专用框架</td></tr>
+      <tr><td>LoRA 训练</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+      <tr><td>蒸馏训练</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag partial">⚠️ 间接</span></td><td>底层基于 verl（内置 NPU），但多模态 rollout 依赖 vLLM-Omni，NPU 适配待验证；有华为昇腾员工参与开发</td></tr>
+      <tr><td>MoE/EP</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li><strong>分布式架构</strong>：actor-rollout-reward 拓扑，Ray 管理</li>
+      <li><strong>推理引擎</strong>：vLLM-Omni，高吞吐 rollout</li>
+      <li><strong>训练后端</strong>：FSDP2 + Ulysses 序列并行</li>
+      <li><strong>其他支持模型</strong>：Qwen-Image(FlowGRPO)、Qwen-Omni、BAGEL、HunyuanImage-3.0、Wan2.2(DanceGRPO)</li>
+      <li><strong>增长速度</strong>：Stars 从 7 月 465 涨到 9 月 1,040，两个月翻一倍多</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">3.7 Fizgig <span class="badge green">SFT+LoRA</span> <span class="badge blue">16GB消费级</span></div>
+      <a class="github-link" href="https://github.com/shootthesound/Fizgig" target="_blank">shootthesound/Fizgig ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">385</div></div>
+      <div class="info-item"><div class="label">维护者</div><div class="value">shootthesound（个人）</div></div>
+      <div class="info-item"><div class="label">最新版本</div><div class="value">v5.2.0 (2026-09-02)</div></div>
+      <div class="info-item"><div class="label">硬件要求</div><div class="value">NVIDIA 16GB+</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>全量微调 (SFT)</td><td><span class="tag yes">✅ 支持</span></td><td>v5.0.0 起支持 H3 33B 全量微调，<strong>16GB 消费级 GPU</strong> 可运行</td></tr>
+      <tr><td>LoRA 训练</td><td><span class="tag yes">✅ 支持</span></td><td>LoRA + LoKR (LyCORIS)</td></tr>
+      <tr><td>RL 训练</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+      <tr><td>蒸馏训练</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag no">❌ 不支持</span></td><td>仅 NVIDIA GPU</td></tr>
+      <tr><td>MoE/EP</td><td><span class="tag no">❌ 不支持</span></td><td>—</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li><strong>Optimised Likeness Learning</strong>：v5.2.0 新增，H3 的 20-49 块优化人脸/角色相似度</li>
+      <li><strong>LoRA Dataset Studio</strong>：自托管 WebUI，数据管理+训练一体化</li>
+      <li><strong>Checkpoint → LoRA 导出</strong>：可导出供 ComfyUI 使用</li>
+      <li><strong>迭代极快</strong>：v5.0.0→v5.2.0 仅 4 天</li>
+      <li><strong>个人项目</strong>：作者一人贡献 1,597 commits（97%+），长期维护不确定</li>
+    </ul>
+  </div>
+
+  <div class="card watch-card">
+    <div class="card-header">
+      <div class="card-title">3.8 MindSpeed-MM（待观察）<span class="badge orange">不支持H3</span> <span class="badge blue">仅NPU</span></div>
+      <a class="github-link" href="https://github.com/Ascend/MindSpeed-MM" target="_blank">Ascend/MindSpeed-MM ↗</a>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="label">GitHub Stars</div><div class="value star">51</div></div>
+      <div class="info-item"><div class="label">维护组织</div><div class="value">华为昇腾 Ascend</div></div>
+      <div class="info-item"><div class="label">定位</div><div class="value">昇腾多模态大模型训练套件</div></div>
+      <div class="info-item"><div class="label">硬件</div><div class="value">仅昇腾 NPU</div></div>
+    </div>
+    <table>
+      <tr><th>能力</th><th>状态</th><th>说明</th></tr>
+      <tr><td>MiniMax H3 训练</td><td><span class="tag no">❌ 不支持</span></td><td>README 和代码中完全没有 H3 相关内容</td></tr>
+      <tr><td>MiniMax-M3（语言模型）</td><td><span class="tag yes">✅ 支持</span></td><td>2026-08-14 添加，注意是 M3 不是 H3</td></tr>
+      <tr><td>支持的视频模型</td><td>—</td><td>LTX2、HunyuanVideo1.5、Wan2.1（没有 H3）</td></tr>
+      <tr><td>NVIDIA GPU</td><td><span class="tag no">❌ 不支持</span></td><td>README 中完全没有 gpu/cuda，仅昇腾 NPU</td></tr>
+      <tr><td>昇腾 NPU</td><td><span class="tag yes">✅ 原生支持</span></td><td>Atlas 800T A2，配套 TorchNPU + CANN</td></tr>
+      <tr><td>框架能力（LoRA/RL/FSDP2）</td><td><span class="tag yes">✅ 都有</span></td><td>支持 LoRA、RL(FLUX DanceGRPO/Qwen2.5VL GRPO基于verl)、FSDP2、TP/SP/PP/CP</td></tr>
+    </table>
+    <div class="conclusion-box" style="margin-top:16px;">
+      <h4>⚠️ 为什么列入待观察</h4>
+      <p>MindSpeed-MM 是华为昇腾官方的多模态训练套件，框架层面已支持 LoRA 和 RL（基于 verl），如果未来适配 H3，会是<strong>昇腾 NPU 上 H3 训练的有力竞争者</strong>。但目前不支持 H3，且仅支持 NPU 不支持 GPU，因此不列入正式对比。</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="section">
+  <div class="section-title">四、横向对比总表</div>
+  <div class="card">
+    <div style="overflow-x:auto;">
+    <table class="compare-table">
+      <tr><th>维度</th><th>DiffSynth</th><th>AI-Toolkit</th><th>FastVideo</th><th>SimpleTuner</th><th>VeOmni</th><th>VeRL-Omni</th><th>Fizgig</th></tr>
+      <tr><td><strong>维护方</strong></td><td>阿里</td><td>个人</td><td>UCSD</td><td>个人</td><td>字节</td><td>verl社区</td><td>个人</td></tr>
+      <tr><td><strong>Stars</strong></td><td>13,112</td><td>12,041</td><td>4,459</td><td>2,922</td><td>2,210</td><td>1,040</td><td>385</td></tr>
+      <tr><td><strong>H3 SFT/全量</strong></td><td><span class="tag yes">✅7种</span></td><td><span class="tag partial">⚠️主要LoRA</span></td><td><span class="tag yes">✅完整</span></td><td><span class="tag partial">⚠️主要adapter</span></td><td><span class="tag yes">✅两阶段</span></td><td><span class="tag no">❌</span></td><td><span class="tag yes">✅16GB</span></td></tr>
+      <tr><td><strong>H3 LoRA</strong></td><td><span class="tag yes">✅15种</span></td><td><span class="tag yes">✅</span></td><td><span class="tag partial">⚠️框架</span></td><td><span class="tag yes">✅多档</span></td><td><span class="tag partial">⚠️框架</span></td><td><span class="tag no">❌</span></td><td><span class="tag yes">✅LoRA+LoKR</span></td></tr>
+      <tr><td><strong>H3 RL</strong></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td><td><span class="tag partial">⚠️backend</span></td><td><span class="tag yes">✅唯一</span></td><td><span class="tag no">❌</span></td></tr>
+      <tr><td><strong>H3 蒸馏</strong></td><td><span class="tag partial">⚠️框架</span></td><td><span class="tag yes">✅</span></td><td><span class="tag yes">✅FastH3</span></td><td><span class="tag yes">✅Drift</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td></tr>
+      <tr><td><strong>昇腾 NPU</strong></td><td><span class="tag partial">⚠️通用</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td><td><span class="tag yes">✅H3验证</span></td><td><span class="tag partial">⚠️间接</span></td><td><span class="tag no">❌</span></td></tr>
+      <tr><td><strong>MoE/EP</strong></td><td><span class="tag partial">⚠️MoE</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td><td><span class="tag yes">✅MoE</span></td><td><span class="tag yes">✅EP</span></td><td><span class="tag no">❌</span></td><td><span class="tag no">❌</span></td></tr>
+      <tr><td><strong>硬件要求</strong></td><td>服务器级</td><td>24GB+</td><td>服务器级</td><td>24GB+</td><td>服务器多卡/NPU</td><td>服务器多卡</td><td>16GB消费级</td></tr>
+      <tr><td><strong>ComfyUI兼容</strong></td><td><span class="tag yes">✅</span></td><td><span class="tag yes">✅</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag yes">✅可导出</span></td></tr>
+    </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">五、能力雷达图对比</div>
+  <div class="card">
+    <div id="radarChart" class="chart-container radar"></div>
+    <p style="font-size:12px;color:var(--text-muted);">评分维度：SFT完整度、LoRA丰富度、RL支持、蒸馏支持、NPU生态、社区规模、工程化程度（0-5分，基于仓库实际代码和文档评估）</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">六、SFT + RL 组合方案对比</div>
+  <div class="card">
+    <p>目前<strong>没有单一框架同时原生支持 H3 的 SFT + RL</strong>。H3 RL 只有 VeRL-Omni 一个选择，因此 SFT 框架需要能与 VeRL-Omni 配合。</p>
+    <br>
+    <div style="overflow-x:auto;">
+    <table class="compare-table">
+      <tr><th>对比维度</th><th>VeOmni + VeRL-Omni</th><th>DiffSynth + VeRL-Omni</th><th>FastVideo + VeRL-Omni</th></tr>
+      <tr><td><strong>生态一致性</strong></td><td><span class="win">✅ 同属字节生态</span></td><td><span class="lose">⚠️ 阿里 vs 字节</span></td><td><span class="tie">⚠️ UCSD vs 字节</span></td></tr>
+      <tr><td><strong>Checkpoint兼容</strong></td><td><span class="win">✅ 零转换</span></td><td><span class="lose">⚠️ 可能需转换</span></td><td><span class="lose">⚠️ 可能需转换</span></td></tr>
+      <tr><td><strong>RL官方集成</strong></td><td><span class="win">✅ 有官方设计</span></td><td><span class="lose">❌ 无</span></td><td><span class="lose">❌ 无</span></td></tr>
+      <tr><td><strong>H3 SFT文档</strong></td><td><span class="win">✅ 专门文档+NPU验证</span></td><td><span class="win">✅ 18种变体+15种LoRA</span></td><td><span class="win">✅ 完整管线+64GPU配置</span></td></tr>
+      <tr><td><strong>H3 LoRA配置</strong></td><td><span class="lose">⚠️ 暂无H3 LoRA</span></td><td><span class="win">✅ 15种配置</span></td><td><span class="tie">⚠️ 框架支持</span></td></tr>
+      <tr><td><strong>蒸馏能力</strong></td><td><span class="lose">❌ 不支持</span></td><td><span class="tie">⚠️ 框架支持</span></td><td><span class="win">✅ FastH3系列</span></td></tr>
+      <tr><td><strong>昇腾 NPU</strong></td><td><span class="win">✅ H3官方验证</span></td><td><span class="tie">⚠️ 通用支持</span></td><td><span class="lose">❌ 不支持</span></td></tr>
+      <tr><td><strong>社区规模</strong></td><td>2,210</td><td>13,112</td><td>4,459</td></tr>
+    </table>
+    </div>
+    <div class="conclusion-box" style="margin-top:20px;">
+      <h4>🏆 结论：VeOmni + VeRL-Omni 是 SFT→RL 完整流程的最佳组合</h4>
+      <p>同生态、checkpoint 格式零转换、有官方集成设计、H3 在昇腾 NPU 上官方验证。如果需要 LoRA 级别的 SFT，目前还得用 DiffSynth-Studio（15种配置）或 AI-Toolkit。FastVideo 适合需要蒸馏加速的场景。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">七、蒸馏训练支持对比</div>
+  <div class="card">
+    <table>
+      <tr><th>框架</th><th>框架层面蒸馏</th><th>H3 蒸馏脚本</th><th>已有蒸馏案例</th></tr>
+      <tr><td><strong>FastVideo</strong></td><td><span class="tag yes">✅ DMD2+Sparse</span></td><td><span class="tag yes">✅ FastH3系列</span></td><td>FastH3 4-Step/8-Step（从H3蒸馏），Sparse Distillation >50x加速</td></tr>
+      <tr><td><strong>AI-Toolkit</strong></td><td><span class="tag yes">✅ 蒸馏适配器</span></td><td><span class="tag yes">✅ H3蒸馏adapter</span></td><td>MiniMax 官网确认"including a distillation training adapter"</td></tr>
+      <tr><td><strong>SimpleTuner</strong></td><td><span class="tag yes">✅ Drift Distill</span></td><td><span class="tag yes">✅ H3 Drift默认启用</span></td><td>H3 Drift Distillation（防止adapter偏离蒸馏行为）</td></tr>
+      <tr><td><strong>DiffSynth-Studio</strong></td><td><span class="tag yes">✅ 支持</span></td><td><span class="tag partial">⚠️ 暂无H3脚本</span></td><td>Qwen-Image Distill-Full/LoRA；LTX-2 DistilledPipeline</td></tr>
+      <tr><td><strong>VeOmni</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>无（仓库中无任何 distill 引用）</td></tr>
+      <tr><td><strong>VeRL-Omni</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>无</td></tr>
+      <tr><td><strong>Fizgig</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>无</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:12px;">注：H3 模型本身是"CFG 蒸馏模型"（预训练阶段属性），这不是微调框架的蒸馏训练功能。上表统计的是微调框架提供的蒸馏训练能力。</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">八、MoE / EP（专家并行）支持对比</div>
+  <div class="card">
+    <table>
+      <tr><th>框架</th><th>MoE 模型训练</th><th>Expert Parallelism</th><th>已验证 MoE 模型</th><th>EP 优化</th></tr>
+      <tr><td><strong>VeOmni</strong></td><td><span class="tag yes">✅ 支持</span></td><td><span class="tag yes">✅ 明确支持</span></td><td>Qwen3-MoE (30B-A3B/235B-A22B)、Qwen3-VL MoE</td><td>GroupGemm kernel (Liger-Kernel)、ep_fsdp2.md 专门文档</td></tr>
+      <tr><td><strong>SimpleTuner</strong></td><td><span class="tag yes">✅ 支持</span></td><td><span class="tag partial">⚠️ 未明确EP</span></td><td>HiDream MoE</td><td>框架支持 MoE，未找到专门 EP 实现</td></tr>
+      <tr><td><strong>DiffSynth-Studio</strong></td><td><span class="tag yes">✅ 支持</span></td><td><span class="tag partial">⚠️ 未明确EP</span></td><td>LingBot-Video MoE-30B-A3B</td><td>代码搜索仅 1 处 expert parallel，可能使用普通数据并行</td></tr>
+      <tr><td><strong>FastVideo</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>无</td><td>无</td></tr>
+      <tr><td><strong>AI-Toolkit</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>无</td><td>无</td></tr>
+      <tr><td><strong>VeRL-Omni</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>无</td><td>无</td></tr>
+      <tr><td><strong>Fizgig</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>无</td><td>无</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">九、昇腾 NPU 生态支持总结</div>
+  <div class="card">
+    <table>
+      <tr><th>框架</th><th>NPU 支持级别</th><th>H3 NPU 验证</th><th>说明</th></tr>
+      <tr><td><strong>VeOmni</strong></td><td><span class="tag yes">✅ 原生+官方验证</span></td><td><span class="tag yes">✅ 4×Ascend NPU</span></td><td>H3 文档标题明确"on an Ascend NPU machine"，torch_npu + torchrun</td></tr>
+      <tr><td><strong>VeRL-Omni</strong></td><td><span class="tag partial">⚠️ 间接支持</span></td><td><span class="tag partial">⚠️ 待验证</span></td><td>底层 verl 内置 NPU，有华为昇腾员工(ZihaoW123)参与开发，但多模态 rollout 依赖 vLLM-Omni，NPU 适配待验证</td></tr>
+      <tr><td><strong>DiffSynth-Studio</strong></td><td><span class="tag partial">⚠️ 通用支持</span></td><td><span class="tag no">❌ 无H3特定验证</span></td><td>有 [npu]/[npu_aarch64] 安装依赖，但 H3 文档推理示例均为 CUDA</td></tr>
+      <tr><td><strong>MindSpeed-MM</strong>（待观察）</td><td><span class="tag yes">✅ 仅NPU原生</span></td><td><span class="tag no">❌ 不支持H3</span></td><td>华为昇腾官方套件，仅支持 NPU 不支持 GPU，但尚未适配 H3</td></tr>
+      <tr><td><strong>FastVideo</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>NVIDIA GPU + Apple Silicon(MLX)</td></tr>
+      <tr><td><strong>AI-Toolkit</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>仅 CUDA</td></tr>
+      <tr><td><strong>SimpleTuner</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>仅 CUDA</td></tr>
+      <tr><td><strong>Fizgig</strong></td><td><span class="tag no">❌ 不支持</span></td><td><span class="tag no">❌</span></td><td>仅 CUDA</td></tr>
+    </table>
+    <div class="conclusion-box" style="margin-top:16px;">
+      <h4>📌 NPU 结论</h4>
+      <p>如果需要在昇腾 NPU 上做 H3 的完整 SFT+RL，目前 <strong>VeOmni + VeRL-Omni</strong> 是最可行的路径——VeOmni 已官方验证 H3 在 NPU 上训练，VeRL-Omni 有华为昇腾员工参与开发。MindSpeed-MM 是未来潜在的 NPU 竞争者，但目前不支持 H3。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">十、Migi-2 / MAGI-2 Preview 训练支持情况</div>
+  <div class="card">
+    <table>
+      <tr><th>框架</th><th>Migi-2 / MAGI-2 训练支持</th><th>仓库实际观测</th></tr>
+      <tr><td>DiffSynth-Studio</td><td><span class="tag no">❌ 无</span></td><td>examples 有 27 个模型，无 migi/magi 目录</td></tr>
+      <tr><td>AI-Toolkit</td><td><span class="tag no">❌ 无</span></td><td>config/examples 无 migi/magi</td></tr>
+      <tr><td>FastVideo</td><td><span class="tag no">❌ 无</span></td><td>fastvideo/models 无 migi/magi</td></tr>
+      <tr><td>SimpleTuner</td><td><span class="tag no">❌ 无</span></td><td>文档无 migi/magi</td></tr>
+      <tr><td>VeOmni</td><td><span class="tag no">❌ 无</span></td><td>docs/examples 有 14 个文档，无 migi/magi</td></tr>
+      <tr><td>VeRL-Omni</td><td><span class="tag no">❌ 无</span></td><td>仓库中无 migi/magi 引用</td></tr>
+      <tr><td>Fizgig</td><td><span class="tag no">❌ 无</span></td><td>仓库中无 migi/magi 引用</td></tr>
+    </table>
+    <p style="font-size:13px;color:var(--text-secondary);margin-top:12px;"><strong>MAGI-2 Preview</strong> 是 Sand.ai 于 2026年8月5日开源的 114B MoE 音视频模型（6B 激活参数），是目前全球第一个千亿级开源 MoE 视频模型。发布时间较新，各框架可能尚未完成适配。</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">十一、核心贡献者公司/组织背景调研</div>
+  <div class="card">
+    <p style="margin-bottom:16px;">从 GitHub 各贡献者个人主页的 Organization 字段实际提取，覆盖四个主要框架的前 20 名贡献者（含 AI 编码机器人）。</p>
+    <h4 style="color:var(--huawei-red);margin-bottom:10px;">DiffSynth-Studio（阿里 ModelScope）</h4>
+    <ul class="detail-list">
+      <li><strong>Top1 Artiprocher</strong>（531 commits）：🎓 华东师范大学</li>
+      <li><strong>Top2 mi804</strong>（198 commits）：🎓 浙江大学</li>
+      <li>高校背景 5 人 (28%) | 企业背景 4 人 (22%) | AI 机器人 2 人 | 未填写 9 人</li>
+      <li>更像<strong>社区/学术驱动</strong>的项目，虽然挂在阿里 ModelScope 名下</li>
+    </ul>
+    <h4 style="color:var(--huawei-red);margin:16px 0 10px;">VeOmni（字节 Seed）</h4>
+    <ul class="detail-list">
+      <li><strong>Top1 FoolPlayer</strong>（103 commits）：🏢 字节跳动 Seed</li>
+      <li><strong>Top3 TimYangst</strong>（91 commits）：🏢 字节跳动</li>
+      <li><strong>Top4 Coach257</strong>（65 commits）：🏢 字节跳动 Seed</li>
+      <li>字节跳动相关 <strong>9 人 (82%)</strong> | 高校背景 2 人 | AI 机器人 1-2 人</li>
+      <li>典型的<strong>公司主导开源项目</strong></li>
+    </ul>
+    <h4 style="color:var(--huawei-red);margin:16px 0 10px;">VeRL-Omni（verl 社区 + vLLM）</h4>
+    <ul class="detail-list">
+      <li><strong>Top1 zhtmike</strong>（86 commits）：🎓 香港科技大学 (HKUST)</li>
+      <li><strong>Top2 SamitHuang</strong>（83 commits）：🎓 香港科技大学 (HKUST)</li>
+      <li><strong>第14名 ZihaoW123</strong>：🏢 <strong>华为昇腾 (HUAWEI-ASCEND)</strong></li>
+      <li>高校背景 9 人 (60%)，核心团队来自 HKUST | 企业 1 人（华为昇腾）| <strong>AI 机器人 5 人 (25%)</strong></li>
+      <li><strong>学术驱动</strong>的项目，华为昇腾已参与开发</li>
+    </ul>
+    <h4 style="color:var(--huawei-red);margin:16px 0 10px;">Fizgig（个人项目）</h4>
+    <ul class="detail-list">
+      <li><strong>作者 shootthesound</strong> 一人贡献 1,597 commits（<strong>97%+</strong>）</li>
+      <li>其他贡献者均为零星提交，无高校或企业背景标注</li>
+      <li>纯粹的<strong>个人项目</strong></li>
+    </ul>
+    <div class="conclusion-box" style="margin-top:16px;">
+      <h4>🔑 关键发现</h4>
+      <ul>
+        <li>AI 编码机器人已深度融入开源开发——VeRL-Omni 前20名中有 5 个 AI 机器人（Gemini、Codex、Copilot、Cursor、Claude），占 25%</li>
+        <li>VeRL-Omni 有华为昇腾员工参与，说明华为在关注 H3 RL 的 NPU 适配</li>
+        <li>DiffSynth-Studio 虽然挂在阿里名下，但核心贡献者是高校背景</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">十二、关键结论</div>
+  <div class="conclusion-box">
+    <h4>🏆 结论一：SFT+RL 最佳组合是 VeOmni + VeRL-Omni</h4>
+    <p>没有单一框架同时原生支持 H3 的 SFT + RL。VeOmni + VeRL-Omni 同属字节生态，checkpoint 格式零转换，有官方集成设计，H3 在昇腾 NPU 上官方验证，是 SFT→RL 完整流程的最佳组合。</p>
+  </div>
+  <div class="conclusion-box">
+    <h4>🎯 结论二：H3 的 RL 训练只有一个选择——VeRL-Omni</h4>
+    <p>截至 2026 年 9 月，VeRL-Omni 是全球唯一公开支持 MiniMax H3 RL 训练的框架，基于 DiffusionNFT（ICLR 2026 Oral）算法。新发现的 AI-Toolkit、SimpleTuner、FastVideo 都不支持 RL。</p>
+  </div>
+  <div class="conclusion-box">
+    <h4>🔧 结论三：H3 的 SFT/LoRA 选择丰富，按场景选</h4>
+    <table style="margin-top:8px;">
+      <tr><th>场景</th><th>推荐框架</th><th>理由</th></tr>
+      <tr><td>需要 LoRA 训练（配置最丰富）</td><td><strong>DiffSynth-Studio</strong></td><td>15 种 LoRA 配置，社区最大，ComfyUI 兼容</td></tr>
+      <tr><td>消费级 GPU 快速 LoRA</td><td><strong>AI-Toolkit</strong></td><td>24GB 可训练，ComfyUI 兼容，社区活跃</td></tr>
+      <tr><td>需要蒸馏加速模型</td><td><strong>FastVideo</strong></td><td>FastH3 系列是最成熟的 H3 蒸馏产物，DMD2+Sparse distillation</td></tr>
+      <tr><td>需要 Drift 蒸馏保护</td><td><strong>SimpleTuner</strong></td><td>H3 Drift Distillation 默认启用，防止 adapter 偏离蒸馏行为</td></tr>
+      <tr><td>有昇腾 NPU，生产级全量训练</td><td><strong>VeOmni</strong></td><td>H3 在 NPU 上官方验证，两阶段训练，与 VeRL-Omni 生态一致</td></tr>
+      <tr><td>只有消费级 GPU（16-24GB）全量微调</td><td><strong>Fizgig</strong></td><td>唯一能在 16GB GPU 上全量微调 H3 33B</td></tr>
+    </table>
+  </div>
+  <div class="conclusion-box">
+    <h4>⚗️ 结论四：蒸馏训练有 4 个框架支持，FastVideo 最成熟</h4>
+    <p>FastVideo（FastH3 系列）、AI-Toolkit（蒸馏适配器）、SimpleTuner（Drift Distillation）、DiffSynth-Studio（框架支持）均支持蒸馏。其中 FastVideo 的 FastH3 4-Step/8-Step 是最成熟的 H3 蒸馏产物，实现了 >50x 推理加速。VeOmni、VeRL-Omni、Fizgig 不支持蒸馏。</p>
+  </div>
+  <div class="conclusion-box">
+    <h4>⚠️ 结论五：NPU 生态中 VeOmni 对 H3 的支持最成熟</h4>
+    <p>VeOmni 的 H3 训练明确在 4×Ascend NPU 上官方验证。VeRL-Omni（唯一 RL 方案）有华为昇腾员工参与开发，但 NPU 适配待验证。MindSpeed-MM 是华为昇腾官方套件但尚未适配 H3。其余 5 个框架均仅支持 CUDA。</p>
+  </div>
+  <div class="conclusion-box">
+    <h4>🔮 结论六：待观察框架——MindSpeed-MM</h4>
+    <p>华为昇腾官方的 MindSpeed-MM（51 stars）框架层面已支持 LoRA 和 RL（基于 verl），如果未来适配 H3，会是昇腾 NPU 上 H3 训练的有力竞争者。但目前不支持 H3，且仅支持 NPU 不支持 GPU。</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">十三、数据来源与验证说明</div>
+  <div class="card">
+    <ul class="detail-list">
+      <li><strong>GitHub Stars</strong>：2026-09-18 直接从各仓库 GitHub 页面 HTML 的 stargazerCount 字段提取</li>
+      <li><strong>DiffSynth-Studio H3 支持</strong>：从仓库 docs/zh/Model_Details/MiniMax-H3.md、examples/minimax_h3/ 目录、train.py 源码实际核实</li>
+      <li><strong>AI-Toolkit H3 支持</strong>：从 commit 8502a84、README 模型列表、MiniMax 官网确认"including a distillation training adapter"</li>
+      <li><strong>FastVideo H3 支持</strong>：从 overfit_minimax_h3_t2va.yaml、launch 脚本、FastH3 系列模型、README NEWS 实际核实</li>
+      <li><strong>SimpleTuner H3 支持</strong>：从 docs.simpletuner.io/quickstart/MINIMAX_H3/ 官方文档、多档显存配置、Drift Distillation 实际核实</li>
+      <li><strong>VeOmni H3 支持</strong>：从 docs/examples/minimax_h3.md、configs/dit/、tasks/train_dit.py、README 实际核实</li>
+      <li><strong>VeRL-Omni H3 RL</strong>：VeRL-Omni 团队 2026-09-08 官方公告，DiffusionNFT 为 ICLR 2026 Oral</li>
+      <li><strong>Fizgig 数据</strong>：GitHub release notes（v5.0.0/v5.2.0）、仓库 README</li>
+      <li><strong>MindSpeed-MM</strong>：从 Ascend/MindSpeed-MM README、examples 目录、软件版本配套表实际核实，确认不支持 H3 且仅 NPU</li>
+      <li><strong>NPU 支持</strong>：VeOmni H3 文档明确"on an Ascend NPU machine"；DiffSynth-Studio 有 [npu] 安装依赖；MindSpeed-MM 仅 NPU</li>
+      <li><strong>MoE/EP 支持</strong>：从各仓库代码和文档实际搜索。VeOmni README 明确"Experts Parallelism support large MOE model training"</li>
+      <li><strong>贡献者公司背景</strong>：从 GitHub 各贡献者个人主页的 Organization（itemprop="worksFor"）字段实际提取</li>
+      <li><strong>exhaustive 搜索</strong>：经 GitHub API、仓库页面、Google 搜索、官方文档多渠道交叉验证，确认 7 个支持 H3 训练的框架 + 1 个待观察框架</li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">
+  <p>MiniMax H3 开源训练框架调研报告 | 报告日期：2026-09-18 | 所有数据从 GitHub 仓库实际核实</p>
+  <p style="margin-top:6px;">本报告仅列入已验证支持 H3 视频生成模型训练的开源框架</p>
+</div>
+
+</div>
+
+<script>
+var starsChart = echarts.init(document.getElementById('starsChart'));
+starsChart.setOption({
+  backgroundColor: 'transparent',
+  title: { text: '各框架 GitHub Stars 对比（2026-09-18 实时）', left: 'center', textStyle: { fontSize: 15, fontWeight: 600, color: '#1A1A1A' } },
+  tooltip: { trigger: 'axis', triggerOn: 'click', renderMode: 'richText', confine: true, textStyle: { fontSize: 11, lineHeight: 14 }, padding: [6, 8] },
+  grid: { left: 60, right: 40, top: 60, bottom: 80, containLabel: true },
+  xAxis: { type: 'category', data: ['DiffSynth\n-Studio', 'AI-Toolkit', 'FastVideo', 'SimpleTuner', 'VeOmni', 'VeRL-Omni', 'Fizgig', 'MindSpeed-MM\n(待观察)'], axisLabel: { color: '#555', fontSize: 11, interval: 0 } },
+  yAxis: { type: 'value', name: 'Stars', axisLabel: { color: '#555', fontSize: 11 } },
+  series: [{ type: 'bar', data: [
+    { value: 13112, itemStyle: { color: '#C7000B' } },
+    { value: 12041, itemStyle: { color: '#E8384F' } },
+    { value: 4459, itemStyle: { color: '#EF5350' } },
+    { value: 2922, itemStyle: { color: '#F06292' } },
+    { value: 2210, itemStyle: { color: '#F48FB1' } },
+    { value: 1040, itemStyle: { color: '#F8BBD0' } },
+    { value: 385, itemStyle: { color: '#FCCDE5' } },
+    { value: 51, itemStyle: { color: '#FFE0B2' } }
+  ], barWidth: '50%', label: { show: true, position: 'top', fontSize: 11, fontWeight: 600, color: '#1A1A1A', formatter: function(params) { return params.value.toLocaleString(); } } }]
+});
+var radarChart = echarts.init(document.getElementById('radarChart'));
+radarChart.setOption({
+  backgroundColor: 'transparent',
+  title: { text: '七大框架能力雷达图对比', left: 'center', textStyle: { fontSize: 15, fontWeight: 600, color: '#1A1A1A' } },
+  tooltip: { trigger: 'item', triggerOn: 'click', renderMode: 'richText', confine: true, textStyle: { fontSize: 11, lineHeight: 14 }, padding: [6, 8] },
+  legend: { top: 36, type: 'scroll', itemWidth: 14, itemHeight: 8, textStyle: { color: '#555', fontSize: 11 } },
+  radar: { indicator: [
+    { name: 'SFT完整度', max: 5 }, { name: 'LoRA丰富度', max: 5 }, { name: 'RL支持', max: 5 },
+    { name: '蒸馏支持', max: 5 }, { name: 'NPU生态', max: 5 }, { name: '社区规模', max: 5 }, { name: '工程化程度', max: 5 }
+  ], center: ['50%', '58%'], radius: '62%', axisName: { color: '#333', fontSize: 12, fontWeight: 600 }, splitArea: { areaStyle: { color: ['rgba(199,0,11,0.02)', 'rgba(199,0,11,0.05)'] } } },
+  series: [{ type: 'radar', data: [
+    { name: 'DiffSynth-Studio', value: [5, 5, 0, 2, 2, 5, 5], itemStyle: { color: '#C7000B' }, areaStyle: { color: 'rgba(199,0,11,0.15)' } },
+    { name: 'AI-Toolkit', value: [2, 5, 0, 4, 0, 5, 4], itemStyle: { color: '#E8384F' }, areaStyle: { color: 'rgba(232,56,79,0.1)' } },
+    { name: 'FastVideo', value: [5, 2, 0, 5, 0, 4, 5], itemStyle: { color: '#1565C0' }, areaStyle: { color: 'rgba(21,101,192,0.1)' } },
+    { name: 'SimpleTuner', value: [2, 4, 0, 4, 0, 3, 4], itemStyle: { color: '#2E7D32' }, areaStyle: { color: 'rgba(46,125,50,0.1)' } },
+    { name: 'VeOmni', value: [5, 2, 2, 0, 5, 3, 5], itemStyle: { color: '#E65100' }, areaStyle: { color: 'rgba(230,81,0,0.1)' } },
+    { name: 'VeRL-Omni', value: [0, 0, 5, 0, 2, 3, 4], itemStyle: { color: '#6A1B9A' }, areaStyle: { color: 'rgba(106,27,154,0.1)' } },
+    { name: 'Fizgig', value: [4, 4, 0, 0, 0, 1, 3], itemStyle: { color: '#00838F' }, areaStyle: { color: 'rgba(0,131,143,0.1)' } }
+  ] }]
+});
+window.addEventListener('resize', function() { starsChart.resize(); radarChart.resize(); });
+</script>
+
+</body>
+</html>
