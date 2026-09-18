@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>报告标题 - AI Research Notes</title>
+<style>
+  :root {
+    --huawei-red: #C7000B;
+    --huawei-red-light: #E8384F;
+    --huawei-red-bg: #FFF0F1;
+    --text-primary: #1A1A1A;
+    --text-secondary: #555555;
+    --text-muted: #888888;
+    --bg-page: #F7F8FA;
+    --bg-card: #FFFFFF;
+    --border-light: #E8E8E8;
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-hover: 0 4px 20px rgba(199,0,11,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .header {
+    background: linear-gradient(135deg, #C7000B 0%, #8B0000 100%);
+    color: #fff;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
+  .header .subtitle { font-size: 15px; opacity: 0.9; margin-bottom: 20px; }
+  .header .meta { display: inline-flex; gap: 24px; font-size: 13px; opacity: 0.85; flex-wrap: wrap; justify-content: center; }
+  .header .meta span { display: flex; align-items: center; gap: 6px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px 60px; }
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 20px; font-weight: 700; color: var(--text-primary);
+    margin-bottom: 20px; padding-left: 14px; border-left: 4px solid var(--huawei-red); line-height: 1.3;
+  }
+  .card {
+    background: var(--bg-card); border-radius: 12px; padding: 28px;
+    box-shadow: var(--shadow-card); margin-bottom: 20px; transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: var(--shadow-hover); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+  .card-title { font-size: 19px; font-weight: 700; color: var(--huawei-red); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--huawei-red-bg); color: var(--huawei-red); }
+  .badge.green { background: #E8F5E9; color: #2E7D32; }
+  .badge.orange { background: #FFF3E0; color: #E65100; }
+  .badge.gray { background: #F0F0F0; color: #666; }
+  .badge.blue { background: #E3F2FD; color: #1565C0; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .info-item { background: #FAFAFA; border-radius: 8px; padding: 12px 16px; border-left: 3px solid var(--huawei-red); }
+  .info-item .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .info-item .value { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .info-item .value.star { color: var(--huawei-red); font-size: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 16px 0; }
+  th { background: var(--huawei-red); color: #fff; padding: 12px 14px; text-align: left; font-weight: 600; font-size: 13px; }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border-light); color: var(--text-secondary); }
+  tr:nth-child(even) td { background: #FAFAFA; }
+  tr:hover td { background: var(--huawei-red-bg); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .tag.yes { background: #E8F5E9; color: #2E7D32; }
+  .tag.no { background: #FFEBEE; color: #C62828; }
+  .tag.partial { background: #FFF3E0; color: #E65100; }
+  .conclusion-box {
+    background: linear-gradient(135deg, #FFF0F1 0%, #FFFFFF 100%);
+    border: 1px solid #FFCDD2; border-radius: 12px; padding: 24px 28px; margin-bottom: 16px;
+  }
+  .conclusion-box h4 { color: var(--huawei-red); font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .conclusion-box p, .conclusion-box li { color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+  .conclusion-box ul { padding-left: 20px; margin-top: 8px; }
+  .highlight { color: var(--huawei-red); font-weight: 600; }
+  .footer { text-align: center; padding: 32px 20px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--border-light); margin-top: 40px; }
+  .detail-list { margin: 12px 0; padding-left: 0; list-style: none; }
+  .detail-list li { padding: 8px 0; border-bottom: 1px dashed #EEE; font-size: 14px; color: var(--text-secondary); display: flex; gap: 10px; }
+  .detail-list li:last-child { border-bottom: none; }
+  .detail-list li::before { content: "▸"; color: var(--huawei-red); font-weight: bold; flex-shrink: 0; }
+  @media (max-width: 768px) {
+    .header h1 { font-size: 22px; }
+    .card { padding: 20px; }
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>报告标题</h1>
+  <div class="subtitle">报告副标题/一句话摘要</div>
+  <div class="meta">
+    <span>📅 2026-09-18</span>
+    <span>🏷️ 标签1 标签2</span>
+    <span>📂 方向目录</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 一、调研概述 -->
+<div class="section">
+  <div class="section-title">一、调研概述</div>
+  <div class="card">
+    <p>调研背景、目标、范围说明。</p>
+  </div>
+</div>
+
+<!-- 二、正文章节 -->
+<div class="section">
+  <div class="section-title">二、章节标题</div>
+  <div class="card">
+    <p>正文内容。</p>
+    <table>
+      <tr><th>列1</th><th>列2</th><th>列3</th></tr>
+      <tr><td>数据</td><td>数据</td><td>数据</td></tr>
+    </table>
+    <ul class="detail-list">
+      <li>要点1</li>
+      <li>要点2</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 三、关键结论 -->
+<div class="section">
+  <div class="section-title">三、关键结论</div>
+  <div class="conclusion-box">
+    <h4>🏆 结论一</h4>
+    <p>结论内容。</p>
+  </div>
+</div>
+
+<!-- 四、数据来源 -->
+<div class="section">
+  <div class="section-title">四、数据来源与验证说明</div>
+  <div class="card">
+    <ul class="detail-list">
+      <li>数据来源1</li>
+      <li>数据来源2</li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">
+  <p>AI Research Notes | 报告日期：2026-09-18 | 数据从实际来源核实</p>
+</div>
+
+</div>
+
+</body>
+</html>
