@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance 版本演进对比报告（1.0 → 1.5 pro → 2.0）</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1400px; margin: 0 auto; padding: 30px 20px; background: #FAFAFA; color: #333; line-height: 1.75; }
+  h1 { color: #C7000B; border-bottom: 3px solid #C7000B; padding-bottom: 12px; font-size: 1.8em; }
+  h2 { color: #C7000B; margin-top: 40px; border-left: 5px solid #C7000B; padding-left: 14px; background: linear-gradient(90deg, #FDE8EA 0%, transparent 100%); padding-top: 8px; padding-bottom: 8px; font-size: 1.4em; }
+  h3 { color: #333; margin-top: 26px; font-size: 1.15em; border-bottom: 1px dashed #F5C6CB; padding-bottom: 4px; }
+  h4 { color: #0066B3; margin-top: 18px; font-size: 1.05em; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-radius: 6px; overflow: hidden; }
+  th { background: #C7000B; color: white; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 0.92em; }
+  td { padding: 10px 12px; border-bottom: 1px solid #EEEEEE; vertical-align: top; font-size: 0.93em; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover { background: #FFF5F5; }
+  .meta-box { background: #FDE8EA; border-radius: 10px; padding: 20px 26px; margin: 20px 0; border-left: 4px solid #C7000B; }
+  .meta-box p { margin: 6px 0; }
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 0.82em; font-weight: 700; margin-right: 5px; white-space: nowrap; }
+  .tag-l1 { background: #E6F7F0; color: #00875A; }
+  .tag-l2 { background: #FFF8E6; color: #B8860B; }
+  .tag-l3 { background: #FFF8F0; color: #CC5500; }
+  .tag-l4 { background: #FDE8EA; color: #C7000B; }
+  .highlight { background: #FFF0F0; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+  .conclusion { background: #E6F7F0; border-left: 5px solid #00B578; padding: 18px 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+  .conclusion h3 { margin-top: 0; color: #00875A; border: none; }
+  .svg-container { background: white; border-radius: 8px; padding: 20px; margin: 18px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: center; overflow-x: auto; }
+  .svg-container svg { max-width: 100%; height: auto; }
+  .purpose-box { background: #FFF8F0; border-left: 3px solid #FF6B00; padding: 10px 16px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.93em; }
+  .purpose-box strong { color: #CC5500; }
+  .detail-card { background: white; border-radius: 8px; padding: 16px 20px; margin: 12px 0; border-left: 3px solid #0066B3; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .version-card { background: white; border-radius: 8px; padding: 16px; border-top: 4px solid #C7000B; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .version-card.v1 { border-top-color: #0066B3; }
+  .version-card.v15 { border-top-color: #FF6B00; }
+  .version-card.v2 { border-top-color: #C7000B; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; color: #999; font-size: 0.88em; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  @media (max-width: 768px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Seedance 版本演进对比报告</h1>
+<h2 style="margin-top:10px; border:none; background:none; padding:0; font-size:1.2em; color:#666;">1.0 → 1.5 pro → 2.0：从视频生成到多模态创作的三阶段演进</h2>
+
+<div class="meta-box">
+  <p><strong>对比范围：</strong>Seedance 1.0（2025.06）、Seedance 1.5 pro Audio-Visual（2025.12）、Seedance 2.0（2026.04）</p>
+  <p><strong>对比维度：</strong>数据管线、模型结构创新、训练范式、后训练/RLHF、推理加速、音频/长视频/可控性、评测标准/指标/维度、评测性能、核心创新点演进</p>
+  <p><strong>数据来源：</strong>三篇 arXiv 论文全文精读（2506.09113 / 2512.13507 / 2604.14148），所有数字可追溯到论文原文</p>
+  <p><strong>核心结论：</strong>1.0 奠基（全栈技术栈搭建）→ 1.5 模态扩展（音视频联合生成）→ 2.0 能力系统化（多模态参考+完整编辑+产品矩阵）</p>
+</div>
+
+<h2>一、三版本概览</h2>
+
+<div class="three-col">
+  <div class="version-card v1">
+    <h4 style="color:#0066B3; margin-top:0;">Seedance 1.0</h4>
+    <p><strong>发布：</strong>2025.06</p>
+    <p><strong>定位：</strong>高性能视频基础生成模型</p>
+    <p><strong>核心能力：</strong>T2V / I2V 联合生成，原生多镜头</p>
+    <p><strong>关键性能：</strong>5s 1080p / L20 41.4s</p>
+    <p><strong>榜单：</strong>AA Arena T2V Elo=1314, I2V=1365</p>
+    <p><strong>架构披露：</strong><span class="tag tag-l1">L1</span> 完整披露</p>
+  </div>
+  <div class="version-card v15">
+    <h4 style="color:#FF6B00; margin-top:0;">Seedance 1.5 pro</h4>
+    <p><strong>发布：</strong>2025.12</p>
+    <p><strong>定位：</strong>原生音视频联合生成基础模型</p>
+    <p><strong>核心能力：</strong>T2VA / I2VA，多语言唇形同步，电影级相机控制</p>
+    <p><strong>关键性能：</strong>端到端加速 >10×，RLHF 提速 ~3×</p>
+    <p><strong>榜单：</strong>论文未明确披露具体 Elo</p>
+    <p><strong>架构披露：</strong><span class="tag tag-l2">L2</span> 双分支方向明确，音频细节未披露</p>
+  </div>
+  <div class="version-card v2">
+    <h4 style="color:#C7000B; margin-top:0;">Seedance 2.0</h4>
+    <p><strong>发布：</strong>2026.04</p>
+    <p><strong>定位：</strong>统一多模态联合生成 + 完整编辑能力</p>
+    <p><strong>核心能力：</strong>四模态输入，R2V 多模态参考，五大编辑，标准版+Fast版</p>
+    <p><strong>关键性能：</strong>4-15s，原生480p/720p，双耳音频</p>
+    <p><strong>榜单：</strong>Arena.AI T2V Elo=1450, I2V=1449（双榜#1）</p>
+    <p><strong>架构披露：</strong><span class="tag tag-l4">L4</span> 架构细节完全未披露</p>
+  </div>
+</div>
+
+<h2>二、模型结构创新对比</h2>
+
+<table>
+  <tr><th style="width:15%">结构维度</th><th style="width:28%">Seedance 1.0</th><th style="width:28%">Seedance 1.5 pro</th><th style="width:29%">Seedance 2.0</th></tr>
+  <tr>
+    <td><strong>整体架构</strong></td>
+    <td>单分支 DiT（解耦时空层 + MMDiT）</td>
+    <td><span class="highlight">双分支 DiT</span>（视频分支 + 音频分支）+ 跨模态联合模块</td>
+    <td><span class="highlight">统一多模态联合生成架构</span>（四模态输入融合）<br><span class="tag tag-l4">L4</span> 具体架构完全未披露</td>
+  </tr>
+  <tr>
+    <td><strong>DiT 核心设计</strong></td>
+    <td>
+      • 解耦时空层：空间层帧内注意力 + 时间层帧间注意力+窗口划分<br>
+      • MMDiT：空间层多模态自注意力（双权重 adaptive LN/QKV/MLP），时间层仅视觉注意力<br>
+      • QK 归一化防训练不稳定<br>
+      • 文本 token 仅参与空间层
+    </td>
+    <td>
+      • 视频分支：<span class="highlight">继承 1.0</span> 解耦时空层 + MMDiT<br>
+      • 音频分支：独立音频 DiT，处理音频 latent 扩散变换<br>
+      • 基于 MMDiT 的统一框架，支持多任务预训练
+    </td>
+    <td>
+      • 论文仅描述为"unified, highly efficient, and large-scale architecture"<br>
+      • 推测：在双分支 DiT + 跨模态联合模块基础上扩展视频参考分支<br>
+      • <span class="tag tag-l4">L4</span> 层数/通道数/注意力头数/位置编码/损失函数全部未披露
+    </td>
+  </tr>
+  <tr>
+    <td><strong>位置编码</strong></td>
+    <td><span class="highlight">Multishot MM-RoPE</span>：3D 视觉 RoPE + 1D 文本 RoPE，支持交错序列和多镜头训练</td>
+    <td>继承 MM-RoPE，扩展支持音频位置编码</td>
+    <td><span class="tag tag-l4">L4</span> 未披露</td>
+  </tr>
+  <tr>
+    <td><strong>统一任务公式</strong></td>
+    <td>noisy input + clean/zero-padded frames 通道拼接 + binary mask，统一 T2I/T2V/I2V</td>
+    <td>扩展为多任务预训练：<span class="highlight">T2VA / I2VA / T2V / I2V</span> 四任务统一</td>
+    <td>扩展支持 R2V（多模态参考生成）+ 编辑任务</td>
+  </tr>
+  <tr>
+    <td><strong>VAE</strong></td>
+    <td>时间因果卷积，压缩比 (4,16,16)，C=48，总压缩比 1/64；L1+KL+LPIPS+对抗损失；PatchGAN 混合判别器</td>
+    <td><span class="highlight">继承 1.0</span>：(4,16,16), C=48</td>
+    <td><span class="tag tag-l4">L4</span> 压缩比和通道数未披露</td>
+  </tr>
+  <tr>
+    <td><strong>音频模块</strong></td>
+    <td>无（纯视频生成）</td>
+    <td>
+      • <span class="highlight">全新音频分支</span>：音频 DiT + 音频编码器/解码器<br>
+      • 音频 latent 空间压缩（具体架构未披露）<br>
+      • <span class="tag tag-l2">L2</span> 方向明确，参数未披露
+    </td>
+    <td>
+      • 双耳（Binaural）音频输出<br>
+      • 音频参考输入（≤3段）<br>
+      • <span class="tag tag-l4">L4</span> 音频编解码器架构未披露
+    </td>
+  </tr>
+  <tr>
+    <td><strong>跨模态融合</strong></td>
+    <td>MMDiT 空间层内视觉+文本 token 联合注意力</td>
+    <td><span class="highlight">跨模态联合模块</span>（Cross-modal Joint Module）：视频分支↔音频分支双向信息融合，确保精确时序同步+语义一致性<br><span class="tag tag-l3">L3</span> 功能目标明确，具体实现（交叉注意力/特征拼接/门控）未披露</td>
+    <td>四模态（文本/图像/音频/视频）统一编码和融合<br><span class="tag tag-l4">L4</span> 融合机制未披露</td>
+  </tr>
+  <tr>
+    <td><strong>参考生成 (R2V)</strong></td>
+    <td>无（仅 T2V/I2V）</td>
+    <td>无（仅 T2VA/I2VA）</td>
+    <td><span class="highlight">全新能力</span>：视频参考≤3段、图像参考≤9张、音频参考≤3段</td>
+  </tr>
+  <tr>
+    <td><strong>编辑能力</strong></td>
+    <td>无</td>
+    <td>无</td>
+    <td><span class="highlight">五大编辑功能</span>（具体编辑类型论文有描述）</td>
+  </tr>
+  <tr>
+    <td><strong>Refiner 超分</strong></td>
+    <td>级联扩散：base 480p → refiner 720p/1080p，refiner 从 base 初始化</td>
+    <td>继承级联超分框架</td>
+    <td>原生 480p/720p，标准版+Fast版双版本</td>
+  </tr>
+</table>
+
+<div class="purpose-box">
+  <strong>结构演进逻辑：</strong>1.0 搭建单分支视频 DiT 基础架构（解耦时空层+MMDiT+MM-RoPE），解决"能不能生成高质量视频"的问题；1.5 在视频分支旁新增音频分支和跨模态联合模块，解决"能不能同时生成音视频"的问题；2.0 进一步扩展为四模态统一架构，新增 R2V 参考生成和编辑能力，解决"能不能用任意素材创作并精细编辑"的问题。架构披露程度逐代降低（L1→L2→L4），反映技术成熟后商业保密需求增强。
+</div>
+
+<h2>三、评测标准 / 评测指标 / 评测维度对比</h2>
+
+<h3>3.1 评测标准（用什么基准评测）</h3>
+
+<table>
+  <tr><th style="width:15%">版本</th><th style="width:30%">内部评测基准</th><th style="width:30%">外部公开榜单</th><th style="width:25%">评测规模</th></tr>
+  <tr>
+    <td><strong>1.0</strong></td>
+    <td><span class="highlight">SeedVideoBench-1.0</span></td>
+    <td>Artificial Analysis Video Arena</td>
+    <td>T2V 300条 + I2V 300条 prompt</td>
+  </tr>
+  <tr>
+    <td><strong>1.5 pro</strong></td>
+    <td>论文未明确披露独立评测基准名称<br><span class="tag tag-l4">L4</span> 推测使用 SeedVideoBench 扩展版</td>
+    <td>论文未明确披露具体榜单成绩</td>
+    <td>论文未明确披露</td>
+  </tr>
+  <tr>
+    <td><strong>2.0</strong></td>
+    <td><span class="highlight">SeedVideoBench 2.0</span>（三任务评测）</td>
+    <td><span class="highlight">Arena.AI</span>（原 Artificial Analysis Arena 升级）</td>
+    <td>论文未明确披露具体 prompt 数量</td>
+  </tr>
+</table>
+
+<h3>3.2 评测指标（用什么量化指标）</h3>
+
+<table>
+  <tr><th style="width:15%">版本</th><th style="width:40%">评测指标</th><th style="width:45%">说明</th></tr>
+  <tr>
+    <td><strong>1.0</strong></td>
+    <td>
+      • <span class="highlight">GSB</span>（Good-Same-Bad）成对比较指标<br>
+      • <span class="highlight">Elo 评分</span>（外部榜单）
+    </td>
+    <td>GSB 用于内部人工专家评测；Elo 用于外部公开盲测排行榜。两种指标结合，兼顾内部细粒度评估和外部用户偏好验证。</td>
+  </tr>
+  <tr>
+    <td><strong>1.5 pro</strong></td>
+    <td>论文未明确披露具体评测指标<br><span class="tag tag-l4">L4</span></td>
+    <td>1.5 pro 论文更侧重技术架构和能力展示，评测章节相对简略。推测继承 GSB + Elo 体系并扩展音频相关指标。</td>
+  </tr>
+  <tr>
+    <td><strong>2.0</strong></td>
+    <td>
+      • <span class="highlight">绝对评分</span>（5点 Likert 量表）<br>
+      • <span class="highlight">GSB</span>（Good-Same-Bad）成对比较<br>
+      • <span class="highlight">Elo 评分</span>（外部榜单，带置信区间）<br>
+      • 人工评估（专业评测者）
+    </td>
+    <td>2.0 评测体系最完整：绝对评分提供各维度绝对水平，GSB 提供相对优劣，Elo 提供全球排名，三种指标互补。Elo 报告置信区间（如 1450±15），统计严谨性提升。</td>
+  </tr>
+</table>
+
+<h3>3.3 评测维度（具体评估哪些方面）</h3>
+
+<table>
+  <tr><th style="width:15%">版本</th><th style="width:85%">评测维度明细</th></tr>
+  <tr>
+    <td><strong>1.0</strong></td>
+    <td>
+      <strong>4大维度 + 20个细分子项</strong>（与电影导演专家合作制定）：
+      <ul>
+        <li><strong>Motion Quality（运动质量）</strong>：结构准确性、运动合理性、运动稳定性、运动生动性（4项）</li>
+        <li><strong>Prompt Following（指令遵循）</strong>：动作响应、主体描述保真度、风格一致性、辅助实体融入、运动时序对齐、相机行为、环境描绘准确性（7项）</li>
+        <li><strong>Aesthetic Quality（美学质量）</strong>：视觉纹理、AI感可感知度、材质细节保真度、美学意图的艺术表达（4项）</li>
+        <li><strong>Preservation（源图一致性，仅I2V）</strong>：主体一致性、风格一致性、材质保真度、视觉内容对齐、色彩光照一致性（5项）</li>
+      </ul>
+      <strong>Prompt 分类体系</strong>（6类）：Subject、Subject Description、Action、Action Description、Camera、Aesthetic description<br>
+      <strong>应用场景覆盖</strong>：特效（special effects）、电商（e-commerce）、PGC（professional-generated content）
+    </td>
+  </tr>
+  <tr>
+    <td><strong>1.5 pro</strong></td>
+    <td>
+      论文未明确披露完整评测维度体系<br><span class="tag tag-l4">L4</span><br><br>
+      从论文能力描述可推测新增维度：
+      <ul>
+        <li>音频质量（Audio Quality）</li>
+        <li>音视频同步（Audio-Visual Synchronization）</li>
+        <li>唇形同步准确度（Lip Sync Accuracy）</li>
+        <li>多语言/方言支持</li>
+        <li>相机控制准确度（电影级相机运动）</li>
+      </ul>
+      <em>注：以上为基于论文能力描述的合理推测，非论文原文明确披露的评测维度。</em>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>2.0</strong></td>
+    <td>
+      <strong>12个细粒度维度</strong>（SeedVideoBench 2.0），覆盖：
+      <ul>
+        <li><strong>视觉质量</strong>（Visual Quality）</li>
+        <li><strong>运动质量</strong>（Motion Quality）</li>
+        <li><strong>指令遵循</strong>（Prompt Following）</li>
+        <li><strong>音频质量</strong>（Audio Quality）</li>
+        <li><strong>音视频同步</strong>（Audio-Visual Synchronization）</li>
+        <li><strong>参考一致性</strong>（Reference Consistency，R2V 新增）</li>
+        <li>... 等共 12 个维度（论文未逐一列出全部子项名称）</li>
+      </ul>
+      <strong>三任务评测</strong>：T2V（继承）、I2V（继承）、<span class="highlight">R2V（新增）</span><br>
+      <strong>安全与责任评测</strong>：独立章节（9.4），评估模型安全合规性<br>
+      <span class="tag tag-l1">L1</span> 评测基准设计完整披露
+    </td>
+  </tr>
+</table>
+
+<div class="purpose-box">
+  <strong>评测体系演进逻辑：</strong>1.0 建立视频专用评测体系（4大维度20子项，与电影导演合作），解决"怎么评估视频生成质量"的问题；1.5 评测体系在论文中披露较少，处于"能力扩展期"的过渡阶段；2.0 评测体系最完整成熟——从2任务扩展到3任务（新增R2V），从4维度扩展到12维度（新增音频、音视频同步、参考一致性），从2种指标扩展到3种指标（新增绝对评分），并新增安全与责任评测，反映模型从"技术验证"走向"产品化"后评测体系的全面成熟。
+</div>
+
+<h2>四、评测性能对比</h2>
+
+<table>
+  <tr><th style="width:20%">性能指标</th><th style="width:26%">Seedance 1.0</th><th style="width:26%">Seedance 1.5 pro</th><th style="width:28%">Seedance 2.0</th></tr>
+  <tr>
+    <td><strong>外部榜单 T2V Elo</strong></td>
+    <td><span class="highlight">1314</span>（AA Arena，双榜第一）</td>
+    <td>论文未明确披露</td>
+    <td><span class="highlight">1450 (±15)</span>（Arena.AI，全球#1）</td>
+  </tr>
+  <tr>
+    <td><strong>外部榜单 I2V Elo</strong></td>
+    <td><span class="highlight">1365</span>（AA Arena，双榜第一）</td>
+    <td>论文未明确披露</td>
+    <td><span class="highlight">1449 (±11)</span>（Arena.AI，全球#1）</td>
+  </tr>
+  <tr>
+    <td><strong>Elo 提升幅度</strong></td>
+    <td>基准</td>
+    <td>—</td>
+    <td>T2V +136分，I2V +84分（相比1.0）</td>
+  </tr>
+  <tr>
+    <td><strong>对比竞品</strong></td>
+    <td>Kling 2.1、Veo 3、Wan 2.1、Sora、Runway Gen4</td>
+    <td>—</td>
+    <td>Kling 3.0、Veo 3.5、Hailuo 02、Sora 2、Wan 2.5（2026 Q1最新竞品）</td>
+  </tr>
+  <tr>
+    <td><strong>推理速度</strong></td>
+    <td>5s 1080p / L20 <span class="highlight">41.4s</span></td>
+    <td>端到端加速 <span class="highlight">>10×</span></td>
+    <td>Fast 低延迟版本（具体速度未披露）</td>
+  </tr>
+  <tr>
+    <td><strong>输出时长</strong></td>
+    <td>5秒（1080p）</td>
+    <td>论文未明确披露</td>
+    <td><span class="highlight">4-15秒</span></td>
+  </tr>
+  <tr>
+    <td><strong>输出分辨率</strong></td>
+    <td>Base 480p → Refiner 720p/1080p</td>
+    <td>继承 1080p</td>
+    <td>原生 480p/720p</td>
+  </tr>
+  <tr>
+    <td><strong>音频能力</strong></td>
+    <td>无</td>
+    <td>原生音视频联合生成，多语言/方言唇形同步</td>
+    <td>双耳（Binaural）音频，音频参考输入</td>
+  </tr>
+</table>
+
+<h2>五、数据管线对比</h2>
+
+<table>
+  <tr><th style="width:15%">维度</th><th style="width:28%">1.0</th><th style="width:28%">1.5 pro</th><th style="width:29%">2.0</th></tr>
+  <tr>
+    <td><strong>策展管线</strong></td>
+    <td>五步法：镜头分割→覆盖修正→质量安全过滤→语义去重→分布重平衡</td>
+    <td><span class="highlight">多阶段策展管线</span>（Multi-stage Curation Pipeline）+ 策展优先级设计</td>
+    <td>论文未详细披露具体策展步骤<br><span class="tag tag-l4">L4</span></td>
+  </tr>
+  <tr>
+    <td><strong>Caption 系统</strong></td>
+    <td>Tarsier2 基座，视觉编码器冻结+LM全量微调，密集caption（动态+静态特征），中英文双语</td>
+    <td><span class="highlight">高级 Caption 系统</span>：视频Caption（继承+增强）+ <span class="highlight">音频Caption（全新维度）</span> + I2V音频条件设计</td>
+    <td>论文未详细披露<br><span class="tag tag-l4">L4</span></td>
+  </tr>
+  <tr>
+    <td><strong>数据调度</strong></td>
+    <td>分布重平衡：头部下采样+尾部增采样+定向采集</td>
+    <td><span class="highlight">课程式数据调度</span>（Curriculum-based Data Scheduling），运动表现力优先</td>
+    <td>论文未详细披露</td>
+  </tr>
+  <tr>
+    <td><strong>音视频一致性</strong></td>
+    <td>不涉及（纯视频）</td>
+    <td><span class="highlight">音视频一致性优先</span>的数据策展策略</td>
+    <td>继承并扩展</td>
+  </tr>
+</table>
+
+<h2>六、训练范式对比</h2>
+
+<table>
+  <tr><th style="width:15%">训练阶段</th><th style="width:28%">1.0</th><th style="width:28%">1.5 pro</th><th style="width:29%">2.0</th></tr>
+  <tr>
+    <td><strong>预训练</strong></td>
+    <td>Flow Matching + velocity prediction，logit-normal timestep，分辨率感知shift；四阶段渐进课程（256px T2I→256px联合12fps→640px→24fps）</td>
+    <td>多任务预训练：<span class="highlight">T2VA/I2VA/T2V/I2V</span> 四任务统一</td>
+    <td>论文未详细披露训练阶段细节<br><span class="tag tag-l4">L4</span></td>
+  </tr>
+  <tr>
+    <td><strong>CT 继续训练</strong></td>
+    <td>I2V 20%→40%，高质量数据选择（美学+光流），双Caption（长+短），退火学习率</td>
+    <td>论文未明确区分 CT 阶段</td>
+    <td>论文未详细披露</td>
+  </tr>
+  <tr>
+    <td><strong>SFT</strong></td>
+    <td>几百类别定向收集，模型合并（子集独立训练再合并），早停</td>
+    <td>高质量音视频数据集 SFT</td>
+    <td>论文未详细披露</td>
+  </tr>
+  <tr>
+    <td><strong>训练基础设施</strong></td>
+    <td>HSDP+Ulysses混合并行，MLAC多级激活检查点，kernel融合（内存流量>90%减少），runtime-aware负载均衡，多级容错</td>
+    <td>继承 1.0 基础设施</td>
+    <td>论文未详细披露</td>
+  </tr>
+</table>
+
+<h2>七、后训练 / RLHF 对比</h2>
+
+<table>
+  <tr><th style="width:15%">维度</th><th style="width:28%">1.0</th><th style="width:28%">1.5 pro</th><th style="width:29%">2.0</th></tr>
+  <tr>
+    <td><strong>Reward Model</strong></td>
+    <td>三维度：Foundational（VLM架构）+ Motion（视频专用）+ Aesthetic（关键帧输入，灵感来自Seedream）</td>
+    <td><span class="highlight">音视频专用多维度 RM</span>：提升运动质量/视觉美学/<span class="highlight">音频保真</span></td>
+    <td>论文未详细披露 RM 设计<br><span class="tag tag-l4">L4</span></td>
+  </tr>
+  <tr>
+    <td><strong>RLHF 算法</strong></td>
+    <td>直接 reward 最大化（对比 DPO/PPO/GRPO 证明最优），多轮迭代学习，超分 RLHF</td>
+    <td>继承直接 reward 最大化框架</td>
+    <td>论文未详细披露</td>
+  </tr>
+  <tr>
+    <td><strong>RLHF 基础设施</strong></td>
+    <td>标准 RLHF 训练流程</td>
+    <td><span class="highlight">RLHF 基础设施优化，训练提速 ~3×</span></td>
+    <td>论文未详细披露</td>
+  </tr>
+</table>
+
+<h2>八、推理加速对比</h2>
+
+<table>
+  <tr><th style="width:15%">维度</th><th style="width:28%">1.0</th><th style="width:28%">1.5 pro</th><th style="width:29%">2.0</th></tr>
+  <tr>
+    <td><strong>蒸馏框架</strong></td>
+    <td>三阶段：TSCD（HyperSD，4x）→ Score Distillation（RayFlow）→ 多步对抗蒸馏（APT扩展）</td>
+    <td><span class="highlight">多阶段蒸馏框架</span>，大幅减少 NFE</td>
+    <td>Fast 低延迟版本（具体蒸馏方法未披露）</td>
+  </tr>
+  <tr>
+    <td><strong>VAE 优化</strong></td>
+    <td>Thin decoder（靠近像素空间层通道收窄），2x加速</td>
+    <td>继承 thin decoder</td>
+    <td>论文未详细披露</td>
+  </tr>
+  <tr>
+    <td><strong>系统优化</strong></td>
+    <td>kernel fusion 15%，细粒度混合精度量化，稀疏（AdaSpa扩展），context parallelism（通信降至Ulysses 1/4），FP8通信，AsyncOffloading（性能下降<2%），分布式VAE</td>
+    <td>量化 + 并行推理优化</td>
+    <td>Fast 版本专项优化</td>
+  </tr>
+  <tr>
+    <td><strong>端到端加速</strong></td>
+    <td>~10x，5s 1080p / L20 41.4s</td>
+    <td>>10x</td>
+    <td>Fast 版本（具体数字未披露）</td>
+  </tr>
+</table>
+
+<h2>九、核心创新点演进路线</h2>
+
+<div class="svg-container">
+<svg viewBox="0 0 1000 280" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">
+  <text x="500" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#C7000B">Seedance 核心创新点三阶段演进</text>
+  <rect x="40" y="50" width="280" height="200" rx="10" fill="#EBF5FB" stroke="#0066B3" stroke-width="2"/>
+  <text x="180" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#0066B3">阶段一：1.0 奠基期</text>
+  <text x="180" y="100" text-anchor="middle" font-size="10" fill="#555">2025.06 · 全栈技术栈搭建</text>
+  <text x="60" y="125" font-size="10" fill="#333">✓ 解耦时空层 + MMDiT</text>
+  <text x="60" y="143" font-size="10" fill="#333">✓ Multishot MM-RoPE</text>
+  <text x="60" y="161" font-size="10" fill="#333">✓ 统一任务公式 (T2I/T2V/I2V)</text>
+  <text x="60" y="179" font-size="10" fill="#333">✓ 五步法数据策展 + 密集Caption</text>
+  <text x="60" y="197" font-size="10" fill="#333">✓ 三维度 RM + 直接 reward 最大化</text>
+  <text x="60" y="215" font-size="10" fill="#333">✓ 三阶段蒸馏 + VAE thin decoder</text>
+  <text x="60" y="235" font-size="9" fill="#0066B3" font-style="italic">目标：能生成高质量视频</text>
+  <line x1="322" y1="150" x2="358" y2="150" stroke="#FF6B00" stroke-width="3" marker-end="url(#arr1)"/>
+  <rect x="360" y="50" width="280" height="200" rx="10" fill="#FFF8E6" stroke="#FF6B00" stroke-width="2"/>
+  <text x="500" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#CC5500">阶段二：1.5 模态扩展期</text>
+  <text x="500" y="100" text-anchor="middle" font-size="10" fill="#555">2025.12 · 音视频联合生成</text>
+  <text x="380" y="125" font-size="10" fill="#333">✓ 双分支 DiT（视频+音频）</text>
+  <text x="380" y="143" font-size="10" fill="#333">✓ 跨模态联合模块</text>
+  <text x="380" y="161" font-size="10" fill="#333">✓ 多任务预训练 (T2VA/I2VA/T2V/I2V)</text>
+  <text x="380" y="179" font-size="10" fill="#333">✓ 音频 Caption + I2V 音频条件</text>
+  <text x="380" y="197" font-size="10" fill="#333">✓ 多语言/方言唇形同步</text>
+  <text x="380" y="215" font-size="10" fill="#333">✓ 电影级相机控制</text>
+  <text x="380" y="235" font-size="9" fill="#CC5500" font-style="italic">目标：能同时生成音视频</text>
+  <line x1="642" y1="150" x2="678" y2="150" stroke="#C7000B" stroke-width="3" marker-end="url(#arr2)"/>
+  <rect x="680" y="50" width="280" height="200" rx="10" fill="#FDE8EA" stroke="#C7000B" stroke-width="2"/>
+  <text x="820" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#C7000B">阶段三：2.0 能力系统化期</text>
+  <text x="820" y="100" text-anchor="middle" font-size="10" fill="#555">2026.04 · 多模态创作+编辑</text>
+  <text x="700" y="125" font-size="10" fill="#333">✓ 四模态统一输入 (文/图/音/视)</text>
+  <text x="700" y="143" font-size="10" fill="#333">✓ R2V 多模态参考生成</text>
+  <text x="700" y="161" font-size="10" fill="#333">✓ 五大编辑功能套件</text>
+  <text x="700" y="179" font-size="10" fill="#333">✓ 标准版 + Fast 低延迟版</text>
+  <text x="700" y="197" font-size="10" fill="#333">✓ 双耳 (Binaural) 音频</text>
+  <text x="700" y="215" font-size="10" fill="#333">✓ SeedVideoBench 2.0 (12维度)</text>
+  <text x="700" y="235" font-size="9" fill="#C7000B" font-style="italic">目标：能用任意素材创作并编辑</text>
+  <defs>
+    <marker id="arr1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#FF6B00"/></marker>
+    <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#C7000B"/></marker>
+  </defs>
+</svg>
+</div>
+
+<h2>十、为什么是这样的演进方式？——五大底层驱动力</h2>
+
+<div class="conclusion">
+  <h3>驱动力一：用户需求从"看视频"到"做视频"再到"改视频"</h3>
+  <p>1.0 时代用户需求是"AI 能不能生成一段好看的视频"，核心是生成质量；1.5 时代用户发现"只有画面没有声音不完整"，需求扩展到音视频同步；2.0 时代用户不再满足于"从零生成"，而是希望"用我已有的素材（图片/视频/音频）来创作"，并且需要"生成后能精细编辑"。需求升级直接驱动能力从 T2V → T2VA → R2V+编辑 的演进。</p>
+</div>
+
+<div class="conclusion">
+  <h3>驱动力二：技术栈复用降低边际成本</h3>
+  <p>1.0 搭建的解耦时空层+MMDiT+MM-RoPE 架构、五步法数据策展、三维度 RLHF、三阶段蒸馏等核心技术，在 1.5 和 2.0 中被大量继承和复用。1.5 只需在视频分支旁新增音频分支和跨模态联合模块，无需重构整个架构；2.0 只需在双分支基础上扩展参考输入和编辑能力。技术栈复用使得每代迭代的边际成本递减，迭代速度加快。</p>
+</div>
+
+<div class="conclusion">
+  <h3>驱动力三：模态融合是视频生成的必然方向</h3>
+  <p>视频本质上是多模态的（视觉+听觉+语言），纯视频生成只是"半个产品"。1.5 加入音频是补全模态的必然一步；2.0 进一步加入图像/视频参考输入，是因为用户创作时通常已有参考素材（参考图、参考视频、参考音频），纯文本 prompt 无法精确表达复杂的创作意图。多模态参考生成（R2V）是降低用户创作门槛的关键。</p>
+</div>
+
+<div class="conclusion">
+  <h3>驱动力四：产品化要求编辑能力和双版本策略</h3>
+  <p>1.0/1.5 更偏技术验证，2.0 明显走向产品化：①新增五大编辑功能，因为专业创作流程中"生成-编辑-再生成"是刚需，纯生成无法满足专业工作流；②推出标准版+Fast版双版本，因为不同场景对质量和速度的权衡不同（专业创作要质量，社交分享要速度）；③评测体系从 4 维度扩展到 12 维度并新增安全评测，反映产品上线前需要更全面的质量和安全保障。</p>
+</div>
+
+<div class="conclusion">
+  <h3>驱动力五：商业保密随技术成熟递增</h3>
+  <p>架构披露程度逐代降低（1.0 L1 完整披露 → 1.5 L2 方向明确 → 2.0 L4 完全保密），这不是偶然。1.0 作为初代技术报告，需要通过完整披露建立技术影响力和学术声誉；1.5 处于快速迭代期，核心方向可以披露但具体参数开始保密；2.0 作为成熟产品，架构细节是核心商业机密，完全保密以维持竞争壁垒。这是所有技术公司从"技术展示"到"产品竞争"的典型路径。</p>
+</div>
+
+<h2>十一、对 V0.1 从零训练方案的修订建议（基于三版本对比）</h2>
+
+<div class="detail-card">
+  <h4>建议一：架构设计预留多模态扩展接口</h4>
+  <p>V0.1 方案如果只设计单分支视频 DiT，未来加入音频/参考输入时需要大规模重构。建议参考 Seedance 演进路径，在架构设计阶段就预留：①双分支/多分支扩展能力；②跨模态联合模块的插入位置；③多任务统一公式的扩展性。避免 1.0→1.5 那样的大规模架构调整。</p>
+</div>
+
+<div class="detail-card">
+  <h4>建议二：评测体系从第一天就建立多维度基准</h4>
+  <p>Seedance 1.0 就建立了 4 维度 20 子项的 SeedVideoBench，2.0 扩展到 12 维度。V0.1 方案应从训练第一天就建立内部评测基准，至少覆盖：运动质量、指令遵循、美学质量、源图一致性（I2V）四大维度，并预留音频质量、音视频同步、参考一致性等扩展维度。避免后期补建评测体系导致训练目标不清晰。</p>
+</div>
+
+<div class="detail-card">
+  <h4>建议三：RLHF 设计考虑多维度 RM 的可扩展性</h4>
+  <p>Seedance 1.0 的三维度 RM（Foundational/Motion/Aesthetic）在 1.5 扩展为音视频专用多维度 RM。V0.1 方案在设计 RM 时应考虑：①RM 架构的可扩展性（新增音频 RM 时不需要重构现有 RM）；②复合 reward 的加权策略（不同任务/阶段各维度权重不同）；③RM 与生成模型的多轮迭代机制。</p>
+</div>
+
+<div class="detail-card">
+  <h4>建议四：推理加速采用渐进式三阶段蒸馏策略</h4>
+  <p>Seedance 1.0 的三阶段蒸馏（TSCD→Score Distillation→对抗蒸馏）被 1.5/2.0 继承，证明这是成熟可靠的加速路径。V0.1 方案应规划：①训练阶段就考虑蒸馏友好性（如教师模型设计）；②三阶段蒸馏的渐进式实施计划；③VAE thin decoder 等架构级优化；④系统级优化（量化/稀疏/并行）的排期。避免模型训练完成后才考虑加速，导致加速效果受限。</p>
+</div>
+
+<div class="detail-card">
+  <h4>建议五：产品化阶段提前规划编辑能力和双版本</h4>
+  <p>Seedance 2.0 才加入编辑能力和 Fast 版本，实际上这些需求从 1.0 时代就存在。V0.1 方案如果目标是产品化，应在架构设计阶段就考虑：①编辑任务的统一公式（与生成任务共享架构）；②参考输入（R2V）的编码方式；③质量-速度权衡的双版本设计（标准版追求质量，Fast版追求速度）。避免后期"打补丁"式添加编辑能力导致架构混乱。</p>
+</div>
+
+<div class="footer">
+  <p>对比报告生成时间：2026-09-07 ｜ 数据来源：Seedance 1.0 (arXiv:2506.09113)、Seedance 1.5 pro (arXiv:2512.13507)、Seedance 2.0 (arXiv:2604.14148) 三篇论文全文精读</p>
+  <p>披露等级说明：L1 公开+消融 ｜ L2 公开口径 ｜ L3 结构暗示 ｜ L4 完全保密 ｜ L5 第三方</p>
+  <p>所有数字、参数、观点均严格来自论文原文，未披露信息明确标注，无主观臆造。</p>
+</div>
+
+</body>
+</html>
